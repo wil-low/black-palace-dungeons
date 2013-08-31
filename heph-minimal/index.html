@@ -1,0 +1,340 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/strict.dtd" >
+<html lang="en" xmlns="http://www.w3.org/TR/xhtml1">
+<head>
+<title>Mark Hughes: Hephaestus</title>
+<meta name="keywords" content="RPG,CRPG,role-playing,game,adventure,construction,builder,maker,kit,editor,design,rogue,rogue-like,roguelike,ultima,final fantasy,lunar,classic,tile,tile-based,java" />
+</head>
+<body bgcolor="#ccffcc" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+
+<!--#include virtual="../header.inc" -->
+
+<table width="100%">
+<tr><td><a href="http://kuoi.asui.uidaho.edu/~kamikaze/Hephaestus/"><img src="images/icon/hephaestus.gif" width="40" height="40" border="1" /></a></td>
+<td><h1 align="center">Hephaestus</h1>
+<p align="center">Version 1.07, released 2002Apr22
+<br />Copyright &copy; 2001-2002 by Mark Hughes &lt;<a href="mailto:kamikaze@kuoi.asui.uidaho.edu">kamikaze@kuoi.asui.uidaho.edu</a>&gt;</p>
+</td></tr>
+</table>
+
+<table align="right" border="1">
+<tr><td><a href="images/screenshot/Hades2.png"><img src="images/screenshot/Hades2.png" width="462" height="278" border="1" alt="[Hades.adv screenshot 2]" /></a></td></tr>
+<tr><td><a href="images/screenshot/Hades2.png">(click on image to enlarge)</a></td></tr>
+</table>
+
+<dl>
+<dt><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+    Hephaestus</dt>
+    <dd><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="#whatsnew">What's New?</a></dd>
+    <dd><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="#mythology">Mythology</a></dd>
+    <dd><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="#legal">Legal Stuff</a></dd>
+    <dd><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="#installation">Download &amp; Installation</a></dd>
+    <dd><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="#problems">Having Problems?</a></dd>
+    <dd><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="#mail">Mailing Lists</a></dd>
+<dt><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="gameplay.html">Gameplay</a></dt>
+<dt><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="adventures.html">Adventures</a></dt>
+<dt><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="faq.html">FAQ</a></dt>
+<dt><img src="images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="design/index.html">Designing Adventures</a></dt>
+</dl>
+<br clear="right" />
+
+<p>Hephaestus is a freeware computer role-playing game construction kit (often
+called an "RPG maker").  You can write your own adventures in a simple yet
+powerful scripting language, and share them with anyone else who has Hephaestus.
+Hephaestus is written in Java, and therefore runs on every platform.</p>
+
+<p>Hephaestus uses the art library of <a href="lostdragon.html">Lost Dragon</a>.
+Thanks, DeBray!</p>
+
+
+<p><hr /></p>
+<h2><a name="whatsnew">What's New?</a></h2>
+
+<dl>
+<dt><b>Version 1.07, released 2002Apr22</b></dt>
+    <dd>
+    <ul>
+    <li>Freeware release.</li>
+    </ul>
+
+<dt><b>Version 1.06, released 2002Mar10</b></dt>
+    <dd>
+    <ul>
+    <li>gcolor() can do alpha-blending.
+        </li>
+    <li>th_get_sx(), th_get_sy() return the screen coordinates of a tile, making
+        special effects easier to create with the graphics functions.
+        </li>
+    <li>Damage taken by a creature or player is shown above the victim.
+        </li>
+    <li>it_takefunc(), it_dropfunc(), it_equipfunc(), and it_unequipfunc()
+        make it possible to build cursed items and items that grant the player
+        magic spells.
+        </li>
+    <li>More sound file formats are supported for playsound(): WAV, MID, AIFF,
+        RMF
+        </li>
+    <li>More image file formats are supported for gimage(): JPG, PNG
+        </li>
+    <li>cr_think(), en_do_move(), en_do_attack(), en_do_magic(),
+        en_do_trigger(), and cr_self_defense() make it easier to create custom
+        AI for creatures.
+        </li>
+    </ul>
+    </dd>
+
+<dt><b>Version 1.05, released 2002Feb02</b></dt>
+    <dd>
+    <ul>
+    <li>Tutorial: <a href="design/pocket.html">DESTROY ALL POCKET MONSTERS!</a>
+        </li>
+    <li>Bug-fixes
+        </li>
+    </ul>
+    </dd>
+
+<!--
+<dt><b>Version </b></dt>
+    <dd>
+    <ul>
+    <li>
+        </li>
+    </ul>
+    </dd>
+
+-->
+</dl>
+
+
+<p><hr /></p>
+<h2><a name="mythology">Mythology</a></h2>
+
+<p>Hephaestus is the Greek god of the forge, art, and industrialization; he is
+the god of engineers<a href="#footnote_god"><small>*</small></a>.</p>
+
+<p>Hera's bastard son, Zeus cast him out of Olympus and he fell for a day and a
+night to the isle of Lemnos, leaving him lame.</p>
+
+<p>During the war with the Titans, he created thunderbolts to arm the gods;
+during the Trojan war, he made impenetrable armor for &AElig;neas; and for his
+own use he made tripods which would move at his command - the first robots!</p>
+
+
+<p><hr /></p>
+<h2><a name="legal">Legal Stuff</a></h2>
+
+<p>Hephaestus is provided 'as-is', without any express or implied warranty.  In
+no event will the author be held liable for any damages arising from the use of
+this software.</p>
+
+<p>Hephaestus is freeware, for personal use only.  You are permitted to download
+and use it at no charge.  You may not redistribute it without the author's
+express written permission.</p>
+
+<p>Adventures you have written belong to you - you may distribute them under any
+terms you like.  You may <b>not</b> bundle Hephaestus with them, instead you
+should provide a link to the Hephaestus home page
+&lt;<a href="http://kuoi.asui.uidaho.edu/~kamikaze/Hephaestus/">http://kuoi.asui.uidaho.edu/~kamikaze/Hephaestus/</a>&gt;.</p>
+
+<p>If you would like to have your adventures, images, or sounds become part of
+the standard Hephaestus distribution,
+<a href="mailto:kamikaze@kuoi.asui.uidaho.edu">contact the author</a>.</p>
+
+
+<p><hr /></p>
+<h2><a name="installation">Download &amp; Installation</a></h2>
+
+<ol>
+<li>You must have a 1024x768 display with 24-bit or at least 16-bit color depth,
+    and the <a href="http://java.sun.com/j2se/1.3/jre/">Java Runtime Environment (JRE)</a>,
+    version 1.3 or later.  Linux users can find the most current JRE at
+    <a href="http://www.blackdown.org/">Blackdown.org</a>.</li>
+
+<li><b><a href="http://kuoi.asui.uidaho.edu/~kamikaze/Hephaestus/hephaestus.zip">Download and unzip hephaestus.zip</a></b>
+    (you can unzip it anywhere).</li>
+
+<li>Now start the game:
+    <dl>
+    <dt><b>Unix</b>:</dt>
+        <dd>Run <code>./heph.sh</code></dd>
+    <dt><b>Windows</b>:</dt>
+        <dd>Run <code>heph.bat</code></dd>
+    <dt><b>MacOS X</b>:</dt>
+        <dd>Double-click on <code>hephaestus.jar</code>, or open a terminal
+        window and run <code>./heph.sh</code></dd>
+    <dt><b>Other</b>:</dt>
+        <dd>If you run Hephaestus on any other platform (BeOS, OS/2, MacOS 9-,
+        etc.), <a href="mailto:kamikaze@kuoi.asui.uidaho.edu">let me know</a>
+        how you did it and how well it worked, and I'll add instructions for
+        your platform.</dd>
+    </dl>
+    </li>
+
+<li><b>Select "New Adventure" from the "Game" menu, and pick "Hades.adv"</b>, or
+    any other adventure you've downloaded or created.  You should see something
+    like the screenshot at the top of this page.</li>
+
+<li><big>That's it!  You're ready to play!</big></li>
+</ol>
+
+
+<p><hr /></p>
+<h2><a name="problems">Having Problems?</a></h2>
+
+<ul>
+<li>There may still be problems with focus on JDK 1.4, but I think I have
+    corrected the main defect.  If not, you will probably have to run Hephaestus
+    with JDK 1.3 until the next version of Hephaestus, which will almost
+    certainly require JDK 1.4.  Sun completely revised the focus system in 1.4,
+    and it is not fully backwards-compatible.</li>
+
+<li>If you get an error message when you run 'heph.bat' or 'heph.sh' saying
+    something like "class java/lang/Thread not found", or "-jar: unknown
+    switch", or "java: command not found", you don't have Java 1.3 or later
+    installed.  See <a href="#installation">Installation step 1</a>.  In
+    particular, a lot of systems (including SuSE Linux, which is what I use)
+    still have Java 1.1 installed, which is about 4 years obsolete; 1.1 is okay
+    for old applets, but it's not advanced enough for Hephaestus.
+    <p>You can type the following command at your shell (this works in Unix,
+    Windows, and MacOS X) to see which version of Java you have installed:</p>
+<pre>
+% java -version
+</pre>
+    </li>
+
+<li>Display speed may be sensitive to your screen setup.  If it's slow at
+    24-bit, try 16-bit; if it's slow at 16-bit, try 24-bit or 32-bit.  It does
+    about 10 frames per second on my K6-2 550MHz w/128MB RAM and a crappy video
+    card; on a serious modern machine, you should never get display lag.</li>
+
+<li>If none of these solve your problem, email me at
+    &lt;<a href="mailto:kamikaze@kuoi.asui.uidaho.edu">kamikaze@kuoi.asui.uidaho.edu</a>&gt;
+    or join the <a href="#mail">hephaestus-user mailing list</a>.
+    <br /><img src="Pocket/mark_0e.gif" width="48" height="70" align="top" />
+    If you're not having problems, join up anyway, I'm lonely.</li>
+</ul>
+
+
+<p><hr /></p>
+<h2><a name="mail">Mailing Lists</a></h2>
+
+<p>There are three mailing lists for Hephaestus:</p>
+<ul>
+<li><a href="http://www.freelists.org/cgi-bin/list?list_id=2077">Hephaestus Announce</a>,
+    a low-volume moderated list for announcements and news.</li>
+<li><a href="http://www.freelists.org/cgi-bin/list?list_id=2078">Hephaestus User</a>,
+    an open list for players of Hephaestus.</li>
+<li><a href="http://www.freelists.org/cgi-bin/list?list_id=2079">Hephaestus Design</a>,
+    an open list about designing adventures for Hephaestus.</li>
+</ul>
+
+
+<p><hr /></p>
+<h2 align="center">&lt;<a href="order.html">Ordering</a>&gt;</h2>
+<h2 align="center">&lt;<a href="gameplay.html">Gameplay</a>&gt;</h2>
+<h2 align="center">&lt;<a href="adventures.html">Adventures</a>&gt;</h2>
+<h2 align="center">&lt;<a href="design/index.html">Designing Adventures</a>&gt;</h2>
+
+
+<pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+
+<p><hr /></p>
+<h2>Footnotes</h2>
+<dl>
+<dt><a name="footnote_god">Greek god*</a></dt>
+    <dd><small>Congratulations to Neal Stephenson on his highly-infectious
+    Athena meme, but she was of course just an upstart local goddess of the
+    slave-trading Athenians, who set science back 2000 years by suppressing the
+    Ionian scientific tradition; she only got in the Greek mythology because the
+    Athenians were the most vicious and murderous of the Greek city-states.
+    Hephaestus is still The Man.<small></dd>
+</dl>
+
+<pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+
+<!--
+<p><hr /></p>
+<h2><a name="x">x</a></h2>
+
+<dl>
+<dt><b>x</b></dt>
+    <dd>x</dd>
+
+</dl>
+
+    <table>
+    <tr><td><a href="images/screenshot/x.png"><img src="images/screenshot/x.png" width="x" height="x" border="1" alt="[x]" /></a></td></tr>
+    <tr><td>(click on image to enlarge)</td></tr>
+    </table>
+
+-->
+<!--#include virtual="../footer.inc" -->
+<p>Last modified: 2002Apr22
+<br />Hephaestus 1.07
+</p>
+<p><hr />EOF</p>
+</body>
+</html>

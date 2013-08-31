@@ -1,0 +1,128 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/strict.dtd" >
+<html lang="en" xmlns="http://www.w3.org/TR/xhtml1">
+<head>
+<title>Mark Hughes: Hephaestus: Art</title>
+</head>
+<body bgcolor="#ccffcc" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+
+<table width="100%">
+<tr><td><a href="http://kuoi.asui.uidaho.edu/~kamikaze/Hephaestus/"><img src="../images/icon/hephaestus.gif" width="40" height="40" border="1" /></a></td>
+<td><h1 align="center">Hephaestus: Art</h1>
+<h4 align="center">Copyright &copy; 2001 by Mark Hughes &lt;<a href="mailto:kamikaze@kuoi.asui.uidaho.edu">kamikaze@kuoi.asui.uidaho.edu</a>&gt;</h4>
+</td></tr>
+</table>
+
+<dl>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../index.html">Hephaestus</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../gameplay.html">Gameplay</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../adventures.html">Adventures</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../faq.html">FAQ</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="index.html">Designing Adventures</a></dt>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="minimal.html">Minimal Language Specification</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="scripting.html">Scripting</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        Art</dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="sound.html">Sound</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="pocket.html">Tutorial: DESTROY ALL POCKET MONSTERS!</a></dd>
+</dl>
+<br clear="right" />
+
+<p>A large standard library of tile art is provided with Hephaestus in
+'images/'.  You are not restricted to these images, however.  When you create
+your adventure, create a directory with your game's name, store your images
+there, refer to that in your '<code><a href="scripting.html#ter_tile">ter_tile()</a></code>'
+and '<code><a href="scripting.html#th_tile">th_tile()</a></code>' calls, and
+make sure you include that directory in your adventure's zip file.</p>
+
+<p>The following directories are under 'images/':</p>
+<dl>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/creature/">creature</a></dt>
+    <dd>Various animals and monsters.  All 48x70, with 2 animation frames, most
+    have 2 facings but some have only 1.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/dungeon/">dungeon</a></dt>
+    <dd>Dungeon/town features, most 48x70.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/floor/">floor</a></dt>
+    <dd>Dungeon/town floors, all 48x48.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/ground/">ground</a></dt>
+    <dd>Wilderness grounds, all 48x48.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/icon/">icon</a></dt>
+    <dd>System icons.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/item/">item</a></dt>
+    <dd>Items you can pick up, all 48x70, 1 frame, 1 facing.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/people/">people</a></dt>
+    <dd>Various humans.  All 48x70, with 2 animation frames, most have 2 facings
+    but some have only 1.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/player/">player</a></dt>
+    <dd>The standard player, all 48x70, 2 frames, 2 facings.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/wall/">wall</a></dt>
+    <dd>Dungeon/town walls, all 48x70, 1 frame, 1 facing.</dd>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*">
+<a href="../images/wild/">wild</a></dt>
+    <dd>Wilderness features, all 48x70.</dd>
+</dl>
+
+<p>Tile images must be 48x48 or larger GIFs, and must be named in a particular
+way: 'basefile_&lt;frame&gt;&lt;facing&gt;.gif', where facing is 'n', 's', 'e',
+or 'w' and frame is a number from 0 to nframes-1.  Tiles that have only one
+facing use only 'n'; tiles that have only two facings use only 'e' and 'w', and
+reuse 'e' for 'n', and 'w' for 's'.  'basefile' is a path relative to
+Hephaestus, and always uses '/' between pathnames, just like a URL.</p>
+
+<p>For instance, the basefile 'images/creature/bunny' refers to the files below,
+so it has 2 facings and 2 frames.</p>
+<ul>
+<li><img src="../images/creature/bunny1_0e.gif" border="1" />images/creature/bunny1_0e.gif</li>
+<li><img src="../images/creature/bunny1_1e.gif" border="1" />images/creature/bunny1_1e.gif</li>
+<li><img src="../images/creature/bunny1_0w.gif" border="1" />images/creature/bunny1_0w.gif</li>
+<li><img src="../images/creature/bunny1_1w.gif" border="1" />images/creature/bunny1_1w.gif</li>
+</ul>
+
+<p>Tile images are animated in sequence, the frame changing every time the view
+updates, every half second.</p>
+
+<p>If your GIF is larger than 48x48, it will extend above and to the right of
+the grid it is placed in - this is useful for giving the appearance of 3D, for
+lamp posts, trees, windows, etc. that you can pass behind.  If you're so
+inclined, you can make everything rise up like that.</p>
+
+<p>Even though tile images are GIF, which are restricted to 256 colors per
+image, the standard assumption of Hephaestus is that anyone with any sense has
+at least a 1024x768x24-bit display, as you can get a computer for well under
+$500 that does that (check Ebay).  Therefore, feel free to use a custom palette
+for each image.</p>
+
+<p>Images displayed with '<code><a href="scripting.html#gimage">gimage()</a></code>'
+do not have to be GIF - JPG and PNG are also usable.  I would recommend doing
+all cutscene art in PNG.  JPG is a lossy format, so every time you modify the
+image you make it murkier and jaggier, and GIF is limited to a 256-color
+palette, while PNG compresses extremely well, and handles 24-bit color.  Be
+aware that using transparency from PNG is somewhat slow, however - a transparent
+GIF can display very quickly, but "alpha blending" a transparent PNG is much
+more complex.</p>
+
+<p>If there is demand for it from registered users, I may support displaying
+video in pop-up windows in a future version of Hephaestus.</p>
+
+<hr />EOF
+</body>
+</html>

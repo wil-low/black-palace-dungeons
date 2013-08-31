@@ -1,0 +1,457 @@
+Minimal Language Specification
+
+Features
+
+Minimal has extremely simple and consistent syntax. There are only six syntax
+rules in Minimal: 
+
+Numbers:
+
+-7.1
+.03
+1e10
+
+
+Strings:
+
+"this is a string"
+"this is a string\nwith a newline in it"
+
+
+Variables:
+
+a
+b$
+c[1]
+c["a"]
+d$[1]
+d$["a"]
+
+
+Functions:
+
+foo(1, "b")
+print("This function is",
+        " continued on the next line")
+
+
+Comments:
+
+# everything to the end of this line is a line comment - but no hashes!
+print(#or everything to the next hash is an inline comment# "Hi!")
+
+
+Function Editing Commands:
+
+;
+
+
+Minimal has structured programming constructs, including user-defined functions with local variables, 'while', 'for', and 'if'.
+Minimal has two primitive data types: numbers (64-bit double-precision floating-point) and strings (unlimited-length, UNICODE). Number constants are the usual positive or negative numbers, possibly followed by an exponent, like '- 1.25e10'. Number vars have no type character after their name - just 'name'. String constants are wrapped with double-quotes ("), like "Hello", and string vars have a '$' type character after their name - 'name$'. You can have string and number vars with the same name ('name' and 'name$'), and they will not conflict.
+All variable and function names in Minimal are case-sensitive - 'name', 'Name', and 'NAME' are all different. The usual convention is for functions and local variables to use 'lowercase', constants to use 'UPPERCASE', and global variables to use 'Titlecase'. You can choose to use either 'multiWordName' or 'multi_word_name', but you should always write 'MULTI_WORD_CONSTANT', or at least 'MULTI_WordConstant' (the latter is much more readable if you have many related constants).
+Minimal has two "array types": lists and hashes. Both lists and hashes contain a set of one primitive type. Lists are keyed by numbers (and all values from 0 to the highest number are defined and take up memory), hashes are keyed by strings (and only those values assigned take up memory): 'a$[10]' is a list reference, and 'a$["foo"]' is a hash reference, and they both return strings. However, you can only use one or the other of a list or hash for any name; you cannot have both 'a$[10]' and 'a$["foo"]' visible at the same time. 
+
+There are no "multi-dimensional" data structures, and you cannot pass data structures into functions directly (but see 'var()' for something similar). If you need structures, join together hash keys and use a global database:
+
+global(addressBook$["mark.email"],"kamikaze@kuoi.asui.uidaho.edu")
+def(getProp$(id$,prop$))
+    return( addressBook$[join$(id$,".",prop$)] )
+    ;
+print(getProp$("mark", "email"))
+
+
+If you need a multi-dimensional array, e.g. for a map, multiply the indices out - instead of 'map[x][y]', use 'map[add(x,mul(y,MAPWIDTH))]'.
+
+Array types do not need to be "dimensioned"; they can automatically hold any number of values, expanding as needed. Strings in them default to "", numbers to 0, but you must have assigned at least one value to them, to create the array type. Simple variables must be declared (by assigning a value to them) before they can be used.
+Minimal is secure; the application can restrict which libraries can be loaded (and pre-load those libraries, if desired), and the standard library cannot affect anything on the client machine or the network except the client's memory and CPU time; you can always kill a runaway program. This makes it safe to distribute Minimal scripts online, and to download and run Minimal scripts from "untrusted" sources. While Python and Java are powerful languages, there are just enough loopholes in their security to make me unwilling to distribute them that loosely, and by now everyone except Microsoft is aware of just how suicidal it is to run Visual Basic macros or ActiveX controls.
+There is a complete syntax-highlighting file for Vim, 'minimal.vim', included with this distribution. To use it: 
+
+Install Vim, if you haven't already.
+Copy minimal.vim to $VIMRUNTIME/syntax/ (if you don't have $VIMRUNTIME set in your environment, start Vim and type ':echo $VIMRUNTIME').
+Add the following line to $VIMRUNTIME/syntax/synload.vim, with the other SynAu lines:
+
+SynAu minimal
+
+
+Add the following lines to $VIMRUNTIME/filetype.vim, with the other au lines:
+
+" Minimal
+au BufNewFile,BufRead *.minset ft=minimal
+
+
+Edit sample.min with Vim to make sure it's working correctly.
+
+If you've never used Vim before, give it a try. It's one of the most powerful programmer's editors that has ever been invented, it works on every platform known to man, it's charityware, it's well-documented (type ':help' to start one of the best help systems ever written), and there's even a book out from  New Riders.
+
+Editing Minimal code with syntax highlighting in Vim is vastly easier than doing it in some crippled toy editor like Notepad (you might spend a few days practicing with Vim, but you'll work better when you've learned it), or trying to make a word-processor leave your text alone (a word processor does to words what a food processor does to food). You should always use the right tool for any job - you don't use a hammer to drive screws, or a garden spade to resurface a highway, do you?
+
+Minimal does have a few known drawbacks/unfortunate design choices:
+
+Minimal is not as fast as some languages, especially not compiled languages. For the little that it does, it probably uses too much memory and too much CPU time. But it's as fast as a scripting language implemented in Java can be. Unlike some I could name, it never has to parse a line more than once.
+Minimal does not currently support full UNICODE, only Latin-1. While it reads and writes UNICODE text with input() and print(), the standard Java StreamTokenizer only recognizes an 8-bit charset, and that's what I'm using as a parser. I hope to fix this in a near-future version.
+Minimal does not allow algebraic expressions; instead, you use functions to do arithmetic, e.g. 'mul(2,add(3,4))' instead of '2*(3+4)'. While this is admittedly ugly, it is consistent with the function-oriented syntax, and makes Minimal much smaller and faster than it would be otherwise. A future version may support algebraic expressions, but once you become accustomed to using functions, it's no great hardship; Lisp programmers have lived with this same defect for 40 years. I'm aware that this detracts from the beginner ease-of-use. Please do not bother to complain about this "feature", it will get changed if and when it gets changed, and not before. Thank you.
+
+
+Standard Functions
+
+Standard functions are the core of the language, and are always loaded.
+
+~abs(a)
+	Returns 'a' if 'a' >= 0, -'a' if 'a' < 0.
+
+~add(a, b,,,)
+	Returns 'a'+'b'.
+
+~addv(<numvar a>, b,,,)
+	Sets 'a' to 'a'+'b', and returns the result. Identical to 'let(a,add(a,b))'.
+
+~and(a, b,,,)
+	Returns 1 if both 'a' and 'b' are non-zero, else returns 0.
+
+~asc(a$)
+	Returns the UNICODE value of the first character of 'a$', or 0 if 'a$' is "".
+
+~assert(a, {, b$,,, }?)
+	If 'a' is 0, causes an "Assertion failed" error. If 'b' is specified, it is appended to the error message. Returns 1 if 'a' was non-zero. The error contains the expression of 'a'. For example,
+	let(a, 0)
+	assert(a, "shouldn't happen!")
+	Produces the message:
+	ERROR: Assertion failed: a: shouldn't happen!
+	Assertions can be used to verify that values are in or out of certain ranges, or test any other condition that should always be true, or should never be true. This helps you make more reliable programs - the assertion might fail, but that's better than having a subtle bug show up later because you didn't test for it.
+~atn(a)
+	Returns the arctangent of 'a', in radians.
+~band(a, b,,,)
+	Returns the binary AND of 'a' and 'b' (integer portions only).
+~bnot(a)
+	Returns the binary inverse of 'a' (integer portion only).
+~bor(a, b,,,)
+	Returns the binary OR of 'a' and 'b' (integer portions only).
+~bshl(a, b,,,)
+	Returns the value of 'a' shifted left by 'b' bits (integer portions only).
+~bshr(a, b,,,)
+	Returns the value of 'a' shifted right by 'b' bits (integer portions only). The value is sign-extended (that is, if negative, there are an endless number of 1 bits to the left).
+~bxor(a, b,,,)
+	Returns the binary XOR of 'a' and 'b' (integer portions only).
+~bin$(a)
+	Returns the binary equivalent of int('a') as a string.
+~boolean(a)
+	Returns 0 if 'a' is 0, otherwise 1.
+~bye()
+	exit immediately from Minimal.
+~chr$(a)
+	Returns a 1-char string with the UNICODE value 'a'.
+~clear( {<var a>}? )
+	If no arguments are given, clears all global variables and all local variables in scope. If 'a' is given, clears all local and global variables with that identifier. Returns 1.
+~cos(a)
+	Returns the cosine of 'a', in radians.
+~data(<con a>,,,)
+	Stores a series of constants, which may be either string or number, for use with 'read' and 'restore'. Returns 1. Must be on a line by itself. Can only be used inside of a function.
+~date$()
+	Returns the current date. The date is in the form "yyyy-MM-dd" (yyyy=4-digit year, MM=month, dd=day of month).
+~decr(<numvar a>)
+	Subtracts 1 from 'a', and returns the result.
+~def(a())
+	
+	Creates a user-defined function 'a' with zero or more local variables, named in 'a's argument list. The function and its local variables end when 'enddef' is reached. Once defined, it can be called at any time just like a pre-defined function. def() can only be issued in immediate mode (i.e. not within another function).
+	If your function's name conflicts with a library function, the library function takes precedence, and an error happens when you try to define your function. You'll have to rename your method to use it with that library. You end a function with a semicolon on a line by itself:
+
+def(hello(name$))
+    print("Hello, ",name$,"!")
+    ;
+
+
+~deg(a)
+	Returns the degrees equivalent of 'a' radians. See also 'rad'.
+~del(a())
+	deletes a user-defined function 'a'.
+~div(a, b,,,)
+	Returns 'a'/'b'.
+~divv(a, b,,,)
+	Sets 'a' to 'a'/'b', and returns the result. Identical to 'let(a,div(a,b))'. 
+~do(<any a>,,,)
+	evaluates each 'a' in order. Returns 1.
+~end()
+	ends the currently running program.
+~e()
+	Returns the value of e (Euler's constant).
+~env$(a$)
+	Returns the system property 'a'. These are the standard Java properties, which are documented at: <http://java.sun.com/docs/api/java/lang/ System.html#getProperties()>. The most important ones are: "os.arch", "os.name", and "os.version" which tell you what platform you are running on (e.g., "i386", "Linux", "2.2.18"); "file.separator" is the "slash" between filenames in a path (e.g., "/"); "line.separator" is the system's newline - "\r", "\n", or "\r\n" (e.g. "\n"); "user.name" is the user's login name. Please check and use these values, lest you get irate messages from people trying to run your code on another OS. Returns "" if the property is not defined.
+~eof()
+	Returns 1 if the last 'input()' or 'input$()' reached the end of file, 0 if not.
+~eq(<any a>, <any b>)
+	Returns 1 if 'a' and 'b' are equal, else 0. 'a' and 'b' must be of the same type.
+~exp(a)
+	Returns e raised to the power 'a'.
+~for(<numvar v>, a, b, c, <any d>,,,)
+	Starts a loop counting 'v' from 'a' to 'b'. Each 'd' is evaluated, and then 'v' is incremented by 'c', until it is greater than or equal to 'b'. Returns the final value of 'v'. Modifying 'v' inside the loop is not useful, as the loop counter will replace any new value you give it; this helps prevent infinite loops.
+~foreach(<var v>, a[], <any b>,,,)
+	Starts a loop counting 'v' across every index in 'a', evaluating each 'b' for each index. 'a' must reference some value in the array, but does not have to be defined - using "" or 0 is the clearest way to use it. 'v' must be of the same type as the index to 'a'. Returns 1. Most commonly used for hashes like this:
+
+let(a["a"], 1)
+let(a["b"], 2)
+let(a["c"], 3)
+foreach(i$, a[""], print(i$,"=",a[i$]))
+
+
+~frac(a)
+	Returns the fractional portion of 'a'.
+~ge(<any a>, <any b>)
+	Returns 1 if 'a' is greater than or equal to 'b', else 0. 'a' and 'b' must be of the same type.
+~global(<var a>)
+	Assigns 'b' to 'a' in the global scope. 'a' and 'b' must be of the same type. Returns 1.
+~gt(<any a>, <any b>)
+	Returns 1 if 'a' is greater than 'b', else 0. 'a' and 'b' must be of the same type.
+~hex$(a)
+	Returns the hexadecimal equivalent of int('a') as a string.
+~hypot(x0,y0,x1,y1)
+	Returns the straight-line distance between two points x0,y0 and x1,y1.
+~if(a, b {, c, d }* {, e}?)
+	if$(a, b$ {, c, d$ }* {, e$}?)
+Conditional evaluation. If 'a' is non-zero, 'b' is evaluated and returned. If one or more pairs of 'c' and 'd' are specified, then for each 'c', if it is non-zero, its matching 'd' is evaluated and returned. If 'e' is specified at the end, and neither 'a' nor any 'c' was non-zero, 'e' is evaluated and returned. For example: 
+
+    if(1, 10): returns 10
+    if(0, 10, 1, 20): returns 20
+    if(0, 10, 40): returns 40
+    if(0, 10, 0, 20, 1, 30, 40): returns 30
+    if(0, 10, 0, 20, 0, 30, 40): returns 40
+   
+
+~incr(<numvar a>)
+	Adds 1 to 'a', and returns the result.
+~input$({ a$ }?)
+	If 'a' is specified, it is printed as a prompt (equivalent to 'printn(b)'). A full line is read from the input, and is returned. If input is at the end of file, "" is returned. For instance, a program to copy input to output looks like this:
+
+while(not(eof()),
+    let(a$, input$()),
+    if(not(eof()), print(a$)),
+)
+
+
+~input({ a$ }?)
+	As 'input$', but then converts the line to a number and returns it. If the conversion fails, returns 0.
+~instr(a$, b$ {, c }?)
+	Returns the index (the first character is index 1) in 'a' of the first occurrence of 'b', or 0 if not found. If 'c' is specified, the search starts at that index.
+~int(a)
+	Returns the integer portion of 'a'.
+~join$(<any a>,,,)
+	Returns each 'a' converted to a string and joined together. Does not modify 'a'.
+~joinv$(<strvar a>, <any b>,,,)
+	Joins 'a' and 'b', sets 'a' in the local scope, and returns it. Identical to 'let(a$, join$(a$, b))'.
+~le(<any a>, <any b>)
+	Returns 1 if 'a' is less than or equal to 'b', else 0. 'a' and 'b' must be of the same type.
+~left$(a$, b)
+	Returns the leftmost 'b' characters of 'a', or pads 'a' out to 'b' spaces on the right side (left-justifying 'a') if 'b' is more than 'a's length.
+~len(a$)
+	Returns the length of 'a'.
+~let(<var a>, <any b>)
+	Assigns 'b' to 'a' in the local scope. 'a' and 'b' must be of the same type. Returns 1.
+~library(a$)
+	Loads a library from package 'a', e.g. "mdh.minimal.file".
+~list({ a() }?)
+	If 'a' is not specified, lists all user-defined functions by their definition and number of lines only. If 'a' is specified, that function is listed completely. Returns the number of user-defined functions.
+~log(a)
+	Returns the natural log (base e) of 'a'.
+~lt(<any a>, <any b>)
+	Returns 1 if 'a' is less than 'b', else 0. 'a' and 'b' must be of the same type.
+~mid$(a$, b {, c}?)
+	Returns the substring of 'a' starting at 'b' and ending at 'c'. The first character is numbered 1. If 'b' is negative or greater than the length of 'a', "" is returned. If 'c' is unspecified or less than 'b' or greater than the lenght of 'a', the substring of 'a' from 'b' to the end is returned.
+~mod(a, b,,,)
+	Returns the remainder ("modulo") of 'a'/'b'.
+~modv(<numvar a>, b,,,)
+	Sets 'a' to the remainder ("modulo") of 'a'/'b', and returns the result. Identical to 'let(a,mod(a,b))'.
+~mul(a, b,,,)
+	Returns 'a'?'b'.
+~mulv(<numvar a>, b,,,)
+	Sets 'a' to 'a'?'b', and returns the result. Identical to 'let(a,mul(a,b))'.
+~ne(<any a>, <any b>)
+	Returns 0 if 'a' and 'b' are equal, else 1. 'a' and 'b' must be of the same type.
+~neg(a)
+	Returns -'a'.
+~new()
+	Clears all variables and the program in memory.
+~not(a)
+	Returns 1 if 'a' is 0, otherwise 0.
+~oct$(a)
+	Returns the octal equivalent of int('a') as a string.
+~or(a, b,,,)
+	Returns 1 if either 'a' or 'b' is non-zero, otherwise 0.
+~pi()
+	Returns the value of pi.
+~pow(<int a>, <int b>)
+	Returns 'a' raised to the 'b' power.
+~print({<any b>,,,}?)
+	printn({<any b>,,,}?)
+	If 'a' is specified, prints to that opened write channel (see 'fopen'), otherwise prints to the console. If 'b' is not specified, just a newline is printed. All 'b' are printed in order. A system-specific end-of-line is printed at the end if you use 'print', no end-of-line if you use 'printn'. Returns 1. print() may be abbreviated p(), and printn() may be abbreviated pn().
+~randomize({a}?)
+	
+Reseeds the pseudo-random number generator (PRNG) with 'a', or with the current system time if 'a' is not specified. Returns 1. See 'rnd'.
+
+Now, you may be asking, "why would I need this function?". There are two methods for producing an apparently random sequence of numbers - through "mechanical" means (most often an electrical-noise or cosmic-ray-counting device, but dice, bingo balls, flipping coins, and other methods have been used to make lists of random numbers), or through software.
+
+Mechanical RNGs produce truly random sequences, but you cannot repeat any given sequence, and most computers do not have a mechanical RNG (the later Pentiums, and some other chips, do have one built in, but it is little-used yet).
+
+Software, however, is always deterministic, as long as the hardware is deterministic; you cannot generate a truly random sequence with just software, they will eventually repeat (though this can take a trillion or more numbers).
+
+There is an important advantage to using a PRNG - repeatability. By using 'randomize(a)', you can "seed" the PRNG to some value, then get a pseudo- random sequence. Later, when you want to repeat that sequence, just reseed with the same value. For example:
+
+randomize(1)
+print(rnd(100)," ",rnd(100)," ",rnd(100))
+randomize(1)
+print(rnd(100)," ",rnd(100)," ",rnd(100))
+
+
+Will display the same sequence twice (it should be the same on all Java implementations):
+
+26 77 96
+26 77 96
+
+
+A common use for 'randomize' is in games. Get a seed from the user or from 'timer()', 'randomize(seed)' before generating a complex game board, then call 'randomize()' when you start the game. Then you can reproduce the board from just that one seed number if the player wants to try it again, without having to save the board. For instance, this is used in many computer versions of Dragon (sometimes incorrectly called "Mah-Jongg", which is a Bridge-like game played with the same tiles) and Solitaire.
+
+"Any one who considers arithmetical methods of producing random digits is, of course, in a state of sin." 
+-John von Neumann, 1951, while explaining such a method
+
+~read()
+~read$()
+	Reads and returns the next constant from 'data' statements in the same function. Can only be used inside of a function.
+~repeat({<any a>,,,}?, b)
+	evaluates each 'a' in order, over and over, until 'b' is non-zero. Returns 1. For instance, to input a line from the user and make sure that it is not "", you could use the following:
+
+repeat(let(name$, input$("What is your name? ")), len(name$))
+	
+
+~restore()
+	Restores the 'read'/'data' pointer to the start of the current user-defined function. Returns 1. Can only be used inside of a function.
+~return(<any a>)
+	Returns from a user-defined function with value 'a'. Can only be used inside of a function.
+~right$(a$, b)
+	Returns the rightmost 'b' characters of 'a', or pads 'a' out to 'b' spaces on the left side (right-justifying 'a') if 'b' is more than 'a's length.
+~rnd({a}?)
+	If 'a' is specified, returns a pseudo-random integer number between 1 and 'a', inclusive. If 'a' is not specified, returns a pseudo-random floating-point number between 0.0 and 1.0, inclusive. See also 'randomize'.
+~setglobal(a$, { <any b> }?, <any c>)
+	setvar(a$, { <any b> }?, <any c>)
+Performs a variable or array assignment "on the fly" - the name of the variable is in 'a$'. If 'b' is given, the variable is an array, and 'b' is the index; do not include the [] brackets in 'a$'. The new value of the variable is in 'c'. 'setvar()' assigns a local variable, 'setglobal()' assigns a global variable. Returns 1.
+~sgn(a)
+	Returns 0 if 'a' = 0, 1 if 'a' > 0, or -1 if 'a' < 0.
+~sin(a)
+	Returns the sine of 'a', in radians.
+~size(a[])
+	Returns the number of indices in array 'a'. You must give an index, but the index doesn't have to exist - use "" or 0. Note that lists include index 0, so the following code prints 11, not 10:
+
+let(a[10], 10)
+print(size(a[0]))
+
+
+~sqrt(a)
+	Returns the square root of 'a'.
+~str$(a)
+	Returns a string version of 'a'.
+~string$(a$, b$)
+	Returns a string consisting of 'b' copies of 'a'. If 'b' is negative, or the total length would be more than 32767 characters, "" is returned.
+~sub(a, b,,,)
+	Returns 'a'-'b'.
+~subv(<numvar a>, b,,,)
+	Sets 'a' to 'a'-'b', and returns the result. Identical to 'let(a,sub(a,b))'.
+~tan(a)
+	Returns the tangent of 'a', in radians.
+~time$()
+	Returns the current time. The time is in the form "HH:mm:ss.SSS z" (HH=24- hour hour of day, mm=minute, ss=second, SSS=millisecond, z=timezone).
+~timer()
+	Returns the number of seconds since the Unix epoch (Jan 1, 1970, 0:00 GMT) began. The number will have up to three fractional digits.
+~tron(a)
+	Turns command tracing on if 'a' is non-zero, or off if 'a' is zero. Tracing prints each statement to the console before it is executed. Returns boolean(a).
+~type()
+	Returns the type of the next 'data' constant: 0 if it is an num, or 1 if it is a string. Can only be used inside of a function.
+~val(a$ {, b }?)
+	Returns the num equivalent of 'a', or 0 if 'a' cannot be converted to an num. If 'b' is specified, 'a' is assumed to be an integer in base 'b': usually 2, 8, or 16 for binary, octal, or hex. If 'b' is not specified, 'a' is assumed to be a normal decimal number.
+~var$(a$, { <any b> }?)
+~var(a$, { <any b> }?)
+	performs a variable or array lookup "on the fly" - the name of the variable is in 'a$'. If 'b' is given, the variable is an array, and 'b' is the index; do not include the [] brackets in 'a$'. If the variable is not defined, you will get the usual error. For example:
+
+let(a,1)
+let(b$,"b")
+let(c["a"],3)
+let(d$[1],"d")
+print(var("a"))
+print(var$("b$"))
+print(var("c","a"))
+print(var$("d$",1))
+
+
+Produces the expected result:
+
+1
+b
+3
+d
+
+
+~while(a, {<any b>,,,}?)
+	As long as 'a' is non-zero, evaluates each 'b', then repeats. Returns 1.
+~word$(a$, b {, c$ }? )
+	Returns the 'b'th whitespace-delimited word in 'a'. If 'c' is specified, it is used as the list of delimiter characters instead. Returns "" for words out of bounds 1..wordcount.
+~wordcount(a$ {, b$ }?)
+	Returns the number of whitespace-delimited words in 'a'. If 'b' is specified, it is used as the list of delimiter characters instead.
+~xor(a, b,,,)
+	Returns 1 if 'a' is 0 and 'b' is non-zero, or if 'a' is non-zero and 'b' is 0. Equivalent to 'ne(boolean(a), boolean(b))'.
+
+
+Formal Definition
+
+You probably don't need to read this, each term in the function listings should be self- explanatory.
+
+    { } : = grouping
+    [ ] := char class
+    | := or
+    ? := zero or one
+    * := zero or more
+    + := one or more
+    ,,, := one or more, separated by commas; identical to 'a { , a }*'.
+    \ := ignore special meaning of next char
+
+
+Whitespace is usually optional; it is only significant inside strings.
+
+Every line can contain at most one function call, and a function must be completed on the same "logical line".
+
+<name> := [_a-zA-Z][_a-zA-Z0-9]*
+<numcon> := -?[0-9]+{[eE]-?[0-9]+}?
+<numscalar> := <name>
+<numarray> := <name>\[ <any>,,, \]
+<numvar> := <numscalar>|<numarray>
+<numfunc> := <name>( { <any>,,, }* )
+<num> := <numcon>|<numvar>|<numfunc>
+<strcon> := "{[^\"]|{\\.}}*", uses Java-like escape codes:
+    \a   Alert (^G, ASCII 7)
+    \b   Backspace (^H, ASCII 8)
+    \t   Tab (^I, ASCII 9)
+    \n   Newline (^J, ASCII 10)
+    \v   Vertical Feed (^K, ASCII 11)
+    \f   Formfeed (^L, ASCII 12)
+    \r   Carriage Return (^M, ASCII 13)
+    \"   Double-Quote (", ASCII 34)
+    \\   Backslash (\, ASCII 134)
+    \### Octal ASCII character (i.e. \010 = 8 Backspace, \033 = 27 Escape)
+    \u#### Hexadecimal UNICODE character (i.e. \u0041 = 64 A)
+
+
+Note that using \r, \n, or \r\n to end a line is implementation-specific; Unix uses \n, Macintosh uses \r, and Windoze uses \r\n (just like obsolete teletypes did). You should separate each line and use 'print' to get the platform-specific newline, or use the following portable code:
+
+let(nl$,env$("line.separator"))
+printn("Hi",nl$,"there!",nl$)
+
+
+<strscalar> := <name>$
+<strarray> := <name>$\[<any>,,,\]
+<strvar> := <strscalar>|<strarray>
+<strfunc> := <name>$( { <any>,,, }* )
+<str> := <strcon>|<strvar>|<strfunc>
+<var> := <numvar>|<strvar>
+<con> := <numcon>|<strcon>
+<array> := <numarray>|<strarray>
+<func> := <numfunc>|<strfunc>
+<any> := <str>|<num>
+<comment> := <linecomment>|<inlinecomment>
+<linecomment> := #[^<newline>]*
+<inlinecomment> := #[^#]*#
+<line> := <func>|<comment>

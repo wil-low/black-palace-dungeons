@@ -1,0 +1,960 @@
+# BlackPalace.min
+# Created on book "Black Palace dungeons"
+#
+# Copyright 2002 © by Andrey Ivushkin <ivushkin@lnau.lg.ua>
+#
+# Author: Andrey Ivushkin
+# Email: ivushkin@lnau.lg.ua
+# Created: 28.10.02 9:20
+# Last Modified: 05.11.02 16:13
+
+
+
+
+
+
+
+def(build_world())
+    map_new("world", "World",81,69)
+    map_fill("world", 0, 0, Terrain$[""], join$(
+		"f~~~~~~~~~~~~~~~ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff\n",
+		"fff~~~~~~~~~~~~~ffffffffffffffffffff.....fffffffffffffffffffffffffffffffffffffff\n",
+		"ffff~~~~~~~~~~~~~fffffffffffffffffff.fff..........ffffffffffffffffffffffffffffff\n",
+		"fff~~~~~~~~~~~~~~~fffffffffffff........@fffffffff...ffffffffffffffffffffffffffff\n",
+		"ffffffff~~~~~~~~~~~~fff...fffff.fffffwwwwwfffffffff..ffff...ffffffffffffffffffff\n",
+		"fffffffffff~~~~~~~~~....f.......ffffww...wwfffffffff..fff.f.ffffffffffffffffffff\n",
+		"ffffffffffff~~~~~~~~~~fffffffff......w...w.......ffff.....f.ffffffffffffffffffff\n",
+		"ffffffffff...~~~~~~~ffffff......ffffww...wwfffff.ffffffffff.ffffffffffffffffffff\n",
+		"fffffffff...fff~~~~~~~ffff.fff.ffffffwwwwwfff....ffffffffff.ffffffffffffffffffff\n",
+		"fffffffff.f......~~~~ff....fff.ffffffff.......ff.ffffffffff.ffffffffffffffffffff\n",
+		"fffffffff.fffff.f~~~~~~.ffffff..fffffffff.ffffff.ffffff.....ffffffffffffffffffff\n",
+		"f@...fff..fffff....bbb..f~~ffff.fffffffff..fffff....fff.ffffffffffffffffffffffff\n",
+		"ffff.fff.fffffffff~~~~~~~~fffff....fffffff...ffffff.fff..fffffffffffffffffffffff\n",
+		"fff..fff...ffffffff~~~~~~~~~~fffff.fffffffff.ffffffgggff...fffffffffffffffffffff\n",
+		"fff.ffffff.fffff~~~~~~~fff~~ff.....fffffffff...fffgggggfff.fffffffffppffffffffff\n",
+		"ff..ff.....fffff~~~~~~fff~~~~f.fffffffffffffff..ffggggg.........ffff..ffffffffff\n",
+		"ff.fff.fffffff~~~~~f~~fff~~~~..ffffffffffffffff..ffgggfffffffff....ff.ffffffffff\n",
+		"ff.ff..ffffff~~~~ffff~~~f~~~..ffffffffffff~~~~ff.ffff........fffff....ffffffffff\n",
+		"ff.ff.fffffff~~ffffff~~~~~~~B~~~~~~~~~~~~~~~~~ff...ffff.ffff.....ffff.....ffffff\n",
+		"ff.......ffff~ffffffff~~~~~~B~~~~~~fff~~~~~~ffffff.ffff...ffffff.ffff.fff.ffffff\n",
+		"fffff.ff..fff~~ffffffff~~~~~B~~~~~~~~~~~~~~fffffff.ffffff.ffffff..fff.fff@ffffff\n",
+		"ffff..fff.ffff~~~~~~fff~~~~f.fff~~~~~fffffffffffff.ffffff.fffffff..ff..fffffffff\n",
+		"ffff.fff..ffffffffffffffffff.ffffffffff......fffff....fff....fffff.fff.ff....fff\n",
+		"fff..fff.ffffffffffffffffff.......fff...vvvv.ffffffff.ffffff.fffff.hff....ff.fff\n",
+		"fff.ffff.ffffffffffffffff...fffff.fff.vvvvvv.ffffffff..fffff..ffff.ffffffff..fff\n",
+		"fff.ffff.f.......ffffffff.f..ffff.....vvvvvv.fffffffff..fffff.ff....ffffff..ffff\n",
+		"....ffff.f.fffff.ffffffff.ff.ffffff..vvvvvvv.ffffffffff.fffff.f..ff.....ff.fffff\n",
+		".fffffff...fffff..........ff.ffffff.vvvvvvvv.ffffffffff****.....fffffff.ff.fffff\n",
+		"..fffffffffffffff///ffffffff.ffffff.vvvvvvvv..ffffffft****fffffffff.....ff...fff\n",
+		"f....fffffffffff/////fffff...ffffff.vvvvvvvvv.ffffff****ffffffffff..ffffffff.fff\n",
+		"ffff..ffffffffff/////fffff.fffffff..vvvvvvvvv.ffff*****ffffffffff..ffffffff..fff\n",
+		"fffff.fffffffffff///.fffff.fffff...vvvvvvvvvv.fff****f..fffffffff.fffffffff.ffff\n",
+		"ff....fffffff.....ff.........fff.vvvvvvvvvvvv.ff***f.ff..fffffffkkffffffff..ffff\n",
+		"f..fffff......fff.ff.ffff.ff.....vvvvvvvvvvvv.ffffff.fff.fffffffkkffffffff.fffff\n",
+		"f.ffff...ffffffff.ff.fff..fffffffvvvvvvvvvvvv.ffffff.fff.fffffff.fffffffff.fffff\n",
+		"f......fffffffff..ff..ff.ffffffffvvvvvvvvvvvv.ffffff..ff.mffffff.fffffffff..ffff\n",
+		"f.ffff...fdddddd.ffff.ff..ffffffffvvvvvvvvvv..fffffff....fffffff.ffffffffff.ffff\n",
+		"f.ffffdddddddddd..fff.fff.ffffffffvvvvvvvvvv.....@.....fffffffff......ff........\n",
+		"f...ffddddddddddf.fff.fff.ffffffffvvvvvvvv...fff...fff.fffffff...f.ff....ff.ffff\n",
+		"fff.fdddddddddddf..ff.ff..fffffffffvvvvvv..fffffffff...fffff...fff..fffffff.ffff\n",
+		"ff..fdddddddddddff.......fffffffffffvvvv..fffffffff..fffff...fff....ffffff..ffff\n",
+		"ff.ffffdddddddddfffff.ff..fffffffffff....ffffffffff.ffffff.ffff..ff..fffff.fffff\n",
+		"ff.ffffdddddddddfffff.fff...fffffffff.fffffffffffff.fff....f....ffff.fffff...fff\n",
+		"ff.fffddddddddddfffff..ffff.fffffff...fffffffffffff.fff.ffff.zffffff.fffffffffff\n",
+		"f..fffddddddddddffffff.ffff....ffff.ffffffffffffff..ff..ffff..ffffff..ffffffffff\n",
+		"f.ffdddddddddddddddddd..ffffff.....y.....fffffffff.ff..ffffff....ffff.ffffff.fff\n",
+		"..ffdfddddddddddddddddf....ffffffff.ffffffffff.....ff.ffffffffff.fff..fff....fff\n",
+		".ffddfdddddddddddddddd..ff..fffffff.fffffffff..ff.ff..ff..fffff..ff..~~~~~~~~fff\n",
+		".ffddffffddddddddddddd.ffff...fffff.......ff..f...f..ffff.fffff.fff.~~~~~~~~~~~~\n",
+		".ffdddffdfddddddddf.....fffff.fffffffffff.f..ff.fff.fffff...fff..ff.~~~~~~~~~~~~\n",
+		"....fffddddddddddd..ffi.fffff.....fff.......fff..f..fffffff.ffff.ff.~~~~~~~~~~~~\n",
+		"fff.fffdddddddddddddddf..ffffffff.....fff.ffffff.f.fff.....y..ff.ff..~~~~~~~~~~~\n",
+		"ff..ffffffddddddddddddff.fffffffffffffff..ff...........ffff.f....fff.~~~~~~~~~~~\n",
+		"ff.ffff---ffddffddddddff.ffff......fffff.ff@.fff.fttffffff..ffffffff.~~~~~~~~~~~\n",
+		"ff..ff--v---ffffddddddff......ffff.fffff.fffff......tffff..ffffffff..~~~~~~~~~~~\n",
+		"ffffvvvvvvv---fffdddddddf.fff...ff...fff.fffff.fffftfffff.~~~~fffff.f~~~~~~~~~~~\n",
+		"fff-vvvvvvvvv--fffddddddf..ffff..fff.fff.fffff.ffffffffff..~~~~fffff.~~~:oo~~~~~\n",
+		"fff-vvvvvvvvvv----fddd.fff....ff.fff.fff.ffff..fffffffff.~~~~~~~fff.~~~o:o:o~~~~\n",
+		"fff---vvvvvvvvvvv-ffff...ffff..f..ff.fff.fff..ffffffffff.~~~~~~~~~~~~~~~o:oo~~ff\n",
+		"fffff--vvvvvvvvvv-ffffff..ffff.ff.ff.fff..ff.fffffffffff.~~~~~~~~~~~~~~~~~oo~~~~\n",
+		"ffffff---vvvvvvv--fffffff......ff.ff.ffff.f....fffffffff.~~~~~~~~~~~~~~~~~~~~~~~\n",
+		"ffffffff--vvvvvv-fffffffffffff.ff..f.f....f.ff.fffffffff...~~~~~~~~~~~~~~~~~~~~~\n",
+		"fffffffff---vvvv......fff......fff.....ffff.tf...fffffffft.tf~~~~~~~~~~~~~~~~~~~\n",
+		"fffffffffff-----fffff..ff.ffffffffff.ffffff..fff...fffffft..~~~~~~~~~~~~~~~~~~~~\n",
+		"ffffffffffffffffffffff.ff.f..........f....jn.jfffn.jn......t~~~~~~~..~~~~~~~~~ff\n",
+		"ffffffffffffffffffffff......ffffffff...ff.............cfl.fffffff~...~~ff~f..fff\n",
+		"fffffffffffffffffffffffffu.uffffffffff.ff.cffffffffffffff..fff......ff.ffff.fdft\n",
+		"fffffffffffffffffffffffffffffffffffffffff.ffffffffffffffff.....ffff....ffffftttt\n",
+		))
+	;
+
+def(_intro())
+	trig("Wounded","world",38,64)
+	trig("spider1","world",44,63)
+	trig("spider0","world",44,60)
+	trig("dryad","world",36,63)
+	trig("hien","world",32,58)
+	trig("bridge11","world",59,52)
+	trig("bridge21","world",58,51)
+	trig("bridge12","world",35,46)
+	trig("bridge22","world",36,45)
+	trig("village1","world",21,63)
+#	small_village()
+	trig("three_assassins1","world",17,32)
+	trig("three_assassins2","world",20,31)
+	trig("honest_trader","world",46,54)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	trig("","world",,)
+#	th_moveto("player","world",46,54)
+	;
+
+def(bridge(layer))
+	if(eq(layer,LAYER_Under),let(l$,"0101"),let(l$,"1010"))
+	ter_walls(Terrain$["y"],l$)
+	ter_tile(Terrain$["y"],layer,"images/floor/path_ns",1,1)
+	;
+
+def(newgame())
+	set_globals()
+    window_color("white", "black")
+    output_color("white", "black")
+    output("\n       ",GAME$)
+    output("  Copyright 2002 © by Andrey Ivushkin")
+    output("       <ivushkin@lnau.lg.ua>\n")
+	output("Building world...\n")
+	build_world()
+	build_player()
+	_intro()
+	_buildings()
+	output("\n\t\tReady.\n")
+	;
+
+def(build_player())
+    st_name("player", "Willow")
+    stats_lock(1)
+	set_stats("player",15,15,15,15,1)
+    st_prop("player","luck",add(d(1,6),6))
+    th_statmax("player",ST_HitPoints,300)
+#   output("Your luck is ",st_get_prop("player","luck"))
+#   for(i,1,6,1,output(check_luck()))
+    en_secondary("player")
+    th_gold("player", 15)
+	st_prop("player","bulb_water",4)
+	st_prop("player","bag_room",7)
+    stats_lock(0)
+    # Give the player some simple magic spells
+	en_magic("player","Where am I?",debugWhereAmI())
+	en_magic("player","Teleport me",debugTeleport())
+#   spell_select(10)
+	let(id$,tempid$())
+    it_new(id$,"Sword")
+    th_tile(id$,0,"images/weapon/dagger3",1,1)
+    it_equip(id$,EQ_Weapon)
+    pl_equip("player",id$)
+    it_new("Bulb","Healing water")
+    st_prop("Bulb","hp",2)
+    th_tile("Bulb",0,"images/item/bulb_purple",1,1)
+    it_removefunc("Bulb",no_remove())
+    st_trigger("Bulb",drink_bulb())
+    pl_take("player","Bulb")
+    th_moveto("player", "world",41,67)
+	;
+
+def(spell_select(count))
+	let(opt$,"Levity|Fireball|Illusion|Strength|Weakness|Copy|Healing|Swimming")
+	for(i,1,count,1,
+		let(text$,join$("Select magic spell #",str$(i))),
+		let(ch,menu("Getting magic",text$,opt$,0)),
+		let(spell$,word$(opt$,ch,"|")),
+		output("Got ",spell$," spell"),
+		let(n$,join$(str$(i)," ",spell$)),
+		output(n$),
+		en_magic("player",n$,pl_spell(i,n$))
+	)
+	;
+
+def(pl_spell(num,id$))
+	output(num," ",id$)
+	let(x,th_get_x("player"))
+	let(y,th_get_y("player"))
+	if(eq(num,1),do(output("spell"),return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+#	if(eq(num,1),do( ,return(1)))
+	return(1)
+	;
+
+def(check_luck())
+	st_prop("player","luck",sub(st_get_prop("player","luck"),1))
+	return(le(d(2,6),st_get_prop("player","luck")))
+	;
+
+def(trig(id$,mapid$,x,y))
+	ter_new(id$,"")
+	ter_tile(id$,LAYER_Under,"images/ground/grass",1,1)
+	st_trigger(id$,_trig_func())
+	gr_terrain(mapid$,x,y,id$)
+	;
+
+def(_trig_func())
+	if(ne(actorid$,"player"),return(1))
+	quest("")
+	st_trigger(targetid$,0)
+	if(eq(targetid$,"spider1"),do(st_trigger("spider0",0),spider(1),return(1)))
+	if(eq(targetid$,"spider0"),do(st_trigger("spider1",0),spider(0),return(1)))
+	if(eq(targetid$,"dryad"),do(dryad(),return(1)))
+	if(eq(targetid$,"hien"),do(hien(),return(1)))
+	if(eq(left$(targetid$,7),"bridge1"),do(bridge(LAYER_Under),return(1)))
+	if(eq(left$(targetid$,7),"bridge2"),do(bridge(LAYER_Over),return(1)))
+	if(eq(targetid$,"Wounded"),do(wounded(),return(1)))
+	if(eq(targetid$,"village1"),do(small_village(),return(1)))
+	if(eq(targetid$,"three_assassins1"),do(st_trigger("three_assassins2",0),three_assassins(),return(1)))
+	if(eq(targetid$,"three_assassins2"),do(st_trigger("three_assassins1",0),three_assassins(),return(1)))
+	if(eq(targetid$,"honest_trader"),do(
+		let(t$,trader_appear$()),
+		trig("no_trader","world",48,53),
+		st_trigger("no_trader",trader_disappear(t$)),
+		return(1)
+	))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+#	if(eq(targetid$,""),do(			,return(1)))
+	;
+
+def(build_ter(var$, char$, name$, basefile$, nframes, walls$, opa))
+    let(ter$, tempid$())
+    setglobal(var$, char$, ter$)
+    ter_new(ter$, name$)
+    ter_tile(ter$, LAYER_Under, basefile$, 1, nframes)
+    ter_walls(ter$, walls$)
+    ter_opa(ter$, opa)
+    ;
+
+def(set_globals())
+	quest("")
+	global(GAME$,"Black Palace Dungeons")
+	global(TODO$,"What will you do?")
+	global(TOSAY$,"What will you say ")
+    build_ter("Terrain$", ".", "", "images/ground/grass", 1, "0000", OPA_None)
+    build_ter("Terrain$", "*", "", "images/ground/road", 1, "0000", OPA_None)
+    build_ter("Terrain$", "@", "", "images/ground/lava", 5, "0000", OPA_None)
+    build_ter("Terrain$", "b", "", "images/ground/bridge_ew", 1, "0000", OPA_None)
+    build_ter("Terrain$", "B", "", "images/ground/bridge_ns", 1, "0000", OPA_None)
+    build_ter("Terrain$", "g", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "h", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "p", "", "images/wild/town_brown", 1, "0000", OPA_None)
+    build_ter("Terrain$", "t", "", "images/ground/tree_oak", 1, "0000", OPA_Partial)
+    build_ter("Terrain$", "k", "", "images/cavern/floor_dirt6", 1, "0000", OPA_None)
+    build_ter("Terrain$", "m", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "v", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "n", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "z", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "i", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "a", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "r", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    build_ter("Terrain$", "o", "", "images/ground/weeds5", 1, "0000", OPA_None)
+    build_ter("Terrain$", ":", "", "images/ground/tree_cherry", 1, "1111", OPA_None)
+    build_ter("Terrain$", "w", "mountain", "images/ground/mountain", 1, "1111", OPA_Full)
+    build_ter("Terrain$", "~", "water", "images/ground/water", 2, "1111", OPA_None)
+    build_ter("Terrain$", "u", "", "images/ground/tree_apple", 1, "0000", OPA_None)
+    build_ter("Terrain$", "y", "", "images/floor/path_ns", 1, "0000", OPA_None)
+    build_ter("Terrain$", "-", "", "images/wild/fence_white_ew", 1, "1111", OPA_Partial)
+
+    build_ter("Terrain$", "f", "", "images/ground/forest", 1, "1111", OPA_Partial)
+    build_ter("Terrain$", "l", "", "images/ground/forest_sw", 1, "1111", OPA_Partial)
+    build_ter("Terrain$", "n", "", "images/ground/forest_nw", 1, "1111", OPA_Partial)
+    build_ter("Terrain$", "j", "", "images/ground/forest_ne", 1, "1111", OPA_Partial)
+    build_ter("Terrain$", "c", "", "images/ground/forest_es", 1, "1111", OPA_Partial)
+    build_ter("Terrain$", "/", "", "images/ground/sand_weeds", 1, "1111", OPA_None)
+
+    build_ter("Terrain$", "d", "", "images/ground/swamp", 1, "0000", OPA_None)
+    build_ter("Terrain$", "L", "", "images/ground/swamp", 1, "0000", OPA_None)
+    build_ter("Terrain$", "N", "", "images/ground/swamp", 1, "0000", OPA_None)
+    build_ter("Terrain$", "J", "", "images/ground/swamp", 1, "0000", OPA_None)
+    build_ter("Terrain$", "C", "", "images/ground/swamp", 1, "0000", OPA_None)
+
+    build_ter("Terrain$", "#", "", "images/wall/wall_brick", 1, "1111", OPA_Full)
+    build_ter("Terrain$", "_", "", "images/floor/floor_brick", 1, "0000", OPA_None)
+	;
+
+def(takeme(place))
+	if(lt(st_get_prop("player","bag_room"),place),
+		do(
+			output("You haven't enough room in your bag!"),
+			return(0)
+		),
+		st_prop("player","bag_room",sub(st_get_prop("player","bag_room"),place))
+	)
+	output("In bag ",st_get_prop("player","bag_room"))
+	return(1)
+	;
+
+def(dropme())
+	st_prop("player","bag_room",add(st_get_prop("player","bag_room"),
+		st_get_prop(targetid$,"place")))
+	output("In bag",st_get_prop("player","bag_room"))
+	return(1)
+	;
+
+def(player_teleport(mapid$, x, y))
+    if(ne(actorid$,"player"), return(0))
+    th_moveto("player", mapid$, x, y, 1)
+    return(0)
+    ;
+
+def(wounded())
+    let(id$,create_cr$("Wounded man","","images/people/beggar1", 1, 1,1,1,1,1,"world",38,66))
+    st_trigger(id$,wounded_talk())
+    ;
+
+def(wounded_talk())
+	if(eq(alert("Trader","Hello,dear walkman!\nI'm a poor wounded trader,and i'm dying.\nI feel thirsty.Please give me some water",
+		"Yes|No",1,2,"images/people/beggar1_0n.gif"),1),reward_for_water())
+	th_remove(targetid$,1)
+	;
+
+def(no_remove())
+	output("You need not remove this item")
+	return(0)
+	;
+
+def(reward_for_water())
+	if(not(st_get_prop("player","bulb_water")),do(alert("Player","Sorry, but I have no water for you.","OK",
+		1,1,"images/player/hero_0e.gif"),return(0)))
+	st_prop("player","bulb_water",0)
+	output("Your bulb's empty.")
+	let(i$,"On the 1st cross go straight.\nWhen you'll see two apple-trees,\ndig between them.")
+	alert("Trader",join$("Thank you very much. I gonna do my best for you.\n",i$,"\nThere I've hidden all my goods."),"OK",
+		1,1,"images/people/beggar1_0n.gif")
+	let(id$,info$(i$))
+    st_trigger(id$,treasure(26,66))
+	;
+
+def(drink_bulb())
+	let(bw,st_get_prop("player","bulb_water"))
+	if(eq(bw,0), do(output("Your bulb's empty!"),return(0)))
+	if(HP_recover(targetid$),do(
+		st_prop("player","bulb_water",sub(bw,2)),
+		output("You made a drink from the bulb and feel better."),
+		return(1)
+	))
+	;
+
+def(treasure(x,y))
+	if(and(eq(th_get_x("player"),x),eq(th_get_y("player"),y)),
+		do(
+				decr(y),
+				th_remove(targetid$,1),
+				output("You found a treasure!"),
+				build_gold("world",x,y,10),
+				let(i$,create_it$("Silver ring","images/item/ring_cyan",1,1)),
+				th_moveto(i$,"world",x,y),
+				st_trigger(i$,use_ring_cyan()),
+				it_takefunc(i$,ring_cyan_luck()),
+				it_dropfunc(i$,dropme()),
+				let(is$,create_it$("Lamp","images/item/lamp",1,1)),
+			    takedrop(is$,1),
+			    st_trigger(is$,use_lamp()),
+				th_moveto(is$,"world",x,y),
+			),
+			output("There's no treasure!")
+	)
+	;
+
+def(takedrop(id$,place))
+	st_prop(id$,"place",place)
+	it_takefunc(id$,takeme(place))
+	it_dropfunc(id$,dropme())
+	;
+
+def(build_gold(mapid$,x,y,gold))
+    let(id$,tempid$())
+    it_new(id$,"Gold")
+    th_tile(id$,0,"images/item/gold",1,1)
+    it_takefunc(id$,take_gold(gold))
+    th_moveto(id$,mapid$,x,y)
+    return(id$)
+    ;
+
+def(take_gold(gold))
+	if(ne(actorid$,"player"),return(0))
+	th_gold("player",add(th_get_gold("player"),gold))
+	output("You found ",gold," gold!")
+	th_remove(targetid$,1)
+	return(0)
+	;
+
+def(use_lamp())
+	no_use()
+	;
+
+def(use_ring_cyan())
+	no_use()
+	;
+
+def(use_diamond())
+	if(q_is("Trader present"),do(th_remove(targetid$,1),trader_info()))
+	no_use()
+	;
+
+def(use_gold_whistler())
+	no_use()
+	;
+
+def(ring_cyan_luck())
+	let(t,takeme(1))
+	if(t,st_prop("player","luck",add(st_get_prop("player","luck"),1)))
+	return(t)
+	;
+
+def(spider_reward())
+	let(i$,create_it$("Diamond","images/item/gem_big_sapphire",1,1))
+	takedrop(i$,1)
+	st_trigger(i$,use_diamond())
+	th_moveto(i$, "world", 44, 62)
+	let(i$,create_it$("Golden whistler","images/item/music1",1,1))
+	takedrop(i$,1)
+	st_trigger(i$,use_gold_whistler())
+	th_moveto(i$, "world", 44, 62)
+	output("Giant Spider is dead, and you find\n something useful on his tree...")
+	;
+
+def(spider(with_reward))
+    let(id$,create_cr$("Giant Spider","h","images/creature/spider2", 1, 2, 10,5,5,5, "world", 43, 61))
+    enemy(id$)
+   	if(with_reward,cr_defeat(id$,spider_reward()))
+	;
+
+def(set_stats(id$,body,speed,mind,presence,max))
+    th_statboth(id$, ST_Body, body)
+    th_statboth(id$, ST_Speed, speed)
+    th_statboth(id$, ST_Mind, mind)
+    th_statboth(id$, ST_Presence, presence)
+    en_secondary(id$)
+	;
+
+def(create_cr$(name$,brain$,image$,nframes,nfacings,body,speed,mind,presence,mapid$,x,y))
+    let(id$,tempid$())
+    cr_new(id$, name$)
+    cr_brain(id$, brain$)
+    th_tile(id$, 0, image$,nframes,nfacings)
+	set_stats(id$,body,speed,mind,presence,0)
+	cr_faction(id$,0)
+	th_moveto(id$,mapid$,x,y)
+    return(id$)
+    ;
+
+def(create_it$(name$,image$,nframes,nfacings))
+    let(id$,tempid$())
+    it_new(id$, name$)
+    th_tile(id$, 0, image$,nframes,nfacings)
+    return(id$)
+    ;
+
+def(create_bl$(name$,image$,mapid$,x,y,nframes,nfacings))
+    let(id$,tempid$())
+    bl_new(id$, name$)
+    th_tile(id$, 0, image$,nframes,nfacings)
+    th_moveto(id$,mapid$,x,y)
+    return(id$)
+    ;
+    
+def(dryad())
+	let(f$,create_cr$("dryad","","images/creature/dryad",1,2,8,3,8,0,"world",36,62))
+	st_trigger(f$,dryad_talk())
+	cr_defeat(f$,dryad_defeat())
+	;
+
+def(dryad_talk())
+	let(ch,menu("Dryad","I'm a forest dryad. What do you do at my woods?",
+		"I gonna fight Burlad Dart|I want to rescue the Princess|Just wandering about|<Attack dryad>",0,
+		"images/creature/dryad_0n.gif"))
+	if(eq(ch,4),do(enemy(targetid$),return(0)))
+	if(eq(ch,3),
+		do(
+			alert("Dryad","Well,so I'll help you to get out of there!","OK",1,1,"images/creature/dryad_0n.gif"),
+			th_moveto("player","world",73,20),
+			return(0)
+		)
+	)
+	alert("Dryad","I'll help you. Follow my magic rope,\nit will show you the safest way.Bye!","OK",1,1,"images/creature/dryad_0n.gif")
+	let(r$,create_cr$("Magic rope","pnnnnnnwwnnwwwwwswwwwwnnnwnnwnnennwnnwnnneeenennnwnn","images/item/rope",1,1,0,30,0,0,"world", 36,61))
+	en_turn(r$,rope_move(34))
+	th_blocking(r$,1)
+	th_remove(targetid$,1)
+	;
+
+def(dryad_defeat())
+	let(i$,create_it$("Silver whistler","images/item/music3_cyan",1,1))
+	takedrop(i$,1)
+	st_trigger(i$,use_silver_whistler())
+	th_moveto(i$, "world", th_get_x(targetid$),th_get_y(targetid$))
+	;
+
+def(use_silver_whistler())
+	if(q_is("Trader present"),do(
+		let(ch,alert("Trader","It's a good whistler but what can I do with it?\nWould you like to give me more 2 gold?",
+			"Yes|No",1,2,"images/people/citizen2_0n.gif")),
+		if(eq(ch,1),
+			if(goldcost(2),do(
+				pl_drop("player",targetid$),
+				th_remove(targetid$,1),
+				trader_info(),
+				return(0)
+			))
+		),
+		trader_leave()
+	))		 
+	;
+
+def(rope_move(y))
+	if(ne(th_get_y(actorid$),y),return(0))
+	th_remove(actorid$,1)
+	;
+
+def(hien())
+	let(f$,create_cr$("Hien","","images/creature/dog1",1,2,7,3,8,0,"world",32,56))
+	st_trigger(f$,hien_talk())
+	;
+
+def(hien_talk())
+	let(ch,menu(GAME$,"Hien blocked your way.",
+		"<Ask what he wants>|<Attack the Hien>",0,"images/creature/dog1_0n.gif"))
+	if(eq(ch,2),do(enemy(targetid$),return(0)))
+	if(eq(ch,1),do(
+		alert("Hien","Oh, I'm glad to see somebody and talk to him!\nIf you meet assassins, say a word from me.",
+			"OK",1,1,"images/creature/dog1_0n.gif"),
+		st_trigger(info$("Hien sends his best regards to assassins"),hien_word()),
+	))
+	th_remove(targetid$,1)
+	;
+
+def(hien_word())
+	if(q_is("assassins"),do(
+		ass_reward("Oh, you know the Hien!"),
+		th_remove(targetid$,1),
+		return(1)
+	))
+	no_use()
+	;
+
+def(info$(text$))
+    let(id$,create_it$(text$,"images/item/paper_blue",1,1))
+    pl_take("player",id$)
+    return(id$)
+    ;
+
+def(no_use())
+	output("This info is of no use there!")
+	;
+
+def(small_village())
+#	tron(1)
+	let(id$,create_cr$("Old man","","images/people/old_citizen3",1,2,1,1,1,1,"world",13,59))
+	st_trigger(id$,old1_talk())
+	let(id$,tempid$())
+	bl_new(id$,"Well")
+	th_tile(id$,0,"images/dungeon/well1",1,1)
+	st_trigger(id$,well())
+	th_moveto(id$,"world",13,59)
+#	restore()
+#	return(1)
+#	let(x,read())
+#	let(y,read())
+#	while(ge(x,0),
+#		let(id$,tempid$()),
+#		bl_new(id$,"House"),
+#		th_tile(id$,0,"images/wild/house_stilts",1,1),
+#		th_moveto(id$,"world",x,y),
+#		let(x, read()), let(y, read())
+#	)	
+	return(1)
+	data(
+		7,55,	8,55,	4,56,	10,56,	11,56,	5,57,	8,57,	11,57,	13,57,
+		6,58,	12,58,	15,58,	16,58,	7,59,	8,59,	10,59,	14,59,	16,59,
+		9,60,	11,60,	14,60,	15,60,	11,61,	12,61,	13,62,	-1,-1,
+	)
+	;
+
+def(well())
+	let(ch,menu(GAME$,"This is a well full of water",
+		"Drink some water|Fill your bulb",1,"images/dungeon/well1_0n"))
+	if(eq(ch,1),output("You take a drink and feel better"))
+	if(eq(ch,2),do(output("Your bulb is full and may be used\nas before."),
+		st_prop("player","bulb_water",4)))
+	;
+
+def(debugWhereAmI())
+	output("You are at ",th_get_x("player"),", ",th_get_y("player"))
+	;
+
+def(debugTeleport())
+	let(dest$,inputdlg$("Teleport","Where do you want to be teleported?",""))
+	let(firstof,instr(dest$," "))
+#	if(gt(firstof,1),return(0))
+	let(x,val(mid$(dest$,1,decr(firstof))))
+	let(y,val(mid$(dest$,incr(firstof))))
+	if(mul(x,y),do(
+		th_moveto("player","world",x,y,1),
+		output("You are teleported."),
+		redraw(),
+		th_moveto("player","world",x,y)
+	))
+	;
+	
+def(old1_talk())
+	alert("Old man","I'm so alone, dear walkman. Some months ago there was\na large, happy village, but all men left it.\nI'm the last",
+		"OK",1,1,"images/people/old_citizen3_0n")
+	let(ch,menu(GAME$,"What do you say him?","I'm going to fight the warlock|Where does this road lead?|<Left the village>",
+		0,"images/people/old_citizen3_0n"))
+	if(eq(ch,1),
+		do(
+			alert("Old man","I'll give you some advices. The road from the village \nleads between the Brown Swamps. Do not turn from the road!\n\nThe most powerful warriors of Burlad Dart are the Green Knights.\nThey have effective magic abilities and can evade some spells, especially Copy spell.",
+				"OK",1,1,"images/people/old_citizen3_0n")
+		)
+	)
+	if(eq(ch,2),alert(GAME$,"Old man becomes suspicious and avoids to answer.\nYou have to left the village...",
+		"OK",1,1,"images/people/old_citizen3_0n"))
+	st_trigger(targetid$,0)
+	;
+
+def(tick_set(m))
+	global(Moves,m)
+	;
+	
+def(three_assassins())
+	global(ENTCOUNT,3)
+	for(i,1,ENTCOUNT,1,do(
+		global(ENT$[i],create_cr$("Assassin","h","images/people/assassin1",1,2,add(i,11),add(i,9),1,1,"world",add(14,mul(i,2)),30)),
+		cr_faction(ENT$[i],1)
+		)
+	)
+	cr_defeat(ENT$[3],ass_defeat())
+	tick_set(2)
+	st_trigger("world",quest_tick())
+	redraw()
+	alert(GAME$,"You see three dangerous assassins blocking your road.\nThey're going to attack and rob you...","OK",1,1)
+	let(ch,menu("Assassins",join$(TOSAY$,"them?"),"I'll give you all my money|I'm here to defeat the warlock|I met your acquaintance|",
+		0,"images/people/assassin1_0n.gif"))
+	if(eq(ch,1),alert("Assassins","You'll give us everything anyhow, guy!","OK",1,1))
+	if(eq(ch,2),ass_reward("Then we'll try to help you."))
+	if(eq(ch,3),do(
+		alert("Assassins","Prove your words now!","OK",1,1),
+		quest("assassins")
+	))
+	;
+
+def(remove_entities())
+	for(i,1,ENTCOUNT,1,if(st_exists(ENT$[i]),th_remove(ENT$[i],1)))
+	global(ENTCOUNT,0)
+	;
+
+def(ass_reward(txt$))
+	alert("Assassins",join$(txt$,"\nThis stork feather may be necessary for you. If you walk to the right from here,\nyou'll come to a bridge which is near the Black Palace. Bye!"),"OK",1,1)
+	build_stork$()
+	remove_entities()
+	;
+	
+def(build_stork$())
+	let(id$,create_it$("Stork feather","images/item/wand_cyan",1,1))
+	takedrop(id$,1)
+	th_moveto(id$,"world",17,30)
+	st_trigger(id$,use_stork_feather())
+	return(id$)
+	;
+
+def(quest(txt$))
+	global(QUEST$,txt$)
+	output("Q-->",QUEST$)
+	;
+
+def(q_is(txt$))
+	return(eq(QUEST$,txt$))
+	;
+
+def(quest_tick())
+	if(eq(actorid$,"player"),do(
+		global(moves,sub(moves,1)),
+		if(not(moves),do(
+			st_trigger("world",0),
+			quest("")
+		)),
+	))
+	;
+
+def(ass_defeat())
+	let(x,th_get_x(ENT$[3])) 
+	let(y,th_get_y(ENT$[3])) 
+	th_moveto(build_stork$(),"world",x,y)
+	build_gold("world",x,y,7)
+	let(id$,create_it$("Bronze jug","images/item/potion_tan",1,1))
+	takedrop(id$,1)
+	st_trigger(id$,use_bronze_jug())
+	th_moveto(id$,"world",x,y)
+	;
+
+def(use_stork_feather())
+	;
+
+def(use_bronze_jug())
+	;
+
+def(_buildings())
+	let(id$,create_bl$("Inn","images/wild/house_stone","world",59,63,1,1))
+	st_trigger(id$,aquatic_inn())
+	let(id$,create_bl$("Trader's shop","images/wild/house_stone","world",51,54,1,1))
+	st_trigger(id$,output("The shop is closed."))
+	;
+
+def(aquatic_inn())
+	if(ne(actorid$,"player"),return(0))
+	output("You enter the Aquatic Inn")
+	st_trigger(targetid$,output("You've already visited the Inn!"))
+	map_new("aqua_inn","Aquatic inn",9,8)
+	map_bounds("aqua_inn",th_moveto("player","world",58,63))
+    map_fill("aqua_inn", 0, 0, Terrain$[""], join$(
+		"#########\n",
+		"#~______#\n",
+		"#~B~~___#\n",
+		"#~B~~___#\n",
+		"#~B~~~~~#\n",
+		"#~B~~~~~#\n",
+		"#_______#\n",
+		"###_#####\n",
+	))	
+	th_moveto("player","aqua_inn",2,6)
+	th_facing("player",North)
+	let(a$,create_cr$("Aquatic","pnnww","images/creature/deepone1",1,2,9,9,20,0,"aqua_inn",7,3))
+	en_turn(a$,aquatic_move(6))
+	st_trigger(a$,aquatic_welcome())
+	return(0)
+	;
+
+def(aquatic_move(x))
+	if(ne(th_get_x(actorid$),x),return(0))
+	en_turn(actorid$,0)
+	cr_brain(actorid$,"")
+	;
+
+def(aquatic_welcome())
+	alert("Aquatic","Welcome to my inn,wanderer.\nI'm ready to help you.Be my guest.\nWould you like to buy some fried fish or drink water?",
+		"OK",1,1,"images/creature/deepone1_0n.gif")
+	st_trigger(targetid$,aquatic_talk())
+	aquatic_talk()
+	;
+def(aquatic_talk())
+	let(ch,menu(GAME$,join$("You have ",th_get_gold(actorid$)," gold.\n",TODO$),"<Buy fried fish for 1 gold (2 HP)>|<Drink some water for 2 gold>|<Attack the Aquatic>|<Say thanks and leave the inn>",
+		1,"images/creature/deepone1_0n.gif"))
+	if(eq(ch,1),buy_item("Fried fish","images/item/food_taco","aqua_inn",7,1,1,2))
+	if(eq(ch,2),do(
+		output("You drink water with pleasure..."),
+        wait(3),
+        output("   and suddenly fall sleeping..."),
+        gcls(),
+        gcolor("black"),
+        gmove(0, 0),
+        gfillrect(VIEW_SIZE, VIEW_SIZE),
+        redraw(),
+        wait(5),
+        gcls(),
+        th_moveto("player","world",37,42),
+        let(i,0),
+        while(lt(i,pl_get_item_count("player")),
+        	let(id$,pl_get_item$("player",i)),
+        	if(eq(id$,"Bulb"),incr(i),th_remove(id$,1))
+        ),
+		st_prop("player","bag_room",0),
+		th_gold("player",0),
+		output("You awake in unknown place.\nYour gold and bag disappeared!\nAquatic robbed you!!!"),
+        redraw()
+	))
+	if(eq(ch,3),enemy(targetid$))
+	if(eq(ch,4),do(output("You leave the Inn."),th_moveto("player","world",58,63)))
+	;
+
+def(goldcost(cost))
+    if(lt(th_get_gold("player"),cost),
+        do(describe("You don't have enough gold."), return(0)) )
+    th_gold("player",sub(th_get_gold("player"),cost))
+    return(1)
+	;
+	
+def(buy_item(name$,image$,mapid$,x,y,cost,food))
+    if(not(goldcost(cost)),return(0))
+    global(BUY$,create_it$(name$,image$,1,1))
+    takedrop(BUY$,1)
+    th_moveto(BUY$,mapid$,x,y)
+    if(food,make_food(BUY$,food))
+	;	
+
+def(enemy(id$))
+	cr_faction(id$,1)
+	cr_brain(id$,"h")
+	st_trigger(id$,0)
+	;
+
+def(HP_recover(id$))
+	let(hp,th_get_stat("player",ST_HitPoints))
+	if(eq(hp,th_get_statmax("player",ST_HitPoints)),
+		do(output("You don't need healing!"),return(0)))
+	th_stat("player",ST_HitPoints,add(hp,st_get_prop(id$,"hp")))
+	return(1)
+	;
+
+def(eat_food())
+	if(HP_recover(targetid$),do(
+		output(st_get_name$(targetid$)," makes you feel better."),
+		th_remove(targetid$,1)
+	))
+	;
+
+def(make_food(id$,hp))
+	st_prop(id$,"hp",hp)
+	st_trigger(id$,eat_food())
+	;
+
+def(trader_appear$())
+	let(id$,create_cr$("Trader","","images/people/citizen2",1,2,14,10,1,1,"world",50,54))
+	st_trigger(id$,trader_welcome())
+	return(id$)
+	;
+
+def(trader_disappear(id$))
+	if(st_exists(id$),th_remove(id$,1))
+	st_trigger("no_trader",0)
+	return(1)
+	;
+	
+def(trader_welcome())
+	let(ch,alert("Trader","How do you do, guy?\nWould you like to visit my shop?",
+		"Yes|No",1,2,"images/people/citizen2_0n.gif"))
+	if(eq(ch,2),do(trader_disappear(targetid$),return(1)))
+	output("You follow the trader into his shop.")
+	map_new("shop","Trader's shop",7,8)
+        map_fill("shop", 0, 0, Terrain$[""], join$(
+		"#######\n",
+		"#_____#\n",
+		"#_____#\n",
+		"#_____#\n",
+		"#_____#\n",
+		"______#\n",
+		"#_____#\n",
+		"#######\n",
+	))	
+	create_bl$("Clock","images/dungeon/clock","shop",5,1,1,2)
+	create_bl$("Bench","images/dungeon/bench2_ns","shop",1,1,1,1)
+	create_bl$("Window","images/dungeon/window_big","shop",3,0,1,1)
+	global(I$[0],create_bl$("Table","images/dungeon/counter_ns1","shop",3,2,1,1))
+	st_trigger(I$[0],trader_buy(targetid$))
+	global(I$[1],create_bl$("Table","images/dungeon/counter_ns2","shop",3,3,1,1))
+	st_trigger(I$[1],trader_buy(targetid$))
+	global(I$[2],create_bl$("Table","images/dungeon/counter_ns2","shop",3,4,1,1))
+	st_trigger(I$[2],trader_buy(targetid$))
+	global(I$[3],create_bl$("Table","images/dungeon/counter_ns2","shop",3,5,1,1))
+	st_trigger(I$[3],trader_buy(targetid$))
+	global(I$[4],create_bl$("Table","images/dungeon/counter_ns3","shop",3,6,1,1))
+	st_trigger(I$[4],trader_buy(targetid$))
+	th_moveto("player","shop",1,5)
+	th_facing("player",East)
+	th_moveto(targetid$,"shop",4,4)
+	st_trigger(targetid$,do(
+		enemy(targetid$),
+		for(i,0,4,1,st_trigger(I$[i],0)),
+		quest("")
+		))
+	cr_defeat(targetid$,trader_dead())
+	map_bounds("shop",trader_leave())
+	return(1)
+	;
+
+def(trader_buy(id$))
+	let(ch,menu("Trader","I can offer you these goods:",
+		"Potato (1 HP for 1 gold)|Grapes (2 HP for 2 gold)|Carrot (1 HP for 1 gold)|Cabbage (2 HP for 2 gold)|Milk (3 HP for 2 gold)|<Talk to the trader>",
+		1,"images/people/citizen2_0n.gif"))
+	if(not(ch),return(0)) 
+	if(eq(ch,6),do(trader_talk(id$),return(0)))
+	if(eq(ch,1),buy_item("Potato (1 HP)","images/item/brain","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
+	if(eq(ch,2),buy_item("Grapes (2 HP)","images/item/food_grapes","shop",th_get_x("player"),sub(th_get_y("player"),1),2,2))
+	if(eq(ch,3),buy_item("Carrot (1 HP)","images/item/food_carrots","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
+	if(eq(ch,4),buy_item("Cabbage (2 HP)","images/item/food_cabbage","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
+	if(eq(ch,5),buy_item("Milk (3 HP)","images/item/potion_grey","shop",th_get_x("player"),sub(th_get_y("player"),1),2,3))
+	return(1)
+	;
+
+def(trader_dead())
+	buy_item("Potato (1 HP)","images/item/brain","shop",5,2,0,1)
+	buy_item("Grapes (2 HP)","images/item/food_grapes","shop",5,3,0,2)
+	buy_item("Carrot (1 HP)","images/item/food_carrots","shop",5,4,0,1)
+	buy_item("Cabbage (2 HP)","images/item/food_cabbage","shop",5,5,0,1)
+	buy_item("Milk (3 HP)","images/item/potion_grey","shop",5,6,0,3)
+	build_gold("shop",4,6,10)
+	check_luck()
+	;
+
+def(trader_talk(i$))
+	alert("Trader","There is no danger about. This forest is quite ordinal.\nMany wanderers visited my shop but none returned.\nThis place is safe enough, you've just lost your way.",
+		"OK",1,1,"images/people/citizen2_0n.gif")
+	let(ch,menu("Trader",join$(TOSAY$,"him?"),"I'm looking for the Black Palace|I'm going to defeat Burlad Dart|I want to awake the Princess|I just wander about the forest|<Attack the trader>",
+		0,"images/people/citizen2_0n.gif"))
+	if(eq(ch,4),do(
+		alert("Trader","Then I wish you pleasant walk. Good bye!",
+			"OK",1,1,"images/people/citizen2_0n.gif"),
+		trader_leave(),
+		return(1)
+	))
+	if(eq(ch,5),do(enemy(i$),return(0)))
+	let(ch,menu("Trader",join$("I can tell you an interesting thing for 7 gold or some present.\n",TODO$),
+		"Pay 7 gold|Give him a present|Go away",0,"images/people/citizen2_0n.gif"))
+	if(eq(ch,2),do(
+		alert("Trader","What do you present me?...","OK",1,1),
+		quest("Trader present"),
+		return(0)
+	))
+	if(eq(ch,1),if(goldcost(7),trader_info()))
+	if(eq(ch,3),trader_leave())
+	;
+
+def(trader_info())
+	alert("Trader","I can tell you where roads lead.\nThere's the warlock's Post to the right in the forest.\nIf you go to the left you'll come to the little hut where an old man lives.\nThe Black Palace do exists but it is far yet.\nI advice you not to hide yourself but go straight.\nThat's my info!!! Bye.",
+		"OK",1,1,"images/people/citizen2_0n.gif")
+	trader_leave()
+	;
+
+def(trader_leave())
+	output("You leave the shop.")
+	quest("")
+	th_moveto("player","world",50,54)
+	for(i,0,4,1,th_remove(I$[i],1))
+	;

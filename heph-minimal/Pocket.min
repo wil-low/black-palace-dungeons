@@ -1,0 +1,842 @@
+# Pocket.min
+# Tutorial adventure.
+#
+# Copyright 2002 © by Mark Hughes <kamikaze@kuoi.asui.uidaho.edu>
+# Permission is granted to use and modify this code freely,
+# provided that you rename your version.
+#
+# Author: Mark Hughes
+# Email: kamikaze@kuoi.asui.uidaho.edu
+# Web: http://kuoi.asui.uidaho.edu/~kamikaze/
+# Created: 2002Jan25
+# Last Modified: 2002Feb01
+
+def(newgame())
+    pause()
+    gcls()
+    gmove(0, 0)
+    gimage("Pocket/title.gif")
+    redraw()
+    let(t1, timer())
+
+    set_globals()
+    build_world()
+    build_burbclave()
+    build_mall()
+    build_arena()
+    build_player()
+
+    # make sure the title screen shows for at least 6 seconds, no matter how
+    # fast the player's computer is.
+    let(t2, timer())
+    let(waittime, sub(6,sub(t2, t1)))
+    if(gt(waittime, 0), wait(waittime))
+    gcls()
+    resume()
+    ;
+
+def(build_player())
+    st_name("player", "Mark")
+    # Set the stats
+    stats_lock(1)
+    th_statboth("player", ST_Body, 15)
+    th_statboth("player", ST_Speed, 15)
+    th_statboth("player", ST_Mind, 20)
+    th_statboth("player", ST_Presence, 15)
+    en_secondary("player")
+    th_gold("player", 120)
+    stats_lock(0)
+    th_tile("player", 0, "Pocket/mark", 2, 2)
+    en_turn("player", player_turn())
+    en_attack("player", player_attack())
+    if(ALLOWCHEAT,
+        if(eq(alert("Cheat?", "Do you want to skip to the endgame?",
+                "No Cheating!|Yeah, Cheat!", 1, 2), 1),
+            return(cheat()),
+        )
+    )
+    th_moveto("player", "burbclave_M", 19, 20, 1)
+    ;
+
+def(cheat())
+    # cheat to fight King Kichapu
+    th_moveto("player", "world_M", 8, 3, 1)
+    stats_lock(1)
+    en_exp("player", 10500) # 15th level
+    stats_lock(0)
+    # sell yourself a Double Shotgun
+    global(actorid$, "player")
+    global(targetid$, "player")
+    st_prop(targetid$, "item5", "Double Shotgun")
+    st_prop(targetid$, "atk5", 25)
+    st_prop(targetid$, "cost5", 5000)
+    sell_shotgun(5)
+    # and a bunch of drugs
+    st_prop(targetid$, "item3", "Adrenalin")
+    st_prop(targetid$, "color3", "cyan")
+    st_prop(targetid$, "cost3", 100)
+    st_prop(targetid$, "item4", "Extract of Pineal Gland")
+    st_prop(targetid$, "color4", "purple")
+    st_prop(targetid$, "cost4", 250)
+    st_prop(targetid$, "item5", "Big Red Pills")
+    st_prop(targetid$, "color5", "red")
+    st_prop(targetid$, "cost5", 500)
+    sell_drugs(3)
+    sell_drugs(3)
+    sell_drugs(3)
+    sell_drugs(4)
+    sell_drugs(4)
+    sell_drugs(4)
+    sell_drugs(5)
+    sell_drugs(5)
+    sell_drugs(5)
+    ;
+
+def(player_turn())
+    for(stat,ST_Body,ST_Speed,1,
+        let(prop$, join$("boost",stat)),
+        let(turns, st_get_prop("player", prop$)),
+        if(turns, do(
+            if( eq(stat,ST_Body), do(
+                    modify_stat("player", ST_Body, -1),
+                    modify_stat("player", ST_Attack, -1),
+                    modify_stat("player", ST_HitPoints, -1),
+                ),
+                eq(stat,ST_Speed), do(
+                    modify_stat("player", ST_Speed, -1),
+                    modify_stat("player", ST_Evade, -1),
+                )
+            ),
+            st_prop("player", prop$, sub(turns,1)),
+            en_checkalive("player",""),
+        ))
+    )
+    ;
+
+def(player_attack())
+    let(wpnid$, pl_get_equip$(actorid$,EQ_Weapon))
+    if(eq(wpnid$,""), return(0))  # unarmed
+    let(wpnname$, st_get_name$(wpnid$))
+    if(not(instr(wpnname$,"Shotgun")), return(0))  # not a shotgun
+    # gotcha?
+    let(blood$, "")
+    pause()
+    if(gt(attackresult,0), do(
+        # drench the target in blood
+        let(blood$, tempid$()),
+        bl_new(blood$, ""),
+        th_tile(blood$, 0, "images/dungeon/blood", 1, 1),
+        th_moveto(blood$, th_get_mapid$(targetid$), th_get_x(targetid$), th_get_y(targetid$), 1),
+        redraw(),
+    ))
+    playsound("Pocket/shotgun.au", SOUND_Stop)
+    playsound("Pocket/shotgun.au")
+    wait(0.25)
+    if(ne(blood$,""), th_remove(blood$, 1))
+    resume()
+    ;
+
+def(build_world())
+    map_new("world_M", "World", WORLDSIZE, WORLDSIZE)
+    map_fill("world_M", 0, 0, Terrain$[""], join$(
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~~~~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~~~~~.9~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~..~~...~~~~~~~~~~~~~~~~~~~~~~...~~~~~~~~~~~~~~~\n",
+        "~~..ff.^...~~~~~~~~~~~~~~~~~~~~~~....~~~~~~~~~~~~~\n",
+        "~~~ffff.ff.~~~~~.~~~.~~~~~~~~~~~.f^.~~~~~~~~~~~~~~\n",
+        "~~~~~.~~~ff~~~~~fffff~~~~~~~~~~~~fff...~~~~~~~~~~~\n",
+        "~~~~~~...f~..ff~.ff..~~~~~~~~~~~.^..f.8..~~~~~~~~~\n",
+        "~~~~~~..f.....fff.f..~~~~~~~~~~~........~~~~~~~~~~\n",
+        "~~~~~~..f...f~..fff.~~~~~~~~~~~~....f.~.~~~~~~~~~~\n",
+        "~~~~~~~......~~........~~~~~~~~~.^^.f.~~~~~~~~~~~~\n",
+        "~~~~~~~.~~~.~~~..f.....~.~~~~~...^^.~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~..^ff..^..~~~~~~~....~~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~.^^ffff...f~~.~~~...~~..~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~^^f..f...^~~..~~~......~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~.^^^^^^^7.~...~..~......~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~.....f.f....f.......^^.~~~~~~~~~~~~\n",
+        "~~~~~~~~..~~~~~f....f.f......^...f..~.~~~~~~~~~~~~\n",
+        "~~~~~~~~...~~~.f....f^f.f........ff.~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~.~~~~~~....f...ff...f.....f~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~..~~~~~~...f.f.f.^^^.f.^^^.~~~~~~~~~~~~~~\n",
+        "~~~~~~~~...~~~~~....ff..ff.f.........~~.~~~~~~~~~~\n",
+        "~~~~~~~~.^..~~....f.f...f.f...^^....~~.^~~~~~~~~~~\n",
+        "~~~~~~~~~...........ffff.f.f..^^^.....~6~~~~~~~~~~\n",
+        "~~~~~~~~~f.^^^^^^.....ffffffff.^^.......~~~~~~~~~~\n",
+        "~~~~~~~~..f..^^.^^^^fff.ff..f...^^^^..~.~~~~~~~~~~\n",
+        "~~~~~~~~..f.......^^............^^^^^~~~~~~~~~~~~~\n",
+        "~~~~~~~...f~~~.fff..............^^^^..ff~~~~~~~~~~\n",
+        "~~~~~~~...~~~~.f................^^.^...f~~~~~~~~~~\n",
+        "~~~~~~~.5...~~..........^^^.....^^^..ff...~~~~~~~~\n",
+        "~~~~~~.......~......f..f..f.....^^......fff~~~~~~~\n",
+        "~~~~~~~.~..~~..........f..ffff.^^^......ff~~~~~~~~\n",
+        "~~~~~~~~~~~~..fff......f..ff.ff.....ffff.....~~~~~\n",
+        "~~~~....~~~~~..ffff......ff..f.....ff..^^^^..~.~~~\n",
+        "~~~~..3.~~~~~....ff^.....ff......fffff..^......~~~\n",
+        "~~~.~..~~~~~.....f...1111.........f.ff...ffff..~~~\n",
+        "~~.....~~~~~.....f..111111......fff.f....ff.ff~~~~\n",
+        "~~~....~~~~~~....f.~11~111........fff..^^.......~~\n",
+        "~~.fff..~~~f.....~~~~~~~1=......ffff....^^^^^ff.~~\n",
+        "~~~f.....~f.....~~~~~~~~.=.......f..ff...^^^4.f.~~\n",
+        "~~~f......fff2..~~~~~~.^^=........f^.....^f.....~~\n",
+        "~~~.~......fff..~~~~~~.^.=~.f......~.....^~.~..f~~\n",
+        "~~..~~...fff.f^~~~~~~~~~~=~f~~~~~..~~.....~~~~~~~~\n",
+        "~~.~~~.~^^f.f....~~~0~~~==~~~~~~~~~~..~~...~~~~~~~\n",
+        "~~~~~~~~~...f....~~~=====~~~~~~~~~~~~~~~....~~~~~~\n",
+        "~~~~~~~.....fff~~~...~f.~~~~~~~~~~~~~~~~..~.~~~~~~\n",
+        "~~~~~~~.~~~.ff~~~~..~~~~~~~~~~~~~~~~~~~~~~~f~~~~~~\n",
+        "~~~~~~~..~~~ff~~~~~f~~~~~~~~~~~~~~~~~~~~~~~f~~~~~~\n",
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+    ))
+
+    let(id$, tempid$())
+    bl_new(id$, "")
+    st_trigger(id$, kichapu_vs_city())
+    th_moveto(id$, "world_M", 25, 40)
+    ;
+
+def(kichapu_vs_city())
+    let(xtext, 36)
+    let(ytext, add(div(VIEW_SIZE,2),36))
+    pause()
+    # move the player up - the callback happens before the move completes
+    th_moveto(actorid$, "world_M", 25, 40, 1)
+    let(kichapu$, tempid$())
+    bl_new(kichapu$, "King Kichapu")
+    th_tile(kichapu$, 0, "Pocket/kichapu", 1, 1)
+    th_moveto(kichapu$, "world_M", 25, 35, 1)
+    gcolor("yellow")
+    gfont("SansSerif", "b", 36)
+    gmove(xtext, ytext)
+    gtext("\"What the heck is that?\"")
+    redraw()
+    wait(1)
+    # step forward again to see all of Kichapu
+    th_moveto(actorid$, "world_M", 25, 39, 1)
+    gcls()
+    gmove(xtext, ytext)
+    gtext("\"It's HUGE!\"")
+    redraw()
+    wait(1)
+    # get rid of the caption
+    gcls()
+    # move and trash the city
+    let(x, read())
+    let(y, read())
+    while(ge(x, 0),
+        th_moveto(kichapu$, "world_M", x, y, 1),
+        gr_terrain("world_M", x, y, Terrain$["r"]),
+        redraw(),
+        playsound("Pocket/blowup.au"),
+        wait(0.5),
+        let(x, read()), let(y, read()),
+    )
+    # Kichapu leaves the view
+    th_moveto(kichapu$, "world_M", 21, 34, 1)
+    redraw()
+    wait(0.5)
+    th_moveto(kichapu$, "world_M", 21, 33, 1)
+    redraw()
+    wait(0.25)
+
+    # destroy the junk objects
+    th_remove(kichapu$, 1)
+    th_remove(targetid$, 1)
+    gmove(xtext, ytext)
+    gtext("\"Oh, hell.")
+    redraw()
+    wait(1)
+    gmove(xtext, add(ytext,36))
+    gtext(" I wanted some sushi.\"")
+    resume()
+    wait(2)
+    gcls()
+    return(0)
+    # coordinates of Kichapu's rampage through the city
+    data(
+        25, 36,
+        25, 37,
+        24, 37,
+        24, 38,
+        24, 37,
+        23, 37,
+        23, 36,
+        24, 36,
+        24, 35,
+        23, 35,
+        22, 35,
+        22, 36,
+        21, 36,
+        21, 37,
+        20, 37,
+        20, 36,
+        21, 36,
+        21, 35,
+        -1, -1,
+    )
+    ;
+
+def(build_burbclave())
+    map_new("burbclave_M", "Burbclave Cero", 23, 23)
+    map_fill("burbclave_M", 0, 0, Terrain$[""], join$(
+        ".......................\n",
+        ".|||||||||||||||||||||.\n",
+        ".|,%,=,%,|,%,|,%,=,%,|.\n",
+        ".|===================|.\n",
+        ".|,%,=,%,=,%,|,%,=,%,|.\n",
+        ".||||=|||=||||====||||.\n",
+        ".|,%,=,%,=,%,|,%,=,%,|.\n",
+        ".|===========||||====|.\n",
+        ".|,%,=,%,=,%,|,%,=,%,|.\n",
+        ".||||=||||||||====||||.\n",
+        ".|,%,=|######|,%,=,%,|.\n",
+        ".|====|##))##||||====|.\n",
+        ".|,%,=|______|,%,=,%,|.\n",
+        ".||||=|______|====||||.\n",
+        ".|,%,=|______|,%,=,%,|.\n",
+        ".|====|||=|||||||====|.\n",
+        ".|,%,=,%,=,%,|,%,=,%,|.\n",
+        ".||||=============||||.\n",
+        ".|,%,=,%,=,%,|,%,=,%,|.\n",
+        ".|===================|.\n",
+        ".|,%,=,%,=,%,|,%,=,%,|.\n",
+        ".||||||||=||||||||||||.\n",
+        "........|=|............\n",
+    ))
+    map_bounds("burbclave_M", player_teleport("world_M", 20, 43))
+
+    # Put 5 of those damn SUVs on the roads
+    for(i,1,5,1,
+        # find a road square
+        let(tile$, ""),
+        while(ne(tile$, "images/floor/floor_cobble"),
+            let(x, rnd(21)), let(y, rnd(21)),
+            let(ter$, gr_get_terrain$("burbclave_M", x, y)),
+            let(tile$, ter_get_tile$(ter$, LAYER_Under)),
+        ),
+        build_suv("burbclave_M", x, y)
+    )
+    ;
+
+def(build_suv(mapid$, x, y))
+    let(id$, tempid$())
+    cr_new(id$, "SUV")
+    th_tile(id$, 0, "Pocket/suv", 4, 1)
+    cr_brain(id$, "r")
+    th_statboth(id$, ST_Body, 20)
+    th_statboth(id$, ST_Speed, 20)
+    th_statboth(id$, ST_Mind, 5)
+    th_statboth(id$, ST_Presence, 5)
+    en_secondary(id$)
+    st_prop(id$, "iscar", 1)
+    en_exp(id$, 20)
+    th_gold(id$, d(2, 25))
+    th_moveto(id$, mapid$, x, y)
+    ;
+
+def(build_mall())
+    map_new("mall_M", "Mini-Mall", 22, 7)
+    map_fill("mall_M", 0, 0, Terrain$[""], join$(
+        "######################\n",
+        "#-----#-----#---#----#\n",
+        "###-#####-#####-#-####\n",
+        "#--------------------#\n",
+        "###-######--#####-####\n",
+        "#------#------#------#\n",
+        "##########((##########\n",
+    ))
+    map_bounds("mall_M", player_teleport("burbclave_M", 10, 11))
+    build_cashier("mall_M", 5, 1, West)
+    build_cashier("mall_M", 7, 1, East)
+    build_cashier("mall_M", 13, 1, East)
+    build_cashier("mall_M", 20, 1, West)
+    build_cashier("mall_M", 1, 5, East)
+    build_cashier("mall_M", 8, 5, East)
+    build_cashier("mall_M", 13, 5, West)
+    build_cashier("mall_M", 15, 5, East)
+    build_cashier("mall_M", 20, 5, West)
+
+    build_counter("mall_M", 4, 1, 0)
+    build_counter("mall_M", 8, 1, 1)
+    build_counter("mall_M", 14, 1, 2)
+    build_counter("mall_M", 19, 1, 3)
+    build_counter("mall_M", 2, 5, 4)
+    build_counter("mall_M", 9, 5, 5)
+    build_counter("mall_M", 12, 5, 6)
+    build_counter("mall_M", 16, 5, 7)
+    build_counter("mall_M", 19, 5, 8)
+    ;
+
+def(build_cashier(mapid$, x, y, f))
+    let(id$, tempid$())
+    bl_new(id$, "cashier")
+    # pick some random citizens
+    let(roll, rnd(6))
+    if( eq(roll,1), do(let(num,10), let(nfa,1)),
+        eq(roll,2), do(let(num,19), let(nfa,1)),
+        eq(roll,3), do(let(num,23), let(nfa,1)),
+        eq(roll,4), do(let(num,30), let(nfa,1)),
+        eq(roll,5), do(let(num,4), let(nfa,2)),
+        do(let(num,8), let(nfa,2)) 
+    )
+    th_tile(id$, 0, join$("images/people/citizen",num), nfa, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_facing(id$, f)
+    ;
+
+def(build_counter(mapid$, x, y, shop))
+    let(id$, tempid$())
+    bl_new(id$, "counter")
+    th_tile(id$, 0, "images/dungeon/counter_ns2", 1, 1)
+    th_moveto(id$, mapid$, x, y)
+    if( eq(shop,0), build_shop_bonbon(id$),
+        eq(shop,1), build_shop_smart(id$),
+        eq(shop,2), build_shop_nerdstorm(id$),
+        eq(shop,3), build_shop_drugs(id$),
+        eq(shop,4), build_shop_espresso(id$),
+        eq(shop,5), build_shop_frozen(id$),
+        eq(shop,6), build_shop_espresso(id$),
+        eq(shop,7), build_shop_espresso(id$),
+        eq(shop,8), build_shop_geewhiz(id$),
+    )
+    st_trigger(id$, sales_counter())
+    ;
+
+def(build_shop_bonbon(id$))
+    st_prop(id$, "title", "Bon Bon")
+    st_prop(id$, "text", "Would you like to try some\nPaper Street Soap?")
+    ;
+
+def(build_shop_smart(id$))
+    st_prop(id$, "title", "S-Mart")
+    st_prop(id$, "text", join$("Welcome to S-Mart, sporting goods dept.\n",
+        "Shop smart, shop S-Mart.\nHow can I help you?") )
+    st_prop(id$, "item1", "Birdshot Shotgun")
+    st_prop(id$, "atk1", 5)
+    st_prop(id$, "cost1", 20)
+    st_prop(id$, "item2", "20 Gauge Shotgun")
+    st_prop(id$, "atk2", 10)
+    st_prop(id$, "cost2", 150)
+    st_prop(id$, "item3", "12 Gauge Shotgun")
+    st_prop(id$, "atk3", 15)
+    st_prop(id$, "cost3", 500)
+    st_prop(id$, "item4", "10 Gauge Shotgun")
+    st_prop(id$, "atk4", 20)
+    st_prop(id$, "cost4", 1500)
+    st_prop(id$, "item5", "Double Shotgun")
+    st_prop(id$, "atk5", 25)
+    st_prop(id$, "cost5", 5000)
+    st_prop(id$, "nitems", 5)
+    ;
+
+def(build_shop_nerdstorm(id$))
+    st_prop(id$, "title", "Nerdstorm")
+    st_prop(id$, "text", join$("Welcome to Nerdstorm.\n",
+        "We have clothes and gadgets for\noverpaid nerds.") )
+    ;
+
+def(build_shop_drugs(id$))
+    st_prop(id$, "title", "Raoul Duke's Drugstore")
+    st_prop(id$, "text", join$("Look, man!  Just tell me what you want!\n",
+        "We don't have all day!") )
+    st_prop(id$, "item1", "Volt Cola")
+    st_prop(id$, "color1", "black")
+    st_prop(id$, "cost1", 10)
+    st_prop(id$, "item2", "Little Yellow Pills")
+    st_prop(id$, "color2", "yellow")
+    st_prop(id$, "cost2", 20)
+    st_prop(id$, "item3", "Adrenalin")
+    st_prop(id$, "color3", "cyan")
+    st_prop(id$, "cost3", 100)
+    st_prop(id$, "item4", "Extract of Pineal Gland")
+    st_prop(id$, "color4", "purple")
+    st_prop(id$, "cost4", 250)
+    st_prop(id$, "item5", "Big Red Pills")
+    st_prop(id$, "color5", "red")
+    st_prop(id$, "cost5", 500)
+    st_prop(id$, "nitems", 5)
+    ;
+
+def(build_shop_espresso(id$))
+    st_prop(id$, "title", "Muscle Spasm Espresso")
+    st_prop(id$, "text", "One triple grande latte, coming right up.")
+    ;
+
+def(build_shop_frozen(id$))
+    st_prop(id$, "title", "Tokyo Frozen Yogourt")
+    st_prop(id$, "text", "One strawberry-teryaki frozen yogourt,\ncoming right up.")
+    ;
+
+def(build_shop_geewhiz(id$))
+    st_prop(id$, "title", "Gee-Whiz")
+    st_prop(id$, "text", "We'd never call our customers nerds.")
+    ;
+
+def(sales_counter())
+    let(nitems, st_get_prop(targetid$, "nitems"))
+    let(title$, st_get_prop$(targetid$, "title"))
+    let(text$, st_get_prop$(targetid$, "text"))
+    # if no items for sale, just show the message
+    if(not(nitems), do(
+        alert(title$, text$, "OK", 1, 0),
+        return(0)
+    ))
+    # build the menu options, item1 ($cost1)|item2 ($cost2)|, etc.
+    let(menu$, "")
+    for(i,1,nitems,1,
+        joinv$(menu$, st_get_prop$(targetid$, join$("item",i)), " ($",
+            st_get_prop(targetid$, join$("cost",i)), ")|")
+    )
+    let(opt, menu(title$, text$, menu$, 1))
+    # did the player hit cancel?
+    if(not(opt), return(0))
+    let(cost, st_get_prop(targetid$, join$("cost",opt)))
+    # can the player afford it?
+    if(not(paygold(cost)), return(0))
+    if( eq(title$, "S-Mart"), sell_shotgun(opt),
+        eq(title$, "Raoul Duke's Drugstore"), sell_drugs(opt),
+        assert(0, "Unknown shop ",title$)
+    )
+    ;
+
+def(sell_shotgun(opt))
+    let(id$, tempid$())
+    let(name$, st_get_prop$(targetid$, join$("item",opt)))
+    it_new(id$, name$)
+    st_prop(id$, "type", "shotgun")
+    it_equip(id$, EQ_Weapon)
+    th_statboth(id$, ST_Attack, st_get_prop(targetid$, join$("atk",opt)))
+    th_statboth(id$, ST_Range, 5)
+    th_tile(id$, 0, "Pocket/shotgun", 1, 1)
+    th_gold(id$, st_get_prop(targetid$, join$("cost",opt)))
+    th_moveto(id$, th_get_mapid$(actorid$), th_get_x(actorid$), th_get_y(actorid$))
+    ;
+
+def(sell_drugs(opt))
+    let(id$, tempid$())
+    let(name$, st_get_prop$(targetid$, join$("item",opt)))
+    it_new(id$, name$)
+    st_prop(id$, "type", "drug")
+    if( eq(name$,"Volt Cola"), st_trigger(id$, use_drug_boost(ST_Speed,3)),
+        eq(name$,"Little Yellow Pills"), st_trigger(id$,use_drug_pain(0.5,20)),
+        eq(name$,"Adrenalin"), st_trigger(id$, use_drug_boost(ST_Body,6)),
+        eq(name$,"Extract of Pineal Gland"), st_trigger(id$, use_drug_boost(ST_Speed,6)),
+        eq(name$,"Big Red Pills"), st_trigger(id$, use_drug_pain(0.75,100)),
+        assert(0, "Unknown drug ",name$)
+    )
+    let(color$, st_get_prop$(targetid$, join$("color",opt)))
+    th_tile(id$, 0, join$("images/item/vial_",color$), 1, 1)
+    th_gold(id$, st_get_prop(targetid$, join$("cost",opt)))
+    th_moveto(id$, th_get_mapid$(actorid$), th_get_x(actorid$), th_get_y(actorid$))
+    ;
+
+def(use_drug_pain(fraction, maxgain))
+    let(hp, th_get_stat(actorid$,ST_HitPoints))
+    let(hpmax, th_get_statmax(actorid$,ST_HitPoints))
+    if(eq(hp,hpmax), do(describe("You aren't in pain!"), return(0)) )
+    th_remove(targetid$, 1)
+    describe("You feel better.")
+    let(gain, mul(hpmax,fraction))
+    if(gt(gain, maxgain), let(gain, maxgain))
+    th_stat(actorid$, ST_HitPoints, add(hp,gain))
+    ;
+
+def(use_drug_boost(stat, bonus))
+    th_remove(targetid$, 1)
+    let(prop$, join$("boost",stat))
+    let(turns, st_get_prop(actorid$, prop$))
+    if(turns, do(
+        describe("Ooh, you shouldn't mix medications."),
+        let(loss, d(2,6)),
+        th_stat(actorid$,stat,sub(th_get_stat(actorid$,stat),loss)),
+        th_stat(actorid$, ST_HitPoints, sub(th_get_stat(actorid$, ST_HitPoints),loss)),
+        en_checkalive(actorid$, targetid$),
+        return(0)
+    ))
+    st_prop(actorid$, prop$, bonus)
+    if( eq(stat,ST_Body), do(
+            describe("You're strong!"),
+            modify_stat(actorid$, ST_Body, bonus),
+            modify_stat(actorid$, ST_Attack, bonus),
+            modify_stat(actorid$, ST_HitPoints, bonus),
+        ),
+        eq(stat,ST_Speed), do(
+            describe("You're fast!"),
+            modify_stat(actorid$, ST_Speed, bonus),
+            modify_stat(actorid$, ST_Evade, bonus),
+        ),
+    )
+    ;
+
+def(modify_stat(id$, stat, bonus))
+    let(oldmax, th_get_statmax(id$, stat))
+    let(oldcurr, th_get_stat(id$, stat))
+    th_statmax(id$, stat, add(oldmax,bonus))
+    th_stat(id$, stat, add(oldcurr,bonus))
+    ;
+
+def(build_arena())
+    # world entrance
+    let(id$, tempid$())
+    bl_new(id$, "King Kichapu")
+    th_tile(id$, 0, "Pocket/kichapu", 1, 1)
+    st_trigger(id$, player_teleport("arena_M", 5, 9))
+    th_moveto(id$, "world_M", 8, 2)
+    # map
+    map_new("arena_M", "King Kichapu's Arena", 11, 11)
+    map_fill("arena_M", 0, 0, Terrain$[""], join$(
+        "|||||_|||||\n",
+        "|_________|\n",
+        "|__#_#_#__|\n",
+        "|_#_____#_|\n",
+        "|_________|\n",
+        "__#_____#__\n",
+        "|_________|\n",
+        "|_#_____#_|\n",
+        "|__#_#_#__|\n",
+        "|_________|\n",
+        "|||||_|||||\n",
+    ))
+    map_bounds("arena_M", player_teleport("world_M", 8, 2))
+    build_king_kichapu()
+    ;
+
+def(build_king_kichapu())
+    # King Kichapu
+    let(id$, tempid$())
+    cr_new(id$, "King Kichapu")
+    th_tile(id$, 0, "Pocket/kichapu", 1, 1)
+    cr_brain(id$, "h")
+    # Player's Evade 15 + levels 15/4 = 20, so you'll need drugs
+    th_statboth(id$, ST_Body, 30)
+    # moves very slowly
+    th_statboth(id$, ST_Speed, 5)
+    # attack strength of the fireball - good thing you have a high Presence!
+    th_statboth(id$, ST_Mind, 20)
+    th_statboth(id$, ST_Presence, 20)
+    en_secondary(id$)
+    # Player's Body 15 + levels 15/4 + dbl shotgun 25 = 44
+    th_statboth(id$, ST_Evade, 44)
+    th_statboth(id$, ST_HitPoints, 100)
+    # super-sized demonic giggle
+    th_statboth(id$, ST_Range, 2)
+    en_attack(id$, playsound("Pocket/giggle.au"))
+    en_turn(id$, kichapu_turn())
+    en_exp(id$, 2000)
+    th_moveto(id$, "arena_M", 5, 5, 1)
+    cr_defeat(id$, kichapu_defeat())
+    ;
+
+def(kichapu_defeat())
+    gcls()
+    gameover(1, "Killed the king\nof the\nPocket Monsters!")
+    ;
+
+def(kichapu_turn())
+    show_hp_bar(actorid$, "red", 0)
+    # Fireball
+    # only fires every fifth turn
+    if(mod(GAMETURN,5), return(0))
+    # find the victim and attacker
+    let(mapid$, th_get_mapid$("player"))
+    let(px, th_get_x("player"))
+    let(py, th_get_y("player"))
+    let(x, th_get_x(actorid$))
+    let(y, th_get_y(actorid$))
+    # delta to the victim
+    let(dx, sub(px, x))
+    let(dy, sub(py, y))
+    let(adx, abs(dx))
+    let(ady, abs(dy))
+    # out of range
+    if(or(gt(adx,VIEW_DIST),gt(ady,VIEW_DIST)), return(0))
+    # number of steps to the victim
+    let(n, if(gt(adx,ady), adx, ady))
+    divv(dx, n)
+    divv(dy, n)
+    # create the fireball
+    let(fireball$, tempid$())
+    bl_new(fireball$, "")
+    th_tile(fireball$, 0, "images/dungeon/fire", 1, 2)
+    # trace the fireball out to the victim
+    pause()
+    let(hit, 1)
+    for(i,1,n,1,
+        if(hit, do(
+            addv(x, dx), addv(y, dy),
+            th_moveto(fireball$, mapid$, x, y),
+            redraw(),
+            wait(0.1),
+        )),
+        let(terid$, gr_get_terrain$(mapid$, x, y)),
+        # impacted on the surface!
+        if(ne(ter_get_walls$(terid$),"0000"), let(hit, 0)),
+    )
+    th_remove(fireball$, 1)
+    gr_terrain(mapid$, x, y, Terrain$["c"])
+    resume()
+    playsound("Pocket/blowup.au")
+    if(hit,
+        en_magattack(actorid$, "player", 5, "", "You are engulfed in flame")
+    )
+    ;
+
+def(show_hp_bar(id$, color$, y))
+    let(hpx, mul(th_get_stat(id$, ST_HitPoints),5))
+    gcls()
+    gcolor(color$)
+    gmove(0, y)
+    gfillrect(hpx, add(y, 10))
+    gmove(hpx, y)
+    grect(mul(th_get_statmax(id$, ST_HitPoints),5), 10)
+    ;
+
+def(set_globals())
+    global(ALLOWCHEAT, 0)
+    global(WORLDSIZE, 50)
+    # Terrains required by World
+    # Grass
+    build_ter("Terrain$", ".", "", "images/ground/grass", 1, "0000", OPA_None)
+    # Road
+    build_ter("Terrain$", "=", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    # Forest
+    build_ter("Terrain$", "f", "forest", "images/ground/forest", 1, "0000", OPA_Partial)
+    st_trigger(Terrain$["f"], forest_pocket_monster())
+    build_ter("Terrain$", "F", "forest", "images/ground/forest", 1, "0000", OPA_Partial)
+    # Mountain
+    build_ter("Terrain$", "^", "mountain", "images/ground/mountain", 1, "1111", OPA_Full)
+    # Water
+    build_ter("Terrain$", "~", "water", "images/ground/water", 2, "1111", OPA_None)
+    # Features
+    # Just place grass with a stone cairn on the ground for the features -
+    # I'll put other stuff there later.
+    build_ter("Terrain$", "2", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "3", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "4", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "5", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "6", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "7", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "8", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+
+    # Terrains required by Burbclave
+    # 0 = entrance to the Burbclave
+    build_ter("Terrain$", "0", "Burbclave Cero", "Pocket/house1", 1, "0000", OPA_None)
+    st_trigger(Terrain$["0"], player_teleport("burbclave_M", 9, 21))
+    # Low Wall
+    build_ter("Terrain$", "|", "wall", "Pocket/wall_low", 1, "1111", OPA_None)
+    # Mini-Mall
+    build_ter("Terrain$", "#", "wall", "images/wall/wall_tan1", 1, "1111", OPA_Full)
+    # Mini-Mall Entrance
+    build_ter("Terrain$", ")", "mall entrance", "images/door/door_grey_closed", 1, "0000", OPA_None)
+    # This callback is called when you try to move into the entrance
+    st_trigger(Terrain$[")"], player_teleport("mall_M", 10, 5))
+    # House
+    build_ter("Terrain$", "%", "conformist house", "Pocket/house1", 1, "0000", OPA_None)
+    st_trigger(Terrain$["%"], no_cars_allowed(0))
+    # Astroturf
+    build_ter("Terrain$", ",", "", "Pocket/grass_smooth", 1, "0000", OPA_None)
+    st_trigger(Terrain$[","], no_cars_allowed(1))
+    # Parking Lot
+    build_ter("Terrain$", "_", "", "images/floor/floor_concrete", 1, "0000", OPA_None)
+
+    # Terrains required by Mall
+    # Mall floor
+    build_ter("Terrain$", "-", "", "Pocket/floor_mall", 1, "0000", OPA_None)
+    # Mini-Mall Exit - doesn't need a trigger, map_bounds will do that.
+    build_ter("Terrain$", "(", "mall exit", "images/door/door_grey_closed", 1, "0000", OPA_None)
+
+    # City
+    build_ter("Terrain$", "1", "city", "Pocket/city", 1, "0000", OPA_None)
+    build_ter("Terrain$", "r", "ruins", "Pocket/ruins", 1, "0000", OPA_None)
+
+    # King Kichapu's arena
+    build_ter("Terrain$", "9", "King Kichapu's Arena", "Pocket/ruins", 1, "0000", OPA_None)
+    build_ter("Terrain$", "c", "", "Pocket/crater", 1, "0000", OPA_None)
+    ;
+
+# convenience function to set all the terrain stuff at once
+# Note that the variable name is passed in - currently, all terrain types are
+# stored in the same hash, but you could have a different hash for each map.
+def(build_ter(var$, char$, name$, basefile$, nframes, walls$, opa))
+    let(ter$, tempid$())
+    setglobal(var$, char$, ter$)
+    ter_new(ter$, name$)
+    ter_tile(ter$, LAYER_Under, basefile$, 1, nframes)
+    ter_walls(ter$, walls$)
+    ter_opa(ter$, opa)
+    ;
+
+def(player_teleport(mapid$, x, y))
+    if(ne(actorid$,"player"), return(0))
+    th_moveto("player", mapid$, x, y, 1)
+    return(0)
+    ;
+
+# Returns 0 (no move allowed) if the actor has the property "iscar" set to a
+# non-zero value, otherwise 1 (move allowed).  If 'hunterokay', then cars are
+# allowed in if they're in hunter-brain - the SUVs will run over grass, but
+# can't get past a house.
+def(no_cars_allowed(hunterokay))
+    if(not(st_get_prop(actorid$, "iscar")), return(1))
+    if(and(hunterokay, eq(cr_get_brain$(actorid$),"h")), return(1))
+    return(0)
+    ;
+
+def(forest_pocket_monster())
+    # note that it can be triggered by *anyone* - player or creature.
+    # find the grid being entered...
+    let(mapid$, th_get_mapid$(actorid$))
+    let(x, th_get_x(actorid$))
+    let(y, th_get_y(actorid$))
+    let(f, th_get_facing(actorid$))
+    addv(x, DIR_DX[f])
+    addv(y, DIR_DY[f])
+    # drop a monster there
+    build_pocket_monster(mapid$, x, y)
+    # change the terrain?
+    if(eq(rnd(2),1), gr_terrain(mapid$, x, y, Terrain$["F"]))
+    return(0)
+    ;
+
+def(build_pocket_monster(mapid$, x, y))
+    let(level, pl_get_level("player"))
+    let(id$, tempid$())
+    cr_new(id$, "Pocket Monster")
+    th_tile(id$, 0, "Pocket/pocket", 2, 1)
+    cr_brain(id$, "h")
+    # they get tougher as you go up in levels so they'll always be dangerous
+    th_statboth(id$, ST_Body, add(15,div(level,4)))
+    # they don't move very fast...
+    th_statboth(id$, ST_Speed, 8)
+    th_statboth(id$, ST_Mind, 5)
+    th_statboth(id$, ST_Presence, 5)
+    en_secondary(id$)
+    # but they can dodge well.
+    th_statboth(id$, ST_Evade, add(20,level))
+    # almost no hit points at low levels, but they get harder and harder to kill
+    th_statboth(id$, ST_HitPoints, d(level,4))
+    # and that demonic giggle can work at range.
+    th_statboth(id$, ST_Range, 2)
+    en_attack(id$, playsound("Pocket/giggle.au"))
+    en_exp(id$, mul(10,level))
+    th_gold(id$, d(level,20))
+    th_moveto(id$, mapid$, x, y, 1)
+    ;
+
+# Tries to subtract 'cost' gold from actorid$, and returns 1 if successful,
+# 0 if not.
+def(paygold(cost))
+    if(lt(th_get_gold(actorid$), cost),
+        do(describe("You don't have enough money."), return(0)) )
+    th_gold(actorid$,sub(th_get_gold(actorid$),cost))
+    return(1)
+    ;
+
+# Outputs some text to the player only.
+def(describe(text$))
+    if(ne(actorid$,"player"), return(0))
+    output(text$)
+    ;
+

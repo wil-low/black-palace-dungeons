@@ -1,0 +1,96 @@
+As you can see in the screenshot, Hephaestus is divided into two areas: a map display and a scrolling icon+text panel. The map only shows squares that are visible from your current position - if a square is not visible, it is filled in with black; if it's only partially visible, it's greyed-out.
+Hephaestus is entirely keyboard-controlled:
+Ctrl-N = New Adventure
+ Starts a new adventure. You will be shown a file dialog, and can choose any ".adv" adventure file. Your current game will be lost unless you save it!
+Ctrl-L = Load Saved Game
+ Loads a saved game. You will be shown a file dialog, and can choose any ".sav" save file; you must have the ".adv" adventure file in the same directory. Your current game will be lost unless you save it!
+Ctrl-S = Save Game
+ Saves your current game. You will be shown a file dialog, and can select a new ".sav" save file to create, or write over an old one.
+Ctrl-Q = Quit Game
+ Quits the current game.
+Ctrl-A = About
+ Shows a dialog with copyright information and the URL of the {Hephaestus home page}.
+F1
+ Lists all of the gameplay keys below in the text panel.
+k, UP = North
+h, RIGHT = East
+j, DOWN = South
+l, LEFT = West
+ You can move in four directions with the arrow keys or the Rogue keys hjkl.
+  * Move into an enemy to attack it.
+  * Move into a friendly creature to talk to it.
+  * Move into a stationary object to trigger it, if it can be triggered.
+  * Hold down shift along with a move key to turn to face in that direction. The sprites for North and East are the same, as are those for South and West, but you do have four facings. Facing only matters for ranged and magic attacks.
+a = Attack Ahead
+ If you have a ranged attack, you can attack anything ahead of you within range; your Range stat shows the number of squares ahead you can attack. You must be facing in the correct direction, either by last moving that direction or by hitting shift and a move key together.
+
+You do not need to use 'a' to make melee attacks - just move into the target.
+d = Drop Item
+ Allows you to select a single item from your inventory and drop it in your current square.
+e = Equip Item
+ Allows you to select a single equippable item from your inventory and ready it; if you already have an item of the same type equipped, it will be removed automatically. Equipment increases your stats as long as you have it ready - weapons increase your Attack stat, armor increases your Defense stat, and so on. There are five equipment positions:
+  * Weapon
+  * Shield
+  * Armor
+  * Hat
+  * Accessory
+g = Get Item
+ Picks up all items in your current square. You have an unlimited inventory.
+i = Inventory
+ Lists all items and equipment carried in the text panel.
+m = Magic
+ Allows you to select one of your known magic spells and activate it if you have enough MagicPoints (MP). If the spell is ranged, you must be facing in the correct direction, either by last moving that direction or by hitting shift and a move key together. Magic spells are defined by the adventure writer, and they can have almost any effect imaginable.
+r = Remove Equip
+ Allows you to select one of your equipped items and remove it - you lose the stat bonuses from that item, but now you can drop the item or equip another item there instead.
+t = Trigger (item on ground)
+ Triggers a non-blocking item that you are standing over. If there are multiple items, the top-most item that can be triggered will be chosen - be careful! Trigger is most often used to close doors - stand over the door, trigger it, and move off to either side; you can open doors by just running into them.
+u = Use Item
+ Allows you to select one of your items and trigger it. This is most often used to use food, potions, wands, and the like. The effects are defined by the adventure writer, and anything can happen.
+w = Wait
+ Stand still for a turn.
+
+
+------------------------------------
+Character
+
+Statistics
+
+There are 4 primary stats and 9 secondary stats. Each stat ranges from 1 to 20 for "normal people" at level 1, but there is no upper limit. Each stat has two scores: a current value and a maximum value, usually written "current / maximum". Your current value can never exceed your maximum, but your maximum can be increased...
+Body
+ Strength, physique, and toughness. Body determines your starting Attack and HitPoints. You will die if your Body reaches 0!
+Speed
+ Reaction speed, agility, and manual dexterity. Speed determines your starting Evade. You will die if your Speed reaches 0!
+Mind
+ Intelligence and perception. Mind determines your starting MagicPoints and MagicAbility. You will die if your Mind reaches 0!
+Presence
+ Charisma, appearance, and force of personality. Presence determines your starting MagicEvade. You will die if your Presence reaches 0!
+HitPoints (HP)
+ The amount of damage you can take before dying. When you reach 0 HP, the game is over, so keep an eye on this stat in combat! HP can be recovered by magic spells, sleeping in an inn, or using items like healing potions.
+MagicPoints (MP)
+ The amount of power you have left to activate magic spells. MP can be recovered by sleeping in an inn or using items like magic potions.
+Attack
+ Your ability to strike an enemy successfully. Attack determines both your chance to hit and the amount of damage you do, and is countered by your target's Evade and Defense.
+Evade
+ Your ability to avoid enemy attacks.
+Defense
+ Your ability to absorb damage, usually gained from armor.
+Range
+ The distance you can attack at, usually gained from missile weapons.
+MagicAbility
+ Your effectiveness at using magic. Many spells depend on your MagicAbility to determine what happens; in the sample adventure, Fire Arrow's damage and Heal Self's healing are 25% of your MagicAbility. More powerful spells (costing more MP) would have higher percentages. In any magic attack, your MagicAbility is resisted by the target's MagicEvade, and then the damage, determined separately, is resisted by MagicDefense.
+MagicEvade
+ Your ability to avoid magical attacks. Unlike physical Evade, MagicEvade is an all-or-nothing attempt - if you fail, the spell takes full effect.
+MagicDefense
+ Your ability to absorb damage from magical attacks. This is very rare; only certain artifacts should give any MagicDefense.
+
+Experience
+
+Your Level indicates how experienced you are. You will start at Level 1, and there is no upper limit - it's quite plausible to have over a hundred levels after a long adventure.
+
+By killing enemies and completing quests, you gain experience. Typically you will earn 1-10 experience points (XP) per level equivalent of the enemy depending on the challenge, or up to half your level's worth for a quest (any adventure writer who gives you more than that is Monty Hall...).
+
+When you have 100×(current level) XP, those XP are spent, your level increases by 1, one of your primary stats, all of the secondary stats based on it, your HitPoints and MagicPoints increase by 1, and you are fully healed. Note that if your Body improves, your HitPoints increase by 2, and if your Mind improves, your MagicPoints increase by 2.
+
+Experience may also be used in an adventure to purchase magic spells or for special training. Levels have no other standard effect, but might be used as a requirement for a quest.
+
+In the sample adventure, the endless supplies of bunnies are worth 1 XP each (they're harmless unless you corner them, then watch out!) and the hillbilly goons are worth 5 XP each (they're a bit weaker than you, especially once you get the spear, but they might get a lucky shot in), so it will take a while to gain levels there. In real adventures, you won't face such weak monsters, and you will earn much greater rewards - in Hades.adv, dragons are worth 2000 XP, and you'll have to earn every point of it!

@@ -1,0 +1,106 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/strict.dtd" >
+<html lang="en" xmlns="http://www.w3.org/TR/xhtml1">
+<head>
+<title>Mark Hughes: Hephaestus Designer Documentation</title>
+</head>
+<body bgcolor="#ccffcc" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+
+<table width="100%">
+<tr><td><a href="http://kuoi.asui.uidaho.edu/~kamikaze/Hephaestus/"><img src="../images/icon/hephaestus.gif" width="40" height="40" border="1" /></a></td>
+<td><h1 align="center">Hephaestus Designer Documentation</h1>
+<h4 align="center">Copyright &copy; 2001 by Mark Hughes &lt;<a href="mailto:kamikaze@kuoi.asui.uidaho.edu">kamikaze@kuoi.asui.uidaho.edu</a>&gt;</h4>
+</td></tr>
+</table>
+
+<dl>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../index.html">Hephaestus</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../gameplay.html">Gameplay</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../adventures.html">Adventures</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../faq.html">FAQ</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a name="topics">Designing Adventures</a></dt>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="minimal.html">Minimal Language Specification</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="scripting.html">Scripting</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="art.html">Art</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="sound.html">Sound</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="pocket.html">Tutorial: DESTROY ALL POCKET MONSTERS!</a></dd>
+</dl>
+<br clear="right" />
+
+<p>Hephaestus uses my scripting language <a href="minimal.html">Minimal</a> and
+a library of <a href="scripting.html">scripting functions</a> to create
+adventures.</p>
+
+<p>The entire adventure is specified in a Minimal script, which should have the
+".min" extension.  When you're ready to try it out, run the compiler on your
+script to produce a ".adv" file.</p>
+
+<p>When Hephaestus loads an adventure, it executes the '<code>newgame()</code>'
+function, which you must define.  The rest is up to you; you can do anything you
+like from that function.  The only thing that exists before the script starts is
+the player, with id "player".  When the '<code>newgame()</code>' function
+returns, the game starts.</p>
+
+<p>Note that you cannot have any immediate commands in your script that call
+Hephaestus, or the compiler will reject your script - you should only have
+'<code><a href="minimal.html#def">def()</a></code>' statements.</p>
+
+<p>When the game is saved, all of the global variables are also saved, so you
+can use them to maintain game state, particularly quest flags (but see also
+'<code><a href="scripting.html#st_prop">st_prop()</a></code>', which is usually
+a better solution).</p>
+
+
+<p><hr /></p>
+<h2><a name="example">Example</a></h2>
+
+<ol>
+<li>Create a new text file '<code>example.min</code>', and type in the
+following:
+<pre>
+def(newgame())
+    output("The smallest Hephaestus adventure ever!")
+    map_new("test_M", "Test Map", 11, 11)
+    th_moveto("player", "test_M", 5, 5)
+    ;
+</pre>
+</li>
+
+<li>Now compile it by running '<code>compile.sh</code>' (Unix) or
+'<code>compile.bat</code>' (Windows) and picking '<code>example.min</code>' in
+the file selector.  This will create '<code>example.adv</code>'.</li>
+
+<li>Start Hephaestus by running '<code>heph.sh</code>' or
+'<code>heph.bat</code>', choose "New Adventure" from the "Game" menu, and pick
+'<code>example.adv</code>'.</li>
+
+<li>The output window will show:
+<pre>
+The smallest Hephaestus adventure ever!
+</pre>
+
+<p>In the view, you will see the player standing in the middle of a black
+void (because you haven't set any tiles).  It works!</p>
+</li>
+
+</ol>
+
+<p>Read <a href="pocket.html">the tutorial</a> or
+<a href="../sample.min">sample.min</a> to see a more complete and commented
+example, and then read the <a href="#topics">other design topics</a>.</p>
+
+
+<hr />EOF
+</body>
+</html>

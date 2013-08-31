@@ -1,0 +1,660 @@
+# sample.min
+# This is a tiny and pointless adventure, but it demonstrates all of the major
+# Hephaestus adventure design techniques.
+#
+# Copyright 2001 © by Mark Hughes <kamikaze@kuoi.asui.uidaho.edu>
+# Permission is granted to use and modify this code freely,
+# provided that you rename your version.
+#
+# Author: Mark Hughes
+# Email: kamikaze@kuoi.asui.uidaho.edu
+# Web: http://kuoi.asui.uidaho.edu/~kamikaze/
+# Created: 2001Nov12
+# Last Modified: 2001Nov18
+
+# newgame() is called to build the game
+def(newgame())
+    output("Sample adventure")
+    output("Copyright 2001 © by Mark Hughes")
+    output("    <kamikaze@kuoi.asui.uidaho.edu>")
+    window_color("black", "#ccffcc")
+    output_color("black", "#ccffcc")
+    output("Welcome to my game!")
+    setGlobals()
+    build_world_M()
+    build_player()
+    intro()
+    ;
+
+#________________________________________
+# A simple animated intro sequence
+def(intro())
+    pause()
+    th_moveto("player", "world_M",5,0)
+    redraw()
+    wait(0.25)
+    th_moveto("player", "world_M",5,2)
+    redraw()
+    wait(0.25)
+    th_moveto("player", "world_M",5,3)
+    redraw()
+    wait(0.25)
+    th_moveto("player", "world_M",5,4)
+    redraw()
+    wait(0.25)
+    th_moveto("player", "world_M",5,5)
+    resume()
+    ;
+
+#________________________________________
+# Sets the player's stats
+def(build_player())
+    # Get a name
+    let(name$,"Willow")
+    st_name("player", name$)
+    # As long as the stats aren't acceptable, try again.
+    roll_stats()
+    # The player hit "OK"
+    en_secondary("player")
+    # Give the player some simple magic spells
+    en_magic("player", "Fire Arrow (3 MP)", magicFireArrow(3))
+    en_magic("player", "Heal Self (4 MP)", magicHealSelf(4))
+    en_magic("player", "Return to Start (5 MP)", magicReturn(5, "world_M",5,5))
+    # And enter the game world
+    th_moveto("player", "world_M",5,5)
+    ;
+
+# Rolls the player's stats.
+# Returns 1 if the stats were acceptable, 0 if not.
+def(roll_stats())
+#    let(text$, "Are these stats okay?\n\n")
+    # for each of the primary stats, roll the score on 4d5, which has
+    # min/avg/max of 4/12/20
+    stats_lock(1)
+    for(i, ST_Body, ST_Presence, 1,
+        let(score, d(4,5)),
+        th_statboth("player", i, score))
+#        joinv$(text$,STAT_NAME$[i]," (",STAT_ABBV$[i],"): ",score,"\n")
+#        )
+    stats_lock(0)
+    # ask the player if it's okay
+#    let(b, alert("Stats", text$, "OK|Reroll", 1, 2) )
+    # acceptable if the player hit "OK"
+#    return(eq(b,1))
+    ;
+
+#________________________________________
+# Magic spells
+
+# Returns the player to the starting position.  Note that the cost is passed in
+# as an argument, so it only has to be defined in one place - where the spell
+# is assigned, which also has the " (cost MP)" text at the end of the spell
+# name.  Never define the same value in two places, it makes changes later much
+# harder.
+def(magicReturn(cost, mapid$, x, y))
+    # First thing in any spell, make sure you have enough MP.
+    if(not(mpcost(cost)), return(0))
+    # Tell the user what's happening
+    describe("You return to the start...")
+    # And finally do it.
+    th_moveto(actorid$, mapid$, x, y)
+    ;
+
+# Heals the player by 25% of the caster's MagicAbility.
+def(magicHealSelf(cost))
+    # Precondition: you need healing
+    let(hp, th_get_stat(actorid$,ST_HitPoints))
+    let(hpmax, th_get_statmax(actorid$,ST_HitPoints))
+    if(eq(hp,hpmax), do(describe("You don't need healing!"), return(0)) )
+    if(not(mpcost(cost)), return(0))
+    describe("You feel better.")
+    # I don't need to check it against hpmax here, that's done by th_stat().
+    let(ma,th_get_stat(actorid$,ST_MagicAbility))
+    th_stat(actorid$,ST_HitPoints, add(hp,mul(ma,0.25)) )
+    ;
+
+# Shoots a fire arrow doing damage equal to 25% of MagicAbility at a target
+# ahead of you.
+def(magicFireArrow(cost))
+    # Precondition: that there is a target ahead of you.
+    global(targetid$,en_get_target$(actorid$, 0, 5))
+    if(eq(targetid$,""), do(describe(join$("No enemy to ",
+        DIR_NAME$[th_get_facing(actorid$)],".")),return(0)) )
+    if(not(mpcost(cost)), return(0))
+    let(youmsg$,join$("You shoot an arrow of fire at ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," shoots an arrow of fire at you"))
+    let(dmg, mul(th_get_stat(actorid$,ST_MagicAbility),0.25))
+    en_magattack(actorid$, targetid$, dmg, youmsg$, tarmsg$)
+    ;
+
+#________________________________________
+# Creates the world_M map
+def(build_world_M())
+    let(mapid$,"world_M")
+    let(size, 16)
+    let(size1, sub(size,1))
+    map_new(mapid$, "Test Map", size, size)
+    # worldTurn() will be called every turn the player is on this map.
+    st_trigger(mapid$, worldTurn())
+    map_fill(mapid$, 0, 0, ter$[""], join$(
+            "...........F....\n",
+            ".f.........F....\n",
+            "................\n",
+            "....f......F....\n",
+            "...ff......F....\n",
+            "...........F....\n",
+            "...........F....\n",
+            "...........F....\n",
+            "...........F....\n",
+            "....##.....F....\n",
+            "...........F....\n",
+            "...........F....\n",
+            "...........F....\n",
+            "...........F....\n",
+            "...........F....\n",
+            "...........F....\n",
+        ) )
+
+    # a "secret" way through the hedge
+    let(secret_tree$, tempid$())
+    ter_new(secret_tree$, "")
+    ter_tile(secret_tree$, LAYER_Under, "images/ground/trees", 1, 1)
+    ter_opa(secret_tree$, OPA_Full)
+    gr_terrain(mapid$, 11, 2, secret_tree$)
+
+    # the entrance to the town - it will trigger when the player walks into it.
+    bl_new("world_town_B", "Town of Poughkeepsie")
+    th_tile("world_town_B", 0, "images/wild/town_red", 1, 1)
+    st_trigger("world_town_B", enterTown())
+    th_moveto("world_town_B", mapid$, 13, 6)
+
+    # that weird huge obelisk
+    bl_new("world_obelisk_B", "Weird Obelisk")
+    th_tile("world_obelisk_B", 0, "images/wild/obelisk", 1, 1)
+    st_trigger("world_obelisk_B", touchObelisk())
+    th_moveto("world_obelisk_B", mapid$, 14, 14)
+
+    bl_new("world_marker_B", "Obelisk Marker")
+    th_tile("world_marker_B", 0, "images/wild/obelisk_marker", 1, 1)
+    th_moveto("world_marker_B", mapid$, 14, 9)
+
+    # now create a couple of critters - a bunny to try to avoid the player...
+    build_bunny("world_bunny_C", "Bunny", mapid$, rnd(10), rnd(10))
+    # ...and a goon to hunt the player
+    build_goon("world_goon_C", "Hillbilly", mapid$, 2, 2)
+    # taunts you with a death message instead of the usual "You have slain..."
+    cr_defeat("world_goon_C", describe("My brother's gonna git ya!"))
+    ;
+
+def(worldTurn())
+    respawnGoon()
+    respawnBunny()
+    ;
+
+def(respawnGoon())
+    if(st_exists("world_goon_C"), return(0))
+    if(gt(rnd(20),1), return(0))
+    let(side,rnd(4))
+    if( eq(side,1), do( let(x,rnd(10)), let(y,10) ),
+        eq(side,2), do( let(x,1), let(y,rnd(10)) ),
+        eq(side,3), do( let(x,rnd(10)), let(y,1) ),
+        eq(side,4), do( let(x,10), let(y,rnd(10)) ) )
+    for(i,1,2,1,build_goon("world_goon_C", "Hillbilly", "world_M", x, y),
+    	th_facing("world_goon_C", sub(side,1)),
+    	cr_defeat("world_goon_C", describe("You'll never beat the McCoy brothers!")))
+
+    ;
+
+def(respawnBunny())
+    if(st_exists("world_bunny_C"), return(0))
+    if(gt(rnd(10),1), return(0))
+    let(x, rnd(10))
+    let(y, rnd(10))
+    build_bunny("world_bunny_C", "Bunny", "world_M", x, y)
+    ;
+
+def(touchObelisk())
+    let(hp,th_get_stat(actorid$,ST_HitPoints))
+    let(hpmax,th_get_statmax(actorid$,ST_HitPoints))
+    let(event,rnd(7))
+    # 1-2=set HP to max
+    # 3-4=gain 1d6 HP
+    # 5-6=lose 1d6 HP
+    # 7=HP max changes +/- 1
+    if(le(event,2), do(describe("It tingles..."),
+            th_stat(actorid$,ST_HitPoints,hpmax)),
+        le(event,4), do(describe("It's soothing..."),
+            th_stat(actorid$,ST_HitPoints,add(hp,rnd(6)))),
+        le(event,6), do(describe("It stings!"),
+            th_stat(actorid$,ST_HitPoints,sub(hp,rnd(6)))),
+        do(describe("You feel really weird..."),
+            if(eq(rnd(2),1), let(shift,-1), let(shift,1)),
+            th_statmax(actorid$,ST_HitPoints,add(hpmax,shift))) )
+    en_checkalive(actorid$, targetid$)
+    return(0)
+    ;
+
+#________________________________________
+def(enterTown())
+    let(mapid$,"town_M")
+    if(not(st_exists(mapid$)), build_town_M())
+    let(y,sub(map_get_ysize(mapid$),2))
+    th_moveto(actorid$, mapid$, 5, y)
+    th_facing(actorid$, North)
+    # return 0 so the motion won't continue normally, or you'll have two copies
+    # of the player - one in town, one on the world.
+    return(0)
+    ;
+
+def(build_town_M())
+    let(mapid$,"town_M")
+    let(size, 11)
+    let(size1, sub(size,1))
+    let(size2, sub(size,2))
+    let(size3, sub(size,3))
+    map_new(mapid$, "Poughkeepsie", size, size)
+    # send the player back to the world map
+    map_bounds(mapid$, townBounds())
+    # create the basic wall/floor structure - note the one grid of grass at
+    # the bottom center, so you can trigger the map_bounds and leave town.
+    map_fill(mapid$, 0, 0, ter$[""], join$(
+            "###########\n",
+            "#__#______#\n",
+            "#__#______#\n",
+            "#_##______#\n",
+            "#_______###\n",
+            "#_________#\n",
+            "#_________#\n",
+            "#_______###\n",
+            "#_________#\n",
+            "#__#______#\n",
+            "#####.#####\n",
+        ) )
+
+    # Ah, the pointed stick, the basis of all armed force everywhere.
+    # Yes, at +2 Attack, it sucks.  But against a goon's Evade 10, +2 gives you
+    # a +20% chance to hit, nothing to sneeze at.  Items early in an adventure
+    # should be extremely weak, and ramp up to stats of tens or hundreds much
+    # later.
+    weapon("town_stick_I", "Pointed Stick", "spear", mapid$, 5, size3)
+    th_statboth("town_stick_I", ST_Attack, 2)
+    # Because it's an item, the only ways to see this message are to stand
+    # over it and hit 't', or to carry it and hit 'u'.
+    st_trigger("town_stick_I", describe("It's a pointed stick.  Could be handy."))
+
+    # Create a safe filled with gold.
+    build_safe("town_safe_B", mapid$, 8, 1, 50)
+
+    # Create a local goon.
+    build_goon("town_goon_C", "Goon", mapid$, 7, 2)
+
+    # Create an old citizen.
+    build_citizen("town_citizen_C", "Citizen", mapid$, 4, 5)
+
+    # Create a shopkeeper and a counter
+    build_alchemist("town_alchemist_C", "Alchemist", mapid$, size2, 5, size3, 5)
+    # non-functioning counter
+    let(ctrid$, tempid$())
+    bl_new(ctrid$, "counter")
+    th_tile(ctrid$, 0, "images/dungeon/counter_ns2", 1, 1)
+    th_moveto(ctrid$, mapid$, size3, 6)
+    # sign - LAYER_Over is used here so you can walk under the sign.
+    let(alc_sign$, tempid$())
+    ter_new(alc_sign$, "")
+    ter_tile(alc_sign$, LAYER_Under, "images/floor/floor_brick", 1, 1)
+    ter_tile(alc_sign$, LAYER_Over, "images/dungeon/sign_potion_w", 1, 1)
+    gr_terrain(mapid$, sub(size,4), 4, alc_sign$)
+
+    # A friendly but useless guard.
+    gr_terrain(mapid$, 3, size1, ter_brickwall$)
+    gr_terrain(mapid$, 3, size2, ter_brickwall$)
+    build_guard("town_guard_C", "Guard", mapid$, 4, size2)
+    st_trigger("town_guard_C", describeicon("images/people/guard1_0e.gif",
+        "The guard says: 'Move right along, sir, you're blocking the road.  And mind you don't touch that switch!'"))
+
+    # And the switch that ends the world - doesn't every town have one?
+    build_door("town_door_B", mapid$,1,3, "door_wood", 1)
+    let(id$, "town_switch_B")
+    bl_new(id$, "switch")
+    th_tile(id$, 0, "images/dungeon/switch_left", 1, 1)
+    th_tile(id$, 1, "images/dungeon/switch_right", 1, 1)
+    st_trigger(id$, throwSwitch())
+    th_moveto(id$, mapid$, 1, 1)
+
+    let(id$, "town_switchsign_B")
+    bl_new(id$, "warning sign")
+    th_tile(id$, 0, "images/dungeon/signpost", 1, 1)
+    st_trigger(id$, describe("Doomsday Switch.\nDo not touch!"))
+    th_moveto(id$, mapid$, 2, 2)
+    ;
+
+def(townBounds())
+    # move to just south of the town icon
+    th_moveto(actorid$, "world_M", 13, 7)
+    th_facing(actorid$, South)
+    ;
+
+def(throwSwitch())
+    let(pose, th_get_pose(targetid$))
+    if(eq(pose,0), do(playsound("sounds/clang.au"),
+        describe("Doomsday device armed."), th_pose(targetid$,1), return(0)))
+    playsound("sounds/clang.au")
+    let(mapid$,"town_M")
+    let(size, map_get_xsize(mapid$))
+    let(size1, sub(size,1))
+    gcls()
+    gcolor("black")
+    gmove(0, 0)
+    gfillrect(VIEW_SIZE, VIEW_SIZE)
+    redraw()
+    gcls()
+    gcolor("red")
+    gmove(0, 0)
+    gfillrect(VIEW_SIZE, VIEW_SIZE)
+    redraw()
+    gcls()
+    gcolor("black")
+    gmove(0, 0)
+    gfillrect(VIEW_SIZE, VIEW_SIZE)
+    redraw()
+    playsound("sounds/aaugh.au")
+    wait(1)
+    gameover(0, "You fool!\nYou threw the switch!")
+    ;
+
+#________________________________________
+# Constructors for items and creatures:
+
+# Creates a door.  If 'closed' is 1, the door is closed.
+def(build_door(id$, mapid$,x,y, tile$, closed))
+    bl_new(id$, "Door")
+    th_tile(id$, 0, join$("images/door/",tile$,"_open"), 1, 1)
+    th_tile(id$, 1, join$("images/door/",tile$,"_closed"), 1, 1)
+    setDoorState(id$, closed)
+    th_moveto(id$, mapid$, x, y)
+    st_trigger(id$, openDoor())
+    ;
+
+# Utility method to set a door's state.
+def(setDoorState(id$,closed))
+    th_pose(id$, closed)
+    th_blocking(id$, closed)
+    if(closed, th_opa(id$,OPA_Full), th_opa(id$,OPA_None) )
+    ;
+
+# Callback function to open a door.
+def(openDoor())
+    let(closed, not(th_get_pose(targetid$)))
+    if(eq(actorid$,"player"), playsound("sounds/clang.au"))
+    setDoorState(targetid$,closed)
+    ;
+
+# Creates a weapon item, but does not give it any stats.
+def(weapon(id$, name$, tile$, mapid$, x, y))
+    it_new(id$, name$)
+    th_tile(id$, 0, join$("images/weapon/",tile$), 1, 1)
+    it_equip(id$, EQ_Weapon)
+    th_moveto(id$, mapid$, x, y)
+    ;
+
+# Creates a safe, using the trigger function below.  If you give one a
+# different trigger function later, that's fine - it just replaces the old one.
+def(build_safe(id$, mapid$, x, y, basecash))
+    it_new(id$, "Safe")
+    th_blocking(id$, 1)
+    th_tile(id$, 0, "images/dungeon/safe_closed", 1, 1)
+    th_tile(id$, 1, "images/dungeon/safe_open", 1, 1)
+    th_moveto(id$, mapid$, x, y)
+    st_trigger(id$, safe(basecash))
+    ;
+
+# A simple trigger function for a safe.  This one gives you 1d4 x 'basecash'
+# gold, but only opens for the player.
+def(safe(basecash))
+    if(ne(actorid$,"player"), return(0))
+    # pose 0 = closed and filled with gold, pose 1 = opened up and empty
+    if(eq(th_get_pose(targetid$),1), do(output("It's empty!"),return(0)))
+    th_pose(targetid$, 1)
+    let(cash, mul(rnd(4),basecash))
+    th_gold(actorid$, add(th_get_gold(actorid$),cash))
+    outputicon("images/item/gold_0n.gif", "You find ",cash," gold!")
+    ;
+
+# Creates a guard who likes you.
+def(build_guard(id$, name$, mapid$, x, y))
+    cr_new(id$, name$)
+    cr_brain(id$, "g")
+    cr_faction(id$, 0)
+    th_tile(id$, 0, "images/people/guard1", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 15)
+    th_statboth(id$, ST_Speed, 10)
+    th_statboth(id$, ST_Mind, 5)
+    th_statboth(id$, ST_Presence, 10)
+    en_secondary(id$)
+    ;
+
+# Creates a citizen
+def(build_citizen(id$, name$, mapid$, x, y))
+    cr_new(id$, name$)
+    cr_faction(id$, 0)
+    cr_think(id$, thinkCircles(1))
+    th_tile(id$, 0, "images/people/old_citizen1", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 15)
+    th_statboth(id$, ST_Mind, 15)
+    th_statboth(id$, ST_Presence, 15)
+    en_secondary(id$)
+    ;
+
+# AI to wander in circles
+def(thinkCircles(turn))
+    # check for self-defense
+    if(cr_selfdefense(actorid$), return(1))
+    # make a Speed roll to move
+    if(le(th_task(actorid$, ST_Speed), 0), return(0))
+    # now figure out where to move
+    # try to move forward, return 1 if it worked.
+    if(en_do_move(actorid$), return(1))
+    # otherwise, turn left or right
+    th_facing(actorid$, add(th_get_facing(actorid$),turn))
+    return(0)
+    ;
+
+# Creates a goon who hates you.
+def(build_goon(id$, name$, mapid$, x, y))
+    cr_new(id$, name$)
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/goon1", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 10)
+    th_statboth(id$, ST_Mind, 5)
+    th_statboth(id$, ST_Presence, 5)
+    en_exp(id$, 5)
+    th_gold(id$, d(1,10))
+    en_secondary(id$)
+    ;
+
+# Creates a bunny who fears you.
+def(build_bunny(id$, name$, mapid$, x, y))
+    cr_new(id$, name$)
+    cr_brain(id$, "a")
+    th_tile(id$, 0, "images/creature/bunny1", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 1)
+    th_statboth(id$, ST_Speed, 15)
+    th_statboth(id$, ST_Mind, 5)
+    th_statboth(id$, ST_Presence, 5)
+    en_exp(id$, 1)
+    en_secondary(id$)
+    # Avoiders will fight back if you corner them.  To make that painfully
+    # clear, this is a killer rabbit.
+    th_statboth(id$, ST_Attack, 20)
+    ;
+
+# Creates an alchemist who will sell you healing or magic potions
+def(build_alchemist(id$, name$, mapid$, x, y, xc, yc))
+    cr_new(id$, name$)
+    cr_brain(id$, "g")
+    cr_faction(id$, 0)
+    th_tile(id$, 0, "images/people/citizen5", 2, 2)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 10)
+    th_statboth(id$, ST_Mind, 10)
+    th_statboth(id$, ST_Presence, 10)
+    en_secondary(id$)
+    th_moveto(id$, mapid$, x, y)
+    st_trigger(id$, alchemist())
+
+    let(ctrid$,join$(id$,"_counter"))
+    bl_new(ctrid$, join$(name$,"'s counter"))
+    th_tile(ctrid$, 0, "images/dungeon/counter_ns2", 1, 1)
+    th_moveto(ctrid$, mapid$, xc, yc)
+    st_trigger(ctrid$, alchemist())
+    ;
+
+# Creates a healing potion
+def(build_healingPotion(cost, mapid$, x, y))
+    if(not(goldcost(cost)), return(0))
+    let(id$, tempid$())
+    it_new(id$, "healing potion")
+    th_tile(id$, 0, "images/item/potion_red", 1, 1)
+    st_trigger(id$, healingPotion())
+    th_moveto(id$, mapid$, x, y)
+    ;
+
+# Creates a magic potion
+def(build_magicPotion(cost, mapid$, x, y))
+    if(not(goldcost(cost)), return(0))
+    let(id$, tempid$())
+    it_new(id$, "magic potion")
+    th_tile(id$, 0, "images/item/potion_green", 1, 1)
+    st_trigger(id$, magicPotion())
+    th_moveto(id$, mapid$, x, y)
+    ;
+
+#________________________________________
+# An alchemist's shop
+def(alchemist())
+    if(ne(actorid$,"player"), return(0))
+    let(menu$, "Healing Potion (20 gold)")
+    joinv$(menu$, "|Magic Potion (50 gold)")
+    let(text$, join$("You have ",th_get_gold(actorid$)," gold\n"))
+    let(opt, menu("Alchemist's Shop", text$, menu$, 1))
+    if(eq(opt,0), return(0))
+    # create the potion under the actor
+    let(mapid$, th_get_mapid$(actorid$))
+    let(x, th_get_x(actorid$))
+    let(y, th_get_y(actorid$))
+    if( eq(opt,1), build_healingPotion(20, mapid$, x, y),
+        eq(opt,2), build_magicPotion(50, mapid$, x, y) )
+    ;
+
+#________________________________________
+# Applies a 50% healing potion to actorid$
+def(healingPotion())
+    let(hp, th_get_stat(actorid$,ST_HitPoints))
+    let(hpmax, th_get_statmax(actorid$,ST_HitPoints))
+    if(eq(hp,hpmax), do(describe("You don't need healing!"), return(0)) )
+    describe("You feel better.")
+    th_stat(actorid$,ST_HitPoints, add(hp,mul(hpmax,0.5)) )
+    th_remove(targetid$,1)
+    ;
+
+# Applies a 50% magic potion to actorid$
+def(magicPotion())
+    let(mp, th_get_stat(actorid$,ST_MagicPoints))
+    let(mpmax, th_get_statmax(actorid$,ST_MagicPoints))
+    if(eq(mp,mpmax), do(describe("You don't need more magic!"), return(0)) )
+    describe("You feel more powerful.")
+    th_stat(actorid$,ST_MagicPoints, add(mp,mul(mpmax,0.5)) )
+    th_remove(targetid$,1)
+    ;
+
+#________________________________________
+# Some utility functions
+
+# Tries to subtract 'cost' MagicPoints from actorid$, and returns 1 if
+# successful, 0 if not.  This is defined in the adventure, not as a library
+# function, because you may want a very different magic system, or want
+# additional costs (madness in a Lovecraftian horror game, for instance).
+def(mpcost(cost))
+    if(lt(th_get_stat(actorid$,ST_MagicPoints),cost),
+        do(describe("You don't have enough magic points."), return(0)) )
+    th_stat(actorid$,ST_MagicPoints,sub(th_get_stat(actorid$,ST_MagicPoints),cost))
+    return(1)
+    ;
+
+# Tries to subtract 'cost' gold from actorid$, and returns 1 if successful, 0
+# if not.
+def(goldcost(cost))
+    if(lt(th_get_gold(actorid$),cost),
+        do(describe("You don't have enough gold."), return(0)) )
+    th_gold(actorid$,sub(th_get_gold(actorid$),cost))
+    return(1)
+    ;
+
+# Outputs some text to the player only.
+def(describe(text$))
+    if(ne(actorid$,"player"), return(0))
+    output(text$)
+    ;
+
+def(describeicon(icon$, text$))
+    if(ne(actorid$,"player"), return(0))
+    outputicon(icon$, text$)
+    ;
+
+#________________________________________
+# Constructors for terrain types.
+
+def(build_ter_brickfloor())
+    global(ter_brickfloor$, tempid$())
+    ter_new(ter_brickfloor$, "")
+    ter_tile(ter_brickfloor$, LAYER_Under, "images/floor/floor_brick", 1, 1)
+    global(ter$["_"], ter_brickfloor$)
+    ;
+
+def(build_ter_brickwall())
+    global(ter_brickwall$, tempid$())
+    ter_new(ter_brickwall$, "")
+    ter_tile(ter_brickwall$, LAYER_Under, "images/wall/wall_brick", 1, 1)
+    ter_walls(ter_brickwall$, "1111")
+    ter_opa(ter_brickwall$, OPA_Full)
+    global(ter$["#"], ter_brickwall$)
+    ;
+
+def(build_ter_grass())
+    global(ter_grass$, tempid$())
+    ter_new(ter_grass$, "")
+    ter_tile(ter_grass$, LAYER_Under, "images/ground/grass", 1, 1)
+    global(ter$["."], ter_grass$)
+    ;
+
+def(build_ter_forest())
+    global(ter_forest$, tempid$())
+    ter_new(ter_forest$, "")
+    ter_tile(ter_forest$, LAYER_Under, "images/ground/trees", 1, 1)
+    ter_opa(ter_forest$, OPA_Partial)
+    global(ter$["f"], ter_forest$)
+    ;
+
+def(build_ter_deep_forest())
+    global(ter_deep_forest$, tempid$())
+    ter_new(ter_deep_forest$, "")
+    ter_tile(ter_deep_forest$, LAYER_Under, "images/ground/forest", 1, 1)
+    ter_walls(ter_deep_forest$, "1111")
+    ter_opa(ter_deep_forest$, OPA_Full)
+    global(ter$["F"], ter_deep_forest$)
+    ;
+
+def(setGlobals())
+    build_ter_brickfloor()
+    build_ter_brickwall()
+    build_ter_grass()
+    build_ter_forest()
+    build_ter_deep_forest()
+    ;
+

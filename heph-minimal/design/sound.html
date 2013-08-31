@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/strict.dtd" >
+<html lang="en" xmlns="http://www.w3.org/TR/xhtml1">
+<head>
+<title>Mark Hughes: Hephaestus: Sound</title>
+</head>
+<body bgcolor="#ccffcc" text="#000000" link="#0000ff" vlink="#990099" alink="#ff0000">
+
+<table width="100%">
+<tr><td><a href="http://kuoi.asui.uidaho.edu/~kamikaze/Hephaestus/"><img src="../images/icon/hephaestus.gif" width="40" height="40" border="1" /></a></td>
+<td><h1 align="center">Hephaestus: Sound</h1>
+<h4 align="center">Copyright &copy; 2001 by Mark Hughes &lt;<a href="mailto:kamikaze@kuoi.asui.uidaho.edu">kamikaze@kuoi.asui.uidaho.edu</a>&gt;</h4>
+</td></tr>
+</table>
+
+<dl>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../index.html">Hephaestus</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../gameplay.html">Gameplay</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../adventures.html">Adventures</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="../faq.html">FAQ</a></dt>
+<dt><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+    <a href="index.html">Designing Adventures</a></dt>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="minimal.html">Minimal Language Specification</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="scripting.html">Scripting</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="art.html">Art</a></dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        Sound</dd>
+    <dd><img src="../images/icon/hammer.gif" width="16" height="10" alt="*" />
+        <a href="pocket.html">Tutorial: DESTROY ALL POCKET MONSTERS!</a></dd>
+</dl>
+<br clear="right" />
+
+<p>A standard library of sounds is provided with Hephaestus in
+'sounds/'.  You are not restricted to these sounds, however.  When you create
+your adventure, create a directory with your game's name, store your sounds
+there, refer to that in your '<code><a href="scripting.html#playsound">playsound()</a></code>'
+calls, and make sure you include that directory in your adventure's zip
+file.</p>
+
+<p>The sound library for Hephaestus is currently fairly small, but it will be
+increasing greatly soon.</p>
+
+<p>Sound files may be in AU, WAV, AIFF, MID, or RMF formats.</p>
+
+<h3>Know When To Use Sound, And When Not To</h3>
+
+<p>Please use background music very sparingly, if at all.  Background music in
+games is almost always an irritation&nbsp;- nobody wants to hear the SAME DAMNED
+TINKLY MIDI FILE over and over for 50 hours.  If you really like writing
+background music, I recommend shipping the .mid or .mp3 files with your
+adventure, and letting the gamer decide if they want to play it in their own
+sound player or not.  It's not the Bad Old Days anymore, when you had to assume
+that most gamers had MS-DOS, and were thus unable to multitask, and distributing
+music required pressing it into a piece of car-seat material (you may be too
+young to remember this, but it's true).  Let people play what they want on their
+own speakers, okay?</p>
+
+<p>Sound effects can be either very useful or very annoying.  If they're used to
+indicate unusual conditions or events, or to set the mood of an area, they're
+wonderful and can help keep the player hooked.  If you make a noise every time
+anything happens (or worse, when nothing at all is happening), that's
+irritating, and the player will eventually get pissed off and delete your
+adventure.</p>
+
+<h3>Speech</h3>
+
+<p>Recorded speech is a grey area, but I generally recommend against it.  Even
+young children can learn to read fairly early, and the more they read for fun,
+the better they get at it; not that Hephaestus is generally a child's game, but
+if children can do it, adults should also be able to read, right?</p>
+
+<p>Voice acting is a skill that most people believe they have, but do not; it is
+<b>very</b> hard to get a precise inflection to carry some tone, and most people
+stammer and stutter and hesitate and curse constantly; you ignore it when
+listening to them live, but recorded it sounds moronic.  If you have bad voice
+actors (your friends and family, usually), your adventure will be painful to
+listen to, and the player will probably delete it.  If you have many good voice
+actors (all your friends are actors and DJs), it might be worthwhile.</p>
+
+<p>Having some characters voice-acted and some text-only can also break the
+player's suspension of disbelief; if you do mix this way, make sure <b>only</b>
+your major characters are voice-acted, or the player will waste time and get
+frustrated trying to activate the Barwench Quest (not that the barwench can't be
+an interesting character, or the focus of a quest...).</p>
+
+<hr />EOF
+</body>
+</html>

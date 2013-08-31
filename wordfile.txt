@@ -1,0 +1,112 @@
+/L1"Minimal" Line Comment = # Block Comment On = # Block Comment Off = # Escape Char = \ String Chars = " File Extensions = MIN
+/Delimiters = ~!@%^&*()-+=|\/{}[]:;"'<> ,	.?
+/Function String 1 = "%def(^([a-zA-Z_][a-zA-Z_0-9^$]++([a-zA-Z_0-9, ^t^$]++)^))$"
+/C1"KeyWords"
+abs add addv and asc assert atn
+band bnot bor bsh bshr bxor bin$ boolean bye
+chr$ clear cos
+data date$ decr def deg del div divv do
+end e env$ eof eq exp
+for foreach frac
+ge global gt
+hex$ hypot
+if if$ incr input$ input instr int
+join$ joinv$
+le left$ len let library list log lt
+mid$ mod modv mul mulv
+ne neg new not
+oct$ or
+pi pow p pn print printn
+randomize read read$ repeat restore return right$ rnd
+setglobal setvar sgn sin size sqrt str$ string$ sub subv
+tan time$ timer tron type
+val var$ var
+word$ wordcount
+xor
+/C3"Constants"
+GAMETURN
+VIEW_DIST VIEW_TILES
+TILE_SIZE TYPE_Map TYPE_Block TYPE_Item TYPE_Creature TYPE_Player
+VIEW_SIZE
+South STAT_ABBV$ STAT_NAME$ ST_Body ST_Speed ST_Mind ST_Presence ST_HitPoints ST_MagicPoints ST_Attack ST_Evade ST_Defense ST_Range ST_MagicAbility ST_MagicEvade ST_MagicDefense
+West
+East
+North NDIRS NSTATS NEQUIP
+DIR_ABBV$ DIR_NAME$ DIR_DX DIR_DY
+LAYER_Under LAYER_Over
+OPA_None OPA_Partial OPA_Full
+EQUIPNAME$ EQ_Weapon EQ_Shield EQ_Armor EQ_Hat EQ_Accessory
+/C4"Functions"
+alert
+bl_new
+cr_brain cr_defeat cr_faction cr_get_brain cr_get_faction cr_selfdefense cr_think cr_new
+d
+en_attack en_checkalive en_do_move en_do_attack en_do_magic en_do_trigger en_exp en_get_exp en_get_target en_get_target$ en_has_magic en_magattack  en_magic  en_secondary en_turn
+gameover gr_get_size gr_get_terrain$ gr_get_thing$ gr_terrain
+inputdlg$ it_dropfunc it_equip it_equipfunc it_new it_removefunc it_takefunc
+map_bounds map_fill map_get_xsize map_get_ysize map_new menu
+output outputicon output_color
+pause pl_drop pl_equip pl_get_equip$ pl_get_item$ pl_get_item_count pl_get_level pl_remove pl_take playsound
+redraw resume
+stats_lock st_exists st_get_name$ st_get_prop st_get_prop$ st_name st_prop st_trigger
+tempid$ ter_frame ter_get_tile$ ter_get_wall$ ter_new ter_opa ter_tile ter_walls th_blocking th_frame th_facing th_get_facing th_get_gold th_get_mapid$ th_get_pose th_get_stat th_get_statmax th_get_sy th_get_sx th_get_x th_get_y th_gold th_moveto th_opa th_pose th_remove th_stat th_statmax th_statboth th_task th_tile
+wait window_color window_image
+/C5"Graphic functions"
+gcls gcolor gcurx gcury gfilloval gfillrect gfont gimage gline gmove goval gplot grect gtext gtext_height gtext_width
+
+/L2"Minimal2" Line Comment = # Block Comment On = # Block Comment Off = # Escape Char = \ String Chars = " File Extensions = MIN2
+/Delimiters = ~!@%^&*()-+=|\/{}[]:;"'<> ,	.?
+/Function String 1 = "%~^([a-zA-Z_][a-zA-Z_0-9^$]++(*)^)"
+/C1"KeyWords"
+abs add addv and asc assert atn
+band bnot bor bsh bshr bxor bin$ boolean bye
+chr$ clear cos
+data date$ decr def deg del div divv do
+end e env$ eof eq exp
+for foreach frac
+ge global gt
+hex$ hypot
+if if$ incr input$ input instr int
+join$ joinv$
+le left$ len let library list log lt
+mid$ mod modv mul mulv
+ne neg new not
+oct$ or
+pi pow p pn print printn
+randomize read read$ repeat restore return right$ rnd
+setglobal setvar sgn sin size sqrt str$ string$ sub subv
+tan time$ timer tron type
+val var$ var
+word$ wordcount
+xor
+/C3"Constants"
+GAMETURN
+VIEW_DIST VIEW_TILES
+TILE_SIZE TYPE_Map TYPE_Block TYPE_Item TYPE_Creature TYPE_Player
+VIEW_SIZE
+South STAT_ABBV$ STAT_NAME$ ST_Body ST_Speed ST_Mind ST_Presence ST_HitPoints ST_MagicPoints ST_Attack ST_Evade ST_Defense ST_Range ST_MagicAbility ST_MagicEvade ST_MagicDefense
+West
+East
+North NDIRS NSTATS NEQUIP
+DIR_ABBV$ DIR_NAME$ DIR_DX DIR_DY
+LAYER_Under LAYER_Over
+OPA_None OPA_Partial OPA_Full
+EQUIPNAME$ EQ_Weapon EQ_Shield EQ_Armor EQ_Hat EQ_Accessory
+/C4"Functions"
+alert
+bl_new
+cr_brain cr_defeat cr_faction cr_get_brain cr_get_faction cr_selfdefense cr_think cr_new
+d
+en_attack en_checkalive en_do_move en_do_attack en_do_magic en_do_trigger en_exp en_get_exp en_get_target en_get_target$ en_has_magic en_magattack  en_magic  en_secondary en_turn
+gameover gr_get_size gr_get_terrain$ gr_get_thing$ gr_terrain
+inputdlg$ it_dropfunc it_equip it_equipfunc it_new it_removefunc it_takefunc
+map_bounds map_fill map_get_xsize map_get_ysize map_new menu
+output outputicon output_color
+pause pl_drop pl_equip pl_get_equip$ pl_get_item$ pl_get_item_count pl_get_level pl_remove pl_take playsound
+redraw resume
+stats_lock st_exists st_get_name$ st_get_prop st_get_prop$ st_name st_prop st_trigger
+tempid$ ter_frame ter_get_tile$ ter_get_walls$ ter_new ter_opa ter_tile ter_walls th_blocking th_frame th_facing th_get_facing th_get_gold th_get_mapid$ th_get_pose th_get_stat th_get_statmax th_get_sy th_get_sx th_get_x th_get_y th_gold th_moveto th_opa th_pose th_remove th_stat th_statmax th_statboth th_task th_tile
+wait window_color window_image
+/C5"Graphic functions"
+gcls gcolor gcurx gcury gfilloval gfillrect gfont gimage gline gmove goval gplot grect gtext gtext_height gtext_width
+

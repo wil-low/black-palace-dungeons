@@ -1,0 +1,119 @@
+def(newgame())
+    set_globals()
+    build_world()
+    build_player()
+    ;
+
+def(build_player() )
+   st_name("player", "Mark")
+    # Set the stats
+    stats_lock(1)
+    th_statboth("player", ST_Body, 15)
+    th_statboth("player", ST_Speed, 15)
+    th_statboth("player", ST_Mind, 20)
+    th_statboth("player", ST_Presence, 15)
+    en_secondary("player")
+    th_gold("player", 120)
+    stats_lock(0)
+    th_tile("player", 0, "Pocket/mark", 2, 2)
+    #FIXME: place the player - should be in the burbclave
+    th_moveto("player", "world_M", 20, 43, 1)
+    ;
+
+def(build_world())
+    map_new("world_M", "World", WORLDSIZE, WORLDSIZE)
+    map_fill("world_M", 0, 0, Terrain$[""], join$(
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~~~~..~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~~~~~.9~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~..~~...~~~~~~~~~~~~~~~~~~~~~~...~~~~~~~~~~~~~~~\n",
+        "~~..ff.^...~~~~~~~~~~~~~~~~~~~~~~....~~~~~~~~~~~~~\n",
+        "~~~ffff.ff.~~~~~.~~~.~~~~~~~~~~~.f^.~~~~~~~~~~~~~~\n",
+        "~~~~~.~~~ff~~~~~fffff~~~~~~~~~~~~fff...~~~~~~~~~~~\n",
+        "~~~~~~...f~..ff~.ff..~~~~~~~~~~~.^..f.8..~~~~~~~~~\n",
+        "~~~~~~..f.....fff.f..~~~~~~~~~~~........~~~~~~~~~~\n",
+        "~~~~~~..f...f~..fff.~~~~~~~~~~~~....f.~.~~~~~~~~~~\n",
+        "~~~~~~~......~~........~~~~~~~~~.^^.f.~~~~~~~~~~~~\n",
+        "~~~~~~~.~~~.~~~..f.....~.~~~~~...^^.~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~..^ff..^..~~~~~~~....~~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~.^^ffff...f~~.~~~...~~..~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~^^f..f...^~~..~~~......~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~.^^^^^^^7.~...~..~......~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~.....f.f....f.......^^.~~~~~~~~~~~~\n",
+        "~~~~~~~~..~~~~~f....f.f......^...f..~.~~~~~~~~~~~~\n",
+        "~~~~~~~~...~~~.f....f^f.f........ff.~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~.~~~~~~....f...ff...f.....f~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~..~~~~~~...f.f.f.^^^.f.^^^.~~~~~~~~~~~~~~\n",
+        "~~~~~~~~...~~~~~....ff..ff.f.........~~.~~~~~~~~~~\n",
+        "~~~~~~~~.^..~~....f.f...f.f...^^....~~.^~~~~~~~~~~\n",
+        "~~~~~~~~~...........ffff.f.f..^^^.....~6~~~~~~~~~~\n",
+        "~~~~~~~~~f.^^^^^^.....ffffffff.^^.......~~~~~~~~~~\n",
+        "~~~~~~~~..f..^^.^^^^fff.ff..f...^^^^..~.~~~~~~~~~~\n",
+        "~~~~~~~~..f.......^^............^^^^^~~~~~~~~~~~~~\n",
+        "~~~~~~~...f~~~.fff..............^^^^..ff~~~~~~~~~~\n",
+        "~~~~~~~...~~~~.f................^^.^...f~~~~~~~~~~\n",
+        "~~~~~~~.5...~~..........^^^.....^^^..ff...~~~~~~~~\n",
+        "~~~~~~.......~......f..f..f.....^^......fff~~~~~~~\n",
+        "~~~~~~~.~..~~..........f..ffff.^^^......ff~~~~~~~~\n",
+        "~~~~~~~~~~~~..fff......f..ff.ff.....ffff.....~~~~~\n",
+        "~~~~....~~~~~..ffff......ff..f.....ff..^^^^..~.~~~\n",
+        "~~~~..3.~~~~~....ff^.....ff......fffff..^......~~~\n",
+        "~~~.~..~~~~~.....f...1111.........f.ff...ffff..~~~\n",
+        "~~.....~~~~~.....f..111111......fff.f....ff.ff~~~~\n",
+        "~~~....~~~~~~....f.~11~111........fff..^^.......~~\n",
+        "~~.fff..~~~f.....~~~~~~~1=......ffff....^^^^^ff.~~\n",
+        "~~~f.....~f.....~~~~~~~~.=.......f..ff...^^^4.f.~~\n",
+        "~~~f......fff2..~~~~~~.^^=........f^.....^f.....~~\n",
+        "~~~.~......fff..~~~~~~.^.=~.f......~.....^~.~..f~~\n",
+        "~~..~~...fff.f^~~~~~~~~~~=~f~~~~~..~~.....~~~~~~~~\n",
+        "~~.~~~.~^^f.f....~~~0~~~==~~~~~~~~~~..~~...~~~~~~~\n",
+        "~~~~~~~~~...f....~~~=====~~~~~~~~~~~~~~~....~~~~~~\n",
+        "~~~~~~~.....fff~~~...~f.~~~~~~~~~~~~~~~~..~.~~~~~~\n",
+        "~~~~~~~.~~~.ff~~~~..~~~~~~~~~~~~~~~~~~~~~~~f~~~~~~\n",
+        "~~~~~~~..~~~ff~~~~~f~~~~~~~~~~~~~~~~~~~~~~~f~~~~~~\n",
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+        "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n",
+    ))
+    ;
+
+def(set_globals())
+    global(WORLDSIZE, 50)
+    # Terrains required by World
+    # Grass
+    build_ter("Terrain$", ".", "", "images/ground/grass", 1, "0000", OPA_None)
+    # Road
+    build_ter("Terrain$", "=", "", "images/floor/floor_cobble", 1, "0000", OPA_None)
+    # Forest
+    build_ter("Terrain$", "f", "forest", "images/ground/forest", 1, "0000", OPA_Partial)
+    #FIXME: forest should start a fight
+    # Mountain
+    build_ter("Terrain$", "^", "mountain", "images/ground/mountain", 1, "1111", OPA_Full)
+    # Water
+    build_ter("Terrain$", "~", "water", "images/ground/water", 2, "1111", OPA_None)
+    # Features
+    # Just place grass with a stone cairn on the ground for the features -
+    # I'll put other stuff there later.
+    build_ter("Terrain$", "0", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "1", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "2", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "3", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "4", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "5", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "6", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "7", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "8", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    build_ter("Terrain$", "9", "", "images/ground/grass_rocks4", 1, "0000", OPA_None)
+    ;
+
+# convenience function to set all the terrain stuff at once
+# Note that the variable name is passed in - currently, all terrain types are
+# stored in the same hash, but you could have a different hash for each map.
+def(build_ter(var$, char$, name$, basefile$, nframes, walls$, opa))
+    let(ter$, tempid$())
+    setglobal(var$, char$, ter$)
+    ter_new(ter$, name$)
+    ter_tile(ter$, LAYER_Under, basefile$, 1, nframes)
+    ter_walls(ter$, walls$)
+    ter_opa(ter$, opa)
+    ;
+

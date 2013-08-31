@@ -1,0 +1,1986 @@
+# Hades.min
+# Hades is an adaptation of Rogue for Hephaestus.
+#
+# Copyright 2001 © by Mark Hughes <kamikaze@kuoi.asui.uidaho.edu>
+# Permission is granted to use and modify this code freely,
+# provided that you rename your version.
+#
+# Author: Mark Hughes
+# Email: kamikaze@kuoi.asui.uidaho.edu
+# Web: http://kuoi.asui.uidaho.edu/~kamikaze/
+# Created: 2001Nov23
+# Last Modified: 2002Mar03
+
+def(newgame())
+    output("Hades")
+    output("Copyright 2001 © by Mark Hughes")
+    output("    <kamikaze@kuoi.asui.uidaho.edu>")
+    window_color("white", "black")
+    output_color("white", "black")
+    set_globals()
+    intro()
+    global(actorid$,"player")
+    build_player()
+    resume()
+    stairs(1)
+    ;
+
+def(intro())
+    pause()
+    map_new("styx", "River Styx", 11, 16)
+    # point the "camera" at the center of the map
+    th_tile("player", 0, "", 1, 1)
+    th_moveto("player", "styx",5,5)
+    # create a dummy that looks like the player
+    let(dummy$, tempid$())
+    bl_new(dummy$, "")
+    th_tile(dummy$, 0, "images/player/hero", 2, 2)
+    th_moveto(dummy$, "styx",5,1)
+    redraw()
+    # build the river styx
+    for(y,0,1,1, for(x,0,10,1, gr_terrain("styx",x,y,ter_grass$) ))
+    for(i,1,8,1, let(x,sub(rnd(11),1)), let(y,sub(rnd(2),1)),
+        gr_terrain("styx",x,y, ter_road$) )
+    for(i,1,8,1, let(x,sub(rnd(11),1)), let(y,sub(rnd(2),1)),
+        gr_terrain("styx",x,y, ter_flower$) )
+    for(y,2,9,1, for(x,0,10,1, gr_terrain("styx",x,y, ter_water$[mod(y,2)]) ))
+    for(y,10,15,1, for(x,0,10,1, gr_terrain("styx",x,y, ter_corridor$) ))
+    redraw()
+    # animation: Charon approaching the shore, where the player waits
+    bl_new("charon", "Charon")
+    th_tile("charon", 0, "images/creature/charon", 1, 1)
+    for(x,0,5,1, th_moveto("charon", "styx",x,8), wait(0.25), redraw() )
+    for(y,7,2,-1, th_moveto("charon", "styx",5,y), wait(0.25), redraw() )
+    # animation: Charon sailing south with the player
+    wait(0.5)
+    th_moveto(dummy$, "styx",5,2)
+    redraw()
+    wait(0.5)
+    for(y,2,9,1, th_moveto("charon", "styx",5,y), th_moveto(dummy$, "styx",5,y), redraw(), wait(0.25) )
+    wait(0.5)
+    th_moveto(dummy$, "styx",5,10)
+    redraw()
+    # destroy the dummy and restore the player tile
+    th_remove(dummy$, 1)
+    th_tile("player", 0, "images/player/hero", 2, 2)
+    th_moveto("player", "styx",5,10)
+    ;
+
+#________________________________________
+# Sets the player's stats
+def(build_player())
+    # Get a name
+    let(name$,"")
+    while(eq(name$,""),
+        let(name$, inputdlg$("Name", "Your name?", env$("user.name"))) )
+    st_name("player", name$)
+    stats_lock(1)
+    for(i, ST_Body, ST_Presence, 1, th_statboth("player", i, add(10,rnd(4))) )
+    en_secondary("player")
+    stats_lock(0)
+    ;
+
+def(nextTurn())
+#    p("Turn ",GAMETURN)
+    turnEffects()
+    turnRecovery()
+    turnWander()
+    ;
+
+def(turnEffects())
+    for(eff,1,EFFECT_TOTAL,1,
+        if(effect[eff], handleEffect(eff)) )
+    ;
+
+def(handleEffect(eff))
+#    p(EFFECT_NAME$[eff],": ",effect[eff])
+    # handle current effect
+    if( eq(eff,EFF_Haste), 0,
+        assert(0, "Unknown effect type",eff) )
+    # decrement turns remaining
+    global(effect[eff],sub(effect[eff],1))
+    if(effect[eff], return(0))
+    # handle end of effect
+    if( eq(eff,EFF_Haste), do(
+            th_stat(actorid$,ST_Speed,sub(th_get_stat(actorid$,ST_Speed),5)),
+            th_statmax(actorid$,ST_Speed,sub(th_get_statmax(actorid$,ST_Speed),5)),
+            th_stat(actorid$,ST_Evade,sub(th_get_stat(actorid$,ST_Evade),5)),
+            th_statmax(actorid$,ST_Evade,sub(th_get_statmax(actorid$,ST_Evade),5)),
+            output("You slow down.") ),
+        assert(0, "Unknown effect type",eff) )
+    en_checkalive(actorid$,"")
+    ;
+
+def(turnRecovery())
+    let(recoveryTurns, sub(50,pl_get_level("player")))
+    if(lt(recoveryTurns,5), let(recoveryTurns,5))
+    if(mod(GAMETURN,recoveryTurns), return(0))
+    for(i,0,sub(NSTATS,1),1,
+        let(st, th_get_stat("player",i)),
+        let(stmax, th_get_statmax("player",i)),
+        if(lt(st,stmax), th_stat("player",i,add(st,1)) ) )
+    ;
+
+def(turnWander())
+    if(ne(rnd(36),1), return(0))
+    let(id$, tempid$())
+    let(x,0)
+    let(y,0)
+    let(xpl, th_get_x("player"))
+    let(ypl, th_get_y("player"))
+    let(mindist, div(LEVEL_WIDTH,6))
+    # put the monster in a corridor!
+    while(or(ne(get_tile(x, y),TILE_Corridor), le(hypot(xpl,ypl,x,y),mindist)),
+        let(x, rnd(LEVEL_WIDTH)), let(y, rnd(LEVEL_HEIGHT)) )
+    let(type, new_monster(id$, x, y, 1))
+#    p("Started a wandering monster ",chr$(add(type,asc("@")))," at ",x,",",y)
+    ;
+
+#________________________________________
+
+def(new_level())
+#    p("new_level ",level)
+    global(mapid$, join$("level_",level,"_M"))
+    global(max_level,level)
+    # note that LEVEL_WIDTH counts 1..LEVEL_WIDTH,
+    # but the map also has a border 0 and LEVEL_WIDTH+1.
+    map_new(mapid$, join$("Level ",level), add(LEVEL_WIDTH,2), add(LEVEL_HEIGHT,2))
+    st_trigger(mapid$, nextTurn())
+    for(i,0,MAX_ROOMS,1, global(connected[i],0), global(goneroom[i],0))
+    # pick 1d4 rooms which aren't there...
+    for(i,1,rnd(4),1, global(goneroom[sub(rnd(MAX_ROOMS),1)],1) )
+    # fill map with walls
+    for(y,0,add(LEVEL_HEIGHT,1),1, for(x,0,add(LEVEL_WIDTH,1),1,
+            gr_terrain(mapid$,x,y, ter_wall$)) )
+    for(i,0,mul(LEVEL_WIDTH,LEVEL_HEIGHT),1, global(levelmap[i], TILE_Wall))
+    # build rooms
+    for(room,0,sub(MAX_ROOMS,1),1, do_room(room) )
+#    print_map()
+    do_passages()
+#    for(room,0,sub(MAX_ROOMS,1),1, p("room ",room," gone=",goneroom[room],", conn=",connected[room]) )
+    # have to call put_doors() twice, to get double doors in all orientations
+    put_doors()
+    put_doors()
+    put_stairs_up()
+    put_stairs_down()
+    for(room,0,sub(MAX_ROOMS,1),1, do_room_contents(room) )
+    put_traps()
+    if(eq(level,KEY_LEVEL), put_random(TILE_Key))
+    for(y,0,add(LEVEL_HEIGHT,1),1, for(x,0,add(LEVEL_WIDTH,1),1,
+            do_clean(x, y) ))
+#    print_map()
+    ;
+
+def(do_clean(x, y))
+    let(nwalls, 0)
+    for(dy,sub(y,1),add(y,1),1, for(dx,sub(x,1),add(x,1),1,
+        if( lt(dx,0), incr(nwalls),
+            ge(dx,LEVEL_WIDTH), incr(nwalls),
+            lt(dy,0), incr(nwalls),
+            ge(dy,LEVEL_WIDTH), incr(nwalls),
+            eq(get_tile(dx,dy),TILE_Wall), incr(nwalls),
+        )
+    ))
+    if(eq(nwalls,9), gr_terrain(mapid$, x, y, ""))
+    ;
+
+# Prints the entire map contents for debugging
+def(print_map())
+    for(y,1,LEVEL_HEIGHT,1,
+        for(x,1,LEVEL_WIDTH,1,
+            pn(TILE_CHAR$[get_tile(x,y)]) ), p() )
+    ;
+
+def(do_room(room))
+    let(xsize, int(div(LEVEL_WIDTH,3)) )
+    let(ysize, int(div(LEVEL_HEIGHT,3)) )
+    # random factor of a room - top and end are off by 1d4
+    let(xrange, sub(xsize,8) )
+    let(yrange, sub(ysize,8) )
+#    p("size=",xsize,"x",ysize,", range=",xrange,"x",yrange)
+    let(x0, mul(mod(room,3),xsize) )
+    let(y0, mul(int(div(room,3)),ysize) )
+    addv(x0, rnd(4))
+    addv(y0, rnd(4))
+    addv(x0, 1)
+    addv(y0, 1)
+    let(x1, add(x0,rnd(xrange),2) )
+    let(y1, add(y0,rnd(yrange),2) )
+#    p("room ",room,"=",x0,",",y0,"-",x1,",",y1,", gone=",goneroom[room])
+    let(xc, div(add(x0,x1),2) )
+    let(yc, div(add(y0,y1),2) )
+    global(xlevelroom[room], xc)
+    global(ylevelroom[room], yc)
+    # dig out the room
+    if(goneroom[room],
+        do(put_tile(xc,yc,TILE_Corridor),
+            put_tile(add(xc,1),yc,TILE_Corridor),
+            put_tile(xc,add(yc,1),TILE_Corridor),
+            put_tile(sub(xc,1),yc,TILE_Corridor),
+            put_tile(xc,sub(yc,1),TILE_Corridor),
+            return(0) ) )
+    for(y,y0,y1,1, for(x,x0,x1,1, put_tile(x,y,TILE_Floor)))
+    ;
+
+def(do_room_contents(room))
+    if(goneroom[room], return(0))
+    let(gold, eq(rnd(2),1))
+    if(gold, put_room_random(room, TILE_Gold))
+    do_monster(room, gold)
+    if(ge(add(rnd(100),level),65), put_room_thing(room))
+    ;
+
+def(do_passages())
+    # 0 1 2
+    # 3 4 5
+    # 6 7 8
+    # connect up every room at least once
+    let(room, sub(rnd(MAX_ROOMS),1))
+    global(connected[room], 1)
+    let(unconnected, sub(MAX_ROOMS,1))
+    while(unconnected, let(unconnected,0),
+        for(i,0,sub(MAX_ROOMS,1),1, if(not(connected[i]),incr(unconnected))),
+        if(unconnected, let(room,next_passage(room))),
+        )
+    # and 1-6 random passages, which may already exist
+    for(i,1,rnd(6),1, random_passage())
+    # and force any rooms that aren't connected yet
+    for(room,1,sub(MAX_ROOMS,1),1, if(not(connected[room]),force_passage(room)))
+    ;
+
+# draws a passage between room and a randomly-chosen unconnected neighbor.
+# Returns the neighbor room.
+def(next_passage(room))
+    let(unconnected,0)
+#    p("next_passage(",room,"): ",PASSAGE$[room])
+    for(i,1,wordcount(PASSAGE$[room]),1,
+        let(nextroom, val(word$(PASSAGE$[room],i))),
+        if(not(connected[nextroom]), incr(unconnected)) )
+    # No unconnected rooms nearby?  Start over at a random connected room.
+#    p("    unconnected=",unconnected)
+    if(not(unconnected),
+        while(1, let(randroom,sub(rnd(MAX_ROOMS),1)),
+                if(connected[randroom], return(next_passage(randroom))) ) )
+    # Pick one of those unconnected rooms
+    while(1, let(j, rnd(wordcount(PASSAGE$[room]))),
+        let(nextroom, val(word$(PASSAGE$[room],j))),
+        if(not(connected[nextroom]),
+            do(draw_passage(room, nextroom), return(nextroom)) ) )
+    ;
+
+def(random_passage())
+    let(room,sub(rnd(MAX_ROOMS),1))
+    let(j,rnd(wordcount(PASSAGE$[room])))
+    let(nextroom,val(word$(PASSAGE$[room],j)))
+#    p("random ",room,"-",nextroom)
+    draw_passage(room, nextroom)
+    ;
+
+def(force_passage(room))
+    let(j, rnd(wordcount(PASSAGE$[room])))
+    let(nextroom, val(word$(PASSAGE$[room],j)))
+#    p("force ",room,"-",nextroom," PASSAGE$=",PASSAGE$[room],", j=",j)
+    draw_passage(room, nextroom)
+    ;
+
+def(draw_passage(from, to))
+    if(connected[from], global(connected[to], 1))
+    if(connected[to], global(connected[from], 1))
+    let(x,xlevelroom[from])
+    let(y,ylevelroom[from])
+    let(x1,xlevelroom[to])
+    let(y1,ylevelroom[to])
+    let(dx, sub(x1,x) )
+    let(dy, sub(y1,y) )
+    if( gt(abs(dx),abs(dy)), let(n,abs(dx)), let(n,abs(dy)) )
+    mulv(n, 2)
+    divv(dx, n)
+    divv(dy, n)
+#    p("passage ",from,"(",x,",",y,")-",to,"(",x1,",",y1,"), delta=",dx,",",dy)
+    while( or(gt(abs(sub(x,x1)),0.5), gt(abs(sub(y,y1)),0.5)),
+        addv(x,dx), addv(y,dy), draw_passage_step(to,x,y,dx,dy) )
+    ;
+
+def(draw_passage_step(to,x,y,dx,dy))
+    let(tile, get_tile(x,y))
+    if( eq(tile,TILE_Wall), put_tile(x,y,TILE_Corridor))
+    let(tile, get_tile(add(x,dx),y))
+    if( eq(tile,TILE_Wall), put_tile(add(x,dx),y,TILE_Corridor))
+    let(tile, get_tile(x,add(y,dy)))
+    if( eq(tile,TILE_Wall), put_tile(x,add(y,dy),TILE_Corridor))
+    return(0)
+    ;
+
+def(do_monster(room, gold))
+#    p("do_monster ",room,",",gold)
+    # monsters are more likely to be near gold
+    if(gt(rnd(100), if(gold, 80, 25)), return(0))
+    let(id$, tempid$())
+    let(xy$, get_room_random$(room))
+    let(x, val(word$(xy$,1)))
+    let(y, val(word$(xy$,2)))
+    let(type, new_monster(id$, x, y, 0))
+    ;
+
+# Returns the type of the new monster.
+def(new_monster(id$, x, y, wander))
+#    p("new_monster ",x,",",y,", wander=",wander)
+    let(list$, if$(wander, "KJBSH AOZG CRQ Y W IXU V   ",
+        "KJBSHEAOZGLCRQNYTWFIXUMVDP "))
+    let(d, add(MON_TYPES,1))
+    while(eq(mid$(list$,d,d)," "),
+        let(d, sub(add(level,rnd(3)),rnd(3))),
+        if(lt(d,1), let(d, rnd(5))),
+        if(gt(d,MON_TYPES), let(d, add(21,rnd(5)))) )
+    let(type, sub(asc(mid$(list$,d,d)),asc("@")))
+#    p("new_monster ",type,",",wander," at ",x,",",y,"  ",list$,"[",d,"]=",mid$(list$,d,d))
+    if( eq(type,MONTYPE_Ant), build_ant(id$,x,y),
+        eq(type,MONTYPE_Bat), build_bat(id$,x,y),
+        eq(type,MONTYPE_Centaur), build_centaur(id$,x,y),
+        eq(type,MONTYPE_Dragon), build_dragon(id$,x,y),
+        eq(type,MONTYPE_Eye), build_eye(id$,x,y),
+        eq(type,MONTYPE_Fungi), build_fungi(id$,x,y),
+        eq(type,MONTYPE_Imp), build_imp(id$,x,y),
+        eq(type,MONTYPE_Hobgoblin), build_hobgoblin(id$,x,y),
+        eq(type,MONTYPE_Invisible), build_invisible(id$,x,y),
+        eq(type,MONTYPE_Cerberus), build_cerberus(id$,x,y),
+        eq(type,MONTYPE_Spider), build_spider(id$,x,y),
+        eq(type,MONTYPE_Fairy), build_fairy(id$,x,y),
+        eq(type,MONTYPE_Mimic), build_mimic(id$,x,y),
+        eq(type,MONTYPE_Dryad), build_dryad(id$,x,y),
+        eq(type,MONTYPE_Goon), build_goon(id$,x,y),
+        eq(type,MONTYPE_Titan_Greater), build_titan_greater(id$,x,y),
+        eq(type,MONTYPE_Quasit), build_quasit(id$,x,y),
+        eq(type,MONTYPE_Rust_Monster), build_rust_monster(id$,x,y),
+        eq(type,MONTYPE_Serpent), build_serpent(id$,x,y),
+        eq(type,MONTYPE_Titan_Lesser), build_titan_lesser(id$,x,y),
+        eq(type,MONTYPE_Unspeakable), build_unspeakable(id$,x,y),
+        eq(type,MONTYPE_Vrykolakas), build_vrykolakas(id$,x,y),
+        eq(type,MONTYPE_Wraith), build_wraith(id$,x,y),
+        eq(type,MONTYPE_Troglodyte), build_troglodyte(id$,x,y),
+        eq(type,MONTYPE_Lictor), build_lictor(id$,x,y),
+        eq(type,MONTYPE_Zombie), build_zombie(id$,x,y),
+        assert(0, "Unknown monster type ",type) )
+    # pump up or weaken beasties out of their depth
+    let(diff,div(sub(level,d),2))
+    th_statboth(id$,ST_Attack,add(th_get_statmax(id$,ST_Attack),diff))
+    th_statboth(id$,ST_Evade,add(th_get_statmax(id$,ST_Attack),diff))
+    return(type)
+    ;
+
+# Returns the id$ of the new thing.
+def(new_thing$())
+    let(roll, rnd(CHANCE_TOTAL))
+    if( le(roll,CHANCE_Potion), return(thing_potion$()),
+        le(roll,CHANCE_Scroll), return(thing_scroll$()),
+        le(roll,CHANCE_Weapon), return(thing_weapon$()),
+        le(roll,CHANCE_Armor), return(thing_armor$()),
+        assert(0, "Unknown thing type ",roll) )
+    ;
+
+# Creates a random level-appropriate weapon, which may be magical.
+# weapon damage = avg dmg, round up
+def(thing_weapon$())
+    let(roll, add(rnd(100),mul(level,5)))
+    if(gt(roll,WEAPON_TOTAL), let(roll,WEAPON_TOTAL))
+    if( le(roll,WEAPON_Dagger), let(id$,build_weapon$("dagger",3,2,"dagger3")),
+        le(roll,WEAPON_Darts), let(id$,build_weapon$("darts",2,4,"darts_green")),
+        le(roll,WEAPON_Mace), let(id$,build_weapon$("mace",5,0,"mace2")),
+        le(roll,WEAPON_Spear), let(id$,build_weapon$("spear",5,2,"spear")),
+        le(roll,WEAPON_Shortsword), let(id$,build_weapon$("short sword",6,0,"shortsword")),
+        le(roll,WEAPON_Bow), let(id$,build_weapon$("bow",6,5,"bow")),
+        le(roll,WEAPON_Longsword), let(id$,build_weapon$("long sword",7,0,"rapier2")),
+        le(roll,WEAPON_DemonSword), let(id$,build_weapon$("demon sword",9,0,"sword_demon")),
+        assert(0, "Unknown weapon type ",roll) )
+    return(id$)
+    ;
+
+def(build_weapon$(name$, atk, rng, img$))
+    let(id$, tempid$())
+    it_new(id$, name$)
+    th_tile(id$, 0, join$("images/weapon/",img$), 1, 1)
+    it_equip(id$, EQ_Weapon)
+    th_statboth(id$, ST_Attack, atk)
+    th_statboth(id$, ST_Range, rng)
+    # magical weapon - cursed or blessed
+    let(roll, rnd(100))
+    if( le(roll,10), do(
+            let(penalty, neg(rnd(add(div(level,5),1)))),
+            th_statboth(id$, ST_Attack, penalty),
+            st_prop(id$, "cursed", 1),
+            it_removefunc(id$, cursedEquip()),
+        ),
+        ge(add(roll,mul(level,2)), 96), do(
+            let(bonus,rnd(add(div(level,5),1))),
+            th_statboth(id$, ST_Attack, add(atk,bonus)),
+            st_name(id$, join$(st_get_name$(id$)," +",bonus))
+        )
+    )
+    return(id$)
+    ;
+
+def(cursedEquip())
+    output("You cannot remove it - it appears to be cursed.")
+    return(0)
+    ;
+
+def(thing_armor$())
+    let(roll, add(rnd(100),mul(level,5)))
+    if(gt(roll,ARMOR_TOTAL), let(roll,ARMOR_TOTAL))
+    if( le(roll,ARMOR_Leather), let(id$,build_armor$("leather armor",EQ_Armor,ST_Defense,1,"leather")),
+        le(roll,ARMOR_Helm), let(id$,build_armor$("helm",EQ_Hat,ST_Defense,1,"helm")),
+        le(roll,ARMOR_Shield), let(id$,build_armor$("shield",EQ_Shield,ST_Evade,2,"shield_wood")),
+        le(roll,ARMOR_Bronze), let(id$,build_armor$("bronze breastplate",EQ_Armor,ST_Defense,3,"plate_gold")),
+        le(roll,ARMOR_Scale), let(id$,build_armor$("iron scale armor",EQ_Armor,ST_Defense,4,"scale")),
+        le(roll,ARMOR_Banded), let(id$,build_armor$("iron banded armor",EQ_Armor,ST_Defense,5,"plate2")),
+        le(roll,ARMOR_Steel), let(id$,build_armor$("steel breastplate",EQ_Armor,ST_Defense,6,"plate3")),
+        assert(0, "Unknown armor type ",roll) )
+    return(id$)
+    ;
+
+def(build_armor$(name$, pos, stat, def, img$))
+    let(id$, tempid$())
+    it_new(id$, name$)
+    th_tile(id$, 0, join$("images/armor/",img$), 1, 1)
+    it_equip(id$, pos)
+    th_statboth(id$, stat, def)
+    # magical armor increases Evade, plus normal Defense
+    let(roll, rnd(100))
+    if( le(roll,10), do(
+            let(penalty, neg(rnd(add(div(level,5),1)))),
+            th_statboth(id$, ST_Evade, penalty),
+            th_statboth(id$, ST_Defense, 0),
+            st_prop(id$, "cursed", 1),
+            it_removefunc(id$, cursedEquip()),
+        ),
+        ge(add(roll,mul(level,2)),96), do(
+        let(bonus,rnd(add(div(level,5),1))),
+        th_statboth(id$, ST_Evade, add(th_get_stat(id$,ST_Evade),bonus)),
+        st_name(id$, join$(st_get_name$(id$)," +",bonus)) ) )
+    return(id$)
+    ;
+
+def(thing_potion$())
+    let(roll, rnd(POTION_TOTAL))
+#    p("thing_potion ",roll)
+    if( le(roll,POTION_Healing), let(id$,build_potion_healing$()),
+        le(roll,POTION_Strength), let(id$,build_potion_boost$("strength",ST_Body,ST_HitPoints,ST_Attack,"You feel as strong as Hercules!")),
+        le(roll,POTION_Intelligence), let(id$,build_potion_boost$("intelligence",ST_Mind,ST_MagicPoints,ST_MagicAbility,"You feel as clever as Hephaestus!")),
+        le(roll,POTION_Dexterity), let(id$,build_potion_boost$("dexterity",ST_Speed,ST_Evade,-1,"You feel as fast as Mercury!")),
+        le(roll,POTION_Charisma), let(id$,build_potion_boost$("charisma",ST_Presence,ST_MagicEvade,-1,"You feel as confident as Zeus!")),
+        le(roll,POTION_RaiseLevel), let(id$,build_potion_raiseLevel$()),
+        le(roll,POTION_ExtraHealing), let(id$,build_potion_extraHealing$()),
+        le(roll,POTION_Haste), let(id$,build_potion_haste$()),
+        le(roll,POTION_Magic), let(id$,build_potion_magic$()),
+        assert(0, "Unknown potion type ",roll) )
+    return(id$)
+    ;
+
+def(thing_scroll$())
+    let(id$, tempid$())
+    it_new(id$, "scroll")
+    th_tile(id$, 0, "images/item/scroll_rune", 1, 1)
+    let(roll, rnd(SCROLL_TOTAL))
+#    p("thing_scroll ",roll)
+    #FIXME: add new scrolls here
+    if( le(roll,SCROLL_Healing), do(let(name$,"healing"),let(cost,4)),
+        le(roll,SCROLL_MonsterDet), do(let(name$,"monster detection"),let(cost,2)),
+        le(roll,SCROLL_GoldDet), do(let(name$,"gold detection"),let(cost,2)),
+        le(roll,SCROLL_Scrying), do(let(name$,"scrying"),let(cost,8)),
+        le(roll,SCROLL_MagicDet), do(let(name$,"magic detection"),let(cost,4)),
+        le(roll,SCROLL_Slow), do(let(name$,"slow"),let(cost,4)),
+        le(roll,SCROLL_DrainLife), do(let(name$,"drain life"),let(cost,8)),
+        le(roll,SCROLL_FireArrow), do(let(name$,"fire arrow"),let(cost,2)),
+        le(roll,SCROLL_Cold), do(let(name$,"cold blast"),let(cost,4)),
+        le(roll,SCROLL_Fire), do(let(name$,"fireball"),let(cost,8)),
+        le(roll,SCROLL_Lightning), do(let(name$,"lightning"),let(cost,16)),
+        le(roll,SCROLL_Teleport), do(let(name$,"teleport"),let(cost,8)),
+        le(roll,SCROLL_Cancellation), do(let(name$,"cancellation"),let(cost,8)),
+        le(roll,SCROLL_RemoveCurse), do(let(name$,"remove curse"),let(cost,0)),
+        assert(0, "Unknown scroll type ",roll) )
+    if$(cost, joinv$(name$," (",cost," MP)"))
+    st_name(id$, join$("scroll of ",name$))
+    st_trigger(id$, useScroll(roll,name$,cost))
+    return(id$)
+    ;
+
+def(useScroll(roll, name$, cost))
+    # immediate spell?
+    if( le(roll,SCROLL_Cancellation), 0,
+        le(roll,SCROLL_RemoveCurse), do(removeCurse(), return(0)),
+    )
+    # spell scroll
+    if(ne(actorid$,"player"), return(0))
+    if(en_has_magic("player",name$),
+        do(output("You already know ",name$), return(0)) )
+    let(task, sub(th_task("player",ST_Mind),cost))
+    if(le(task,0),
+        do(output("You fail to learn the spell, and the scroll crumbles."),
+            th_remove(targetid$,1),
+            return(0)) )
+    #FIXME: add new spells here
+    if( le(roll,SCROLL_Healing), en_magic("player",name$,healingSpell(cost)),
+        le(roll,SCROLL_MonsterDet), en_magic("player",name$,detectSpell(cost,SCROLL_MonsterDet)),
+        le(roll,SCROLL_GoldDet), en_magic("player",name$,detectSpell(cost,SCROLL_GoldDet)),
+        le(roll,SCROLL_Scrying), en_magic("player",name$,detectSpell(cost,SCROLL_Scrying)),
+        le(roll,SCROLL_MagicDet), en_magic("player",name$,detectSpell(cost,SCROLL_MagicDet)),
+        le(roll,SCROLL_Slow), en_magic("player",name$,slowSpell(cost)),
+        le(roll,SCROLL_DrainLife), en_magic("player",name$,drainLifeSpell(cost)),
+        le(roll,SCROLL_FireArrow), en_magic("player",name$,attackSpell(cost,0.25,"an arrow of fire")),
+        le(roll,SCROLL_Cold), en_magic("player",name$,attackSpell(cost,0.5,"a blast of cold")),
+        le(roll,SCROLL_Fire), en_magic("player",name$,attackSpell(cost,0.75,"a fireball")),
+        le(roll,SCROLL_Lightning), en_magic("player",name$,attackSpell(cost,1.0,"a bolt of lightning")),
+        le(roll,SCROLL_Teleport), en_magic("player",name$,teleportSpell(cost)),
+        le(roll,SCROLL_Cancellation), en_magic("player",name$,cancelSpell(cost)),
+        assert(0, "Unknown scroll type ",roll) )
+    output("You learn the spell ",name$)
+    th_remove(targetid$,1)
+    ;
+
+def(attackSpell(cost,mult,text$))
+    # Precondition: that there is a target ahead of you.
+    global(targetid$,en_get_target$(actorid$, 0, 5))
+    if(eq(targetid$,""), do(describe(join$("No enemy to ",
+        DIR_NAME$[th_get_facing(actorid$)],".")),return(0)) )
+    if(not(mpcost(cost)), return(0))
+    let(youmsg$,join$("You shoot ",text$," at ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," shoots ",text$," at you"))
+    let(dmg, mul(th_get_stat(actorid$,ST_MagicAbility),mult))
+    en_magattack(actorid$, targetid$, dmg, youmsg$, tarmsg$)
+    ;
+
+def(cancelSpell(cost))
+    # Precondition: that there is a target ahead of you.
+    global(targetid$,en_get_target$(actorid$, 0, 5))
+    if(eq(targetid$,""), do(describe(join$("No enemy to ",
+        DIR_NAME$[th_get_facing(actorid$)],".")),return(0)) )
+    if(not(mpcost(cost)), return(0))
+    let(youmsg$,join$("You zap ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," zaps you"))
+    if(not(en_magattack(actorid$, targetid$, 0, youmsg$, tarmsg$)), return(0))
+    en_attack(targetid$, 0)
+    en_turn(targetid$, 0)
+    describe(join$(st_get_name$(targetid$)," is now mundane."))
+    ;
+
+def(drainLifeSpell(cost))
+    # Precondition: that there is a target ahead of you.
+    global(targetid$,en_get_target$(actorid$, 0, 5))
+    if(eq(targetid$,""), do(describe(join$("No enemy to ",
+        DIR_NAME$[th_get_facing(actorid$)],".")),return(0)) )
+    if(not(mpcost(cost)), return(0))
+    let(youmsg$,join$("You suck the life from ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," sucks the life from you"))
+    if(not(en_magattack(actorid$, targetid$, 0, youmsg$, tarmsg$)), return(0))
+    let(drain, sub(rnd(6),th_get_stat(targetid$,ST_MagicDefense)))
+    th_stat(targetid$,ST_Body,sub(th_get_stat(targetid$,ST_Body),drain))
+    th_stat(targetid$,ST_HitPoints,sub(th_get_stat(targetid$,ST_HitPoints),drain))
+    th_stat(actorid$,ST_Body,add(th_get_stat(actorid$,ST_Body),drain))
+    th_stat(actorid$,ST_HitPoints,add(th_get_stat(actorid$,ST_HitPoints),drain))
+    en_checkalive(targetid$,actorid$)
+    ;
+
+def(healingSpell(cost))
+    if(not(mpcost(cost)), return(0))
+    let(hp, th_get_stat(actorid$,ST_HitPoints))
+    let(hpmax, th_get_statmax(actorid$,ST_HitPoints))
+    if(eq(hp,hpmax), do(describe("You don't need healing!"), return(0)) )
+    describe("You feel better.")
+    let(raise, mul(th_get_stat(actorid$,ST_MagicAbility),0.5))
+    th_stat(actorid$,ST_HitPoints, add(hp,raise))
+    ;
+
+def(removeCurse())
+    let(ncursed, 0)
+    for(pos,EQ_Weapon,sub(NEQUIP,1),1,
+        let(itid$, pl_get_equip$(actorid$, pos)),
+        if(and(len(itid$), st_get_prop(itid$,"cursed")), do(
+            st_prop(itid$, "cursed", 0),
+            it_removefunc(itid$, 0),
+            incr(ncursed),
+        ))
+    )
+    if(ncursed, output("You feel cleansed."),
+        output("You feel a strange sense of loss.") )
+    output("The scroll crumbles to dust.")
+    th_remove(targetid$, 1)
+    ;
+
+def(slowSpell(cost))
+    # Precondition: that there is a target ahead of you.
+    global(targetid$,en_get_target$(actorid$, 0, 5))
+    if(eq(targetid$,""), do(describe(join$("No enemy to ",
+        DIR_NAME$[th_get_facing(actorid$)],".")),return(0)) )
+    if(not(mpcost(cost)), return(0))
+    let(youmsg$,join$("You zap ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," zaps you"))
+    if(not(en_magattack(actorid$, targetid$, 0, youmsg$, tarmsg$)), return(0))
+    let(drain, sub(rnd(6),th_get_stat(targetid$,ST_MagicDefense)))
+    th_stat(targetid$,ST_Speed,sub(th_get_stat(targetid$,ST_Speed),drain))
+    th_stat(targetid$,ST_Evade,sub(th_get_stat(targetid$,ST_Evade),drain))
+    en_checkalive(targetid$,actorid$)
+    describe(join$(st_get_name$(targetid$)," moves slower."))
+    ;
+
+def(teleportSpell(cost))
+    if(not(mpcost(cost)), return(0))
+    let(xy$,get_map_random$())
+    let(x,val(word$(xy$,1)))
+    let(y,val(word$(xy$,2)))
+    th_moveto(actorid$,mapid$,x,y)
+    ;
+
+# Common code of the detect spells; type is one of SCROLL_*
+def(detectSpell(cost, type))
+    if(not(mpcost(cost)), return(0))
+    if(ne(actorid$,"player"), return(0))
+    pause()
+    # find the center of the radar view
+    let(xpl,th_get_x(actorid$))
+    let(ypl,th_get_y(actorid$))
+    # find the borders
+    let(x0,sub(xpl,19))
+    let(y0,sub(ypl,19))
+    let(x1,add(xpl,19))
+    let(y1,add(ypl,19))
+    # and scan
+    let(text$,"")
+    for(y,y0,y1,1,
+        for(x,x0,x1,1,
+            joinv$(text$,
+                if$(or(lt(x,1),gt(x,LEVEL_WIDTH),lt(y,1),gt(y,LEVEL_HEIGHT)), "  ",
+                    and(eq(x,xpl),eq(y,ypl)), "@ ",
+                    eq(type,SCROLL_MonsterDet), monsterDetect$(x,y),
+                    eq(type,SCROLL_GoldDet), goldDetect$(x,y),
+                    eq(type,SCROLL_Scrying), scryingDetect$(x,y),
+                    eq(type,SCROLL_MagicDet), magicDetect$(x,y),
+                    assert(0, "Unknown detect spell type ",type),
+                    ) )
+            ),
+        joinv$(text$,"\n") )
+    if( eq(type,SCROLL_MonsterDet), let(title$,"Monster Detection"),
+        eq(type,SCROLL_GoldDet), let(title$,"Gold Detection"),
+        eq(type,SCROLL_Scrying), let(title$,"Scrying"),
+        eq(type,SCROLL_MagicDet), let(title$,"Magic Detection"),
+        assert(0, "Unknown detect spell type ",type),
+        )
+    alert(title$, text$, "OK", 1, 1)
+    resume()
+    ;
+
+def(goldDetect$(x, y))
+    let(n, gr_get_size(mapid$,x,y))
+    if(not(n), return(". "))
+    for(i,0,sub(n,1),1,
+        let(id$, gr_get_thing$(mapid$,x,y,i)),
+        if(eq(st_get_name$(id$),"Gold"), return("$ ")) )
+    return(". ")
+    ;
+
+def(magicDetect$(x, y))
+    let(n, gr_get_size(mapid$,x,y))
+    if(not(n), return(". "))
+    for(i,0,sub(n,1),1,
+        let(id$, gr_get_thing$(mapid$,x,y,i)),
+        let(name$,st_get_name$(id$)),
+        if( instr(name$,"scroll"), return("? "),
+            instr(name$,"potion"), return("! "),
+            instr(name$,"+"), return(") "),
+            ) )
+    return(". ")
+    ;
+
+def(scryingDetect$(x, y))
+    let(tile,get_tile(x,y))
+    return(join$(TILE_CHAR$[tile]," "))
+    ;
+
+def(monsterDetect$(x, y))
+    let(n, gr_get_size(mapid$,x,y))
+    if(not(n), return(". "))
+    for(i,0,sub(n,1),1,
+        let(id$, gr_get_thing$(mapid$,x,y,i)),
+        if(eq(st_exists(id$),TYPE_Creature), return("* ")) )
+    return(". ")
+    ;
+
+#________________________________________
+def(put_doors())
+    for(y,1,LEVEL_HEIGHT,1, for(x,1,LEVEL_WIDTH,1,
+        if(eq(get_tile(x,y),TILE_Corridor), try_door(x,y)) ))
+    ;
+
+def(try_door(x,y))
+    let(nc,0)
+    let(nw,0)
+    let(nf,0)
+    let(nd,0)
+    # find out what's in each direction
+    for(d,0,sub(NDIRS,1),1,
+        let(x1,add(x,DIR_DX[d])), let(y1,add(y,DIR_DY[d])),
+        let(tile,get_tile(x1,y1)),
+        if( eq(tile,TILE_Corridor), incr(nc),
+            eq(tile,TILE_Wall), incr(nw),
+            eq(tile,TILE_Door), incr(nd),
+            eq(tile,TILE_Floor), incr(nf) ) )
+    if(and(eq(nf,1),eq(nc,1),eq(nw,2),eq(nd,0)), put_tile(x, y, TILE_Door) )
+    if(and(eq(nf,1),eq(nc,2),eq(nw,1),eq(nd,0)), put_tile(x, y, TILE_Door) )
+    if(and(eq(nf,1),eq(nc,1),eq(nw,1),eq(nd,1)), put_tile(x, y, TILE_Door) )
+    ;
+
+def(put_room_thing(room))
+#    p("put_room_thing ",room)
+    let(itid$,new_thing$())
+    let(xy$, get_room_random$(room))
+    let(x, val(word$(xy$,1)))
+    let(y, val(word$(xy$,2)))
+#    p("    ",st_get_name$(itid$)," at ",x,",",y)
+    th_moveto(itid$, mapid$, x, y)
+    ;
+
+def(put_traps())
+    # lower levels might not have traps...
+    if(ge(rnd(10), level), return(0) )
+    let(ntraps, int(div(level,4)) )
+    if(not(ntraps), incr(ntraps))
+    let(ntraps, rnd(ntraps))
+    if(gt(ntraps,MAX_TRAPS), let(ntraps, MAX_TRAPS))
+    while(ntraps, decr(ntraps), put_random(TILE_Trap) )
+    ;
+
+def(put_stairs_up())
+    let(again,1)
+    let(room,MAX_ROOMS)
+    while(again,
+        let(x, rnd(LEVEL_WIDTH)), let(y, rnd(LEVEL_HEIGHT)),
+        let(floor, clear_tile(x,y)),
+        let(range, hypot(x, y, x_stairs_up[level], y_stairs_up[level]) ),
+        let(again, or( not(floor), lt(range,div(LEVEL_WIDTH,4)) )) )
+    put_tile(x, y, TILE_Stairs_Up)
+    global(x_stairs_up[level],x)
+    global(y_stairs_up[level],y)
+    ;
+
+def(put_stairs_down())
+    let(again,1)
+    let(room,MAX_ROOMS)
+    while(again,
+        let(x, rnd(LEVEL_WIDTH)), let(y, rnd(LEVEL_HEIGHT)),
+        let(floor, clear_tile(x,y)),
+        let(range, hypot(x, y, x_stairs_up[level], y_stairs_up[level]) ),
+        let(again, or( not(floor), lt(range,div(LEVEL_WIDTH,4)) )) )
+    put_tile(x, y, TILE_Stairs_Down)
+    global(x_stairs_down[level],x)
+    global(y_stairs_down[level],y)
+    ;
+
+#________________________________________
+# Room utilities
+
+def(put_random(tile))
+    let(x,0)
+    let(y,0)
+    while(not(clear_tile(x, y)),
+        let(x, rnd(LEVEL_WIDTH)), let(y, rnd(LEVEL_HEIGHT)) )
+    put_tile(x, y, tile)
+    ;
+
+def(put_room_random(room, tile))
+    assert(not(goneroom[room]), "Room ",room," is gone, you can't put anything there!")
+    let(xy$, get_room_random$(room))
+    let(x, val(word$(xy$,1)))
+    let(y, val(word$(xy$,2)))
+    put_tile(x, y, tile)
+    ;
+
+def(get_map_random$())
+    let(x,0)
+    let(y,0)
+    while(not(clear_tile(x, y)),
+        let(x, rnd(LEVEL_WIDTH)), let(y, rnd(LEVEL_HEIGHT)) )
+    return(join$(x," ",y))
+    ;
+
+def(get_room_random$(room))
+    assert(not(goneroom[room]), "Room ",room," is gone, you can't put anything there!")
+    let(xsize, int(div(LEVEL_WIDTH,3)) )
+    let(ysize, int(div(LEVEL_HEIGHT,3)) )
+    let(x0, mul(mod(room,3),xsize) )
+    let(y0, mul(int(div(room,3)),ysize) )
+    let(x,0)
+    let(y,0)
+    while(not(clear_tile(x, y)),
+        let(x, add(x0,rnd(xsize))), let(y, add(y0,rnd(ysize))) )
+    return(join$(x," ",y))
+    ;
+
+# Returns 1 if x,y is floor
+def(clear_tile(x, y))
+    return( eq(get_tile(x, y), TILE_Floor) )
+    ;
+
+def(get_tile(x, y))
+    let(x, int(x))
+    let(y, int(y))
+    return(levelmap[add(mul(y,LEVEL_WIDTH),x)])
+    ;
+
+def(put_tile(x, y, tile))
+    let(x, int(x))
+    let(y, int(y))
+    global(levelmap[add(mul(y,LEVEL_WIDTH),x)], tile)
+    if( eq(tile,TILE_Wall), gr_terrain(mapid$,x,y, ter_wall$),
+        eq(tile,TILE_Corridor), gr_terrain(mapid$,x,y, ter_corridor$),
+        eq(tile,TILE_Stairs_Up), gr_terrain(mapid$,x,y, ter_stairs_up$),
+        eq(tile,TILE_Stairs_Down), gr_terrain(mapid$,x,y, ter_stairs_down$),
+        eq(tile,TILE_Floor), gr_terrain(mapid$,x,y, ter_floor$),
+        eq(tile,TILE_Trap), build_trap(mapid$,x,y,tile),
+        eq(tile,TILE_Gold), build_gold(mapid$,x,y),
+        eq(tile,TILE_Door), build_door(mapid$,x,y),
+        eq(tile,TILE_Key), build_key(mapid$,x,y),
+        assert(0, "Unknown tile ",tile) )
+    ;
+
+#________________________________________
+# Terrain
+
+def(build_ter_grass())
+    global(ter_grass$, tempid$())
+    ter_new(ter_grass$, "")
+    ter_tile(ter_grass$, LAYER_Under, "images/ground/grass", 1, 1)
+    ;
+
+def(build_ter_road())
+    global(ter_road$, tempid$())
+    ter_new(ter_road$, "")
+    ter_tile(ter_road$, LAYER_Under, "images/ground/road", 1, 1)
+    ;
+
+def(build_ter_flower())
+    global(ter_flower$, tempid$())
+    ter_new(ter_flower$, "")
+    ter_tile(ter_flower$, LAYER_Under, "images/ground/dandelions", 1, 1)
+    ;
+
+def(build_ter_water())
+    for(y, 0, 1, 1,
+        global(ter_water$[y], tempid$()),
+        ter_new(ter_water$[y], ""),
+        ter_tile(ter_water$[y], LAYER_Under, "images/ground/water", 1, 2),
+        ter_frame(ter_water$[y], LAYER_Under, y),
+    )
+    ;
+
+def(build_ter_wall())
+    global(ter_wall$, tempid$())
+    ter_new(ter_wall$, "")
+    ter_tile(ter_wall$, LAYER_Under, "images/wall/wall_stone1", 1, 1)
+    ter_walls(ter_wall$, "1111")
+    ter_opa(ter_wall$, OPA_Full)
+    ;
+
+def(build_ter_corridor())
+    global(ter_corridor$, tempid$())
+    ter_new(ter_corridor$, "")
+    ter_tile(ter_corridor$, LAYER_Under, "images/floor/floor_dungeon", 1, 1)
+    ;
+
+def(build_ter_floor())
+    global(ter_floor$, tempid$())
+    ter_new(ter_floor$, "")
+    ter_tile(ter_floor$, LAYER_Under, "images/floor/floor_stone", 1, 1)
+    ;
+
+def(build_ter_stairs_up())
+    global(ter_stairs_up$, tempid$())
+    ter_new(ter_stairs_up$, "stairs up")
+    ter_tile(ter_stairs_up$, LAYER_Under, "images/dungeon/stairs_up", 1, 1)
+    st_trigger(ter_stairs_up$, stairs(-1))
+    ;
+
+def(build_ter_stairs_down())
+    global(ter_stairs_down$, tempid$())
+    ter_new(ter_stairs_down$, "stairs down")
+    ter_tile(ter_stairs_down$, LAYER_Under, "images/dungeon/stairs_down", 1, 1)
+    st_trigger(ter_stairs_down$, stairs(1))
+    ;
+
+# Trigger to ascend or descend stairs
+def(stairs(delta))
+    if(ne(actorid$,"player"),return(0))
+    let(newlevel, add(level,delta))
+    if(le(newlevel,0), return(exitDungeon()) )
+    global(level, newlevel)
+
+    output("You enter level ",level)
+    if(gt(level,max_level), new_level())
+    global(mapid$, join$("level_",level,"_M"))
+    if( eq(delta,-1),
+        do(let(x,x_stairs_down[level]), let(y,y_stairs_down[level])),
+        do(let(x,x_stairs_up[level]), let(y,y_stairs_up[level])),
+    )
+    th_moveto(actorid$, mapid$, x, y, 1)
+    # scan the existing level into levelmap[]
+    for(y,1,LEVEL_WIDTH,1, for(x,1,LEVEL_WIDTH,1,
+        global(levelmap[add(mul(y,LEVEL_WIDTH),x)], scan_tile(x,y)) ))
+#    print_map()
+    # return 0 so the motion won't continue normally, or you'll have two copies
+    # of the player - one on the old level, one on the new level.
+    return(0)
+    ;
+
+def(exitDungeon())
+    let(nthings,pl_get_item_count("player"))
+    let(nope$, "You cannot escape Hades - at least, not yet!")
+    if(not(nthings), do(output(nope$), return(0)) )
+    let(key,0)
+    for(i,0,sub(nthings,1),1,
+        let(itid$, pl_get_item$("player", i)),
+        if(eq(st_get_name$(itid$),"Golden Key"), let(key,1)) )
+    if(not(key), do(output(nope$), return(0)) )
+    alert("", join$("The key glows, brighter and brighter gold,\n",
+        "and you emerge into bright golden sunlight.\n",
+        "You are alive again."), "Next", 1, 1)
+    pause()
+    map_new("elysium","Elysium",11,11)
+    for(y,0,10,1, for(x,0,10,1, gr_terrain("elysium",x,y,ter_grass$) ))
+    for(i,1,20,1, let(x,sub(rnd(11),1)), let(y,sub(rnd(11),1)),
+        gr_terrain("elysium",x,y, ter_flower$) )
+    th_moveto("player", "elysium",5,7)
+    redraw()
+    resume()
+    #FIXME: total up value of items carried
+    let(score,th_get_gold("player"))
+    gameover(1, join$("Escaped from Hades\nScore:",score))
+    ;
+
+def(scan_tile(x, y))
+    let(ter$, gr_get_terrain$(mapid$, x, y))
+    if(eq(ter$,""), return(TILE_Wall))
+    if(eq(ter_get_walls$(ter$),"1111"), return(TILE_Wall))
+    let(nthings, gr_get_size(mapid$,x,y))
+    if(not(nthings), do(
+        let(basefile$, ter_get_tile$(ter$, LAYER_Under)),
+        if(eq(basefile$,"images/floor/floor_dungeon"), return(TILE_Corridor)),
+        return(TILE_Floor) ))
+    for(i,0,sub(nthings,1),1,
+        let(id$, gr_get_thing$(mapid$,x,y,i)),
+        let(name$, st_get_name$(id$)),
+        if(eq(name$,"Door"), return(TILE_Door)),
+        if(eq(name$,"Stairs Up"), return(TILE_Stairs_Up)),
+        if(eq(name$,"Stairs Down"), return(TILE_Stairs_Down)),
+        if(eq(name$,"Gold"), return(TILE_Gold)),
+        )
+    return(TILE_Thing)
+    ;
+
+#________________________________________
+# Pseudo-items
+
+# Creates the key out.
+def(build_key(mapid$, x, y))
+    gr_terrain(mapid$, x, y, ter_floor$)
+    let(id$,tempid$())
+    it_new(id$, "Golden Key")
+    th_blocking(id$, 1)
+    th_tile(id$, 0, "images/item/key_gold", 1, 1)
+    th_moveto(id$, mapid$, x, y)
+    st_trigger(id$, escape())
+    ;
+
+def(escape())
+    if(ne(actorid$,"player"), return(0))
+    pl_take(actorid$, targetid$)
+    output("You return to the land of the living...")
+    for(i,level,2,-1,
+            stairs(-1), redraw(),
+            th_moveto(actorid$,mapid$,x_stairs_up[level],y_stairs_up[level]), redraw() )
+    stairs(-1)
+    return(0)
+    ;
+
+# Creates a pile of gold.
+def(build_gold(mapid$, x, y))
+    gr_terrain(mapid$, x, y, ter_floor$)
+    let(id$,tempid$())
+    bl_new(id$, "Gold")
+    th_tile(id$, 0, "images/item/gold", 1, 1)
+    let(gold, goldcalc())
+    st_trigger(id$, gold(gold))
+    th_moveto(id$, mapid$, x, y)
+    ;
+
+# Gold trigger - removes the gold and gives it to the player (only).
+def(gold(gold))
+    if(ne(actorid$,"player"), return(0))
+    th_gold(actorid$, add(th_get_gold(actorid$),gold) )
+    th_remove(targetid$, 1)
+    outputicon("images/item/gold_0n.gif", "You find ",gold," gold!")
+    return(1)
+    ;
+
+# Creates a trap.
+def(build_trap(mapid$, x, y, tile))
+    gr_terrain(mapid$, x, y, ter_floor$)
+    let(id$,tempid$())
+    bl_new(id$, "")
+    st_trigger(id$, trap(tile))
+    th_moveto(id$, mapid$, x, y)
+    ;
+
+# Trap trigger.
+def(trap(tile))
+    let(hp,th_get_stat(actorid$,ST_HitPoints))
+    let(dmg,rnd(6))
+    th_tile(targetid$, 0, "images/dungeon/spikes_up", 1, 1)
+    th_stat(actorid$,ST_HitPoints,sub(hp,dmg))
+    if(eq(actorid$,"player"),
+        do(output("A spike trap hits you for ",dmg," HP!"), playsound("sounds/aaugh.au")) )
+    if( not(en_checkalive(actorid$,targetid$)), return(0))
+    th_moveto(actorid$,
+            th_get_mapid$(targetid$), th_get_x(targetid$), th_get_y(targetid$) )
+    return(1)
+    ;
+
+# Creates a door.
+def(build_door(mapid$,x,y))
+    let(id$, tempid$())
+    bl_new(id$, "Door")
+    th_tile(id$, 0, join$("images/door/door_oak_open"), 1, 1)
+    th_tile(id$, 1, join$("images/door/door_oak_closed"), 1, 1)
+    setDoorState(id$, 1)
+    th_moveto(id$, mapid$, x, y)
+    st_trigger(id$, openDoor())
+    ;
+
+# Utility method to set a door's state - 0=open, 1=closed
+def(setDoorState(id$,closed))
+    th_pose(id$, closed)
+    th_blocking(id$, closed)
+    if(closed, th_opa(id$,OPA_Full), th_opa(id$,OPA_None) )
+    ;
+
+# Door trigger.
+def(openDoor())
+    let(closed, not(th_get_pose(targetid$)))
+    # Noisy dungeon - if the door is within 1/3 of the map, CLANG!
+    let(x0,th_get_x(targetid$))
+    let(y0,th_get_y(targetid$))
+    let(x1,th_get_x("player"))
+    let(y1,th_get_y("player"))
+    let(dist, hypot(x0,y0,x1,y1))
+    let(sndfile$, if$(closed, "sounds/clang.au", "sounds/open_door.au"))
+    if(le(hypot(x0,y0,x1,y1),div(LEVEL_WIDTH,3)), playsound(sndfile$))
+    setDoorState(targetid$,closed)
+    return(1)
+    ;
+
+#________________________________________
+# Potions
+
+def(build_potion_boost$(name$,stat1,stat2,stat3,text$))
+    let(id$, tempid$())
+    it_new(id$, join$("potion of ",name$))
+    th_tile(id$, 0, "images/item/potion_tan", 1, 1)
+    st_trigger(id$, boostPotion(stat1,stat2,stat3,text$))
+    return(id$)
+    ;
+
+# Applies a strength potion to actorid$
+def(boostPotion(stat1,stat2,stat3,text$))
+    if(le(rnd(100),15), return(poisonPotion()))
+    describe(text$)
+    if(ge(stat1,0), th_statboth(actorid$,stat1, add(th_get_statmax(actorid$,stat1),1)) )
+    if(ge(stat2,0), th_statboth(actorid$,stat2, add(th_get_statmax(actorid$,stat2),1)) )
+    if(ge(stat3,0), th_statboth(actorid$,stat3, add(th_get_statmax(actorid$,stat3),1)) )
+    th_remove(targetid$,1)
+    ;
+
+def(build_potion_extraHealing$())
+    let(id$, tempid$())
+    it_new(id$, "potion of extra-healing")
+    th_tile(id$, 0, "images/item/potion_orange", 1, 1)
+    st_trigger(id$, healingPotion(0.9))
+    return(id$)
+    ;
+
+def(build_potion_haste$())
+    let(id$, tempid$())
+    it_new(id$, "potion of haste")
+    th_tile(id$, 0, "images/item/potion_green", 1, 1)
+    st_trigger(id$, hastePotion())
+    return(id$)
+    ;
+
+def(hastePotion())
+    if(le(rnd(100),15), return(poisonPotion()))
+    if(effect[EFF_Haste],
+        do( describe("You feel exhausted."),
+        th_stat(actorid$,ST_Speed,sub(th_get_stat(actorid$,ST_Speed),d(2,6))),
+        th_stat(actorid$,ST_Evade,sub(th_get_stat(actorid$,ST_Evade),d(2,6))),
+        en_checkalive(actorid$,targetid$),
+        return(0) ) )
+    describe("You're fast!")
+    global(effect[EFF_Haste], add(rnd(4),4))
+    th_statboth(actorid$,ST_Speed,add(th_get_statmax(actorid$,ST_Speed),5))
+    th_statboth(actorid$,ST_Evade,add(th_get_statmax(actorid$,ST_Evade),5))
+    ;
+
+def(build_potion_healing$())
+    let(id$, tempid$())
+    it_new(id$, "potion of healing")
+    th_tile(id$, 0, "images/item/potion_red", 1, 1)
+    st_trigger(id$, healingPotion(0.5))
+    return(id$)
+    ;
+
+# Applies a healing potion to actorid$
+def(healingPotion(mult))
+    if(le(rnd(100),15), return(poisonPotion()))
+    let(hp, th_get_stat(actorid$,ST_HitPoints))
+    let(hpmax, th_get_statmax(actorid$,ST_HitPoints))
+    if(eq(hp,hpmax), do(describe("You don't need healing!"), return(0)) )
+    describe("You feel better.")
+    th_stat(actorid$,ST_HitPoints, add(hp,mul(hpmax,mult)) )
+    th_remove(targetid$,1)
+    return(1)
+    ;
+
+def(build_potion_magic$())
+    let(id$, tempid$())
+    it_new(id$, "potion of magic")
+    th_tile(id$, 0, "images/item/potion_eyeball", 1, 1)
+    st_trigger(id$, magicPotion())
+    return(id$)
+    ;
+
+# Applies a strength potion to actorid$
+def(magicPotion())
+    if(le(rnd(100),15), return(poisonPotion()))
+    let(mpmax,th_get_statmax(actorid$,ST_MagicPoints))
+    let(mp,th_get_stat(actorid$,ST_MagicPoints))
+    if(eq(mp,mpmax), do(describe("You don't need more magic!"), return(0)))
+    describe("Your magic returns.")
+    th_stat(actorid$,ST_MagicPoints, add(mp,mul(rnd(6),2)) )
+    th_remove(targetid$,1)
+    ;
+
+def(build_potion_raiseLevel$())
+    let(id$, tempid$())
+    it_new(id$, "potion of raise level")
+    th_tile(id$, 0, "images/item/potion_purple", 1, 1)
+    st_trigger(id$, raisePotion())
+    return(id$)
+    ;
+
+# Applies a raise level potion to actorid$
+def(raisePotion())
+    if(le(rnd(100),15), return(poisonPotion()))
+    if(ne(actorid$,"player"), return(0))
+    en_exp(actorid$, mul(pl_get_level(actorid$),100))
+    th_remove(targetid$,1)
+    ;
+
+# Applies a poison potion to actorid$
+def(poisonPotion())
+    st_name(targetid$,"poison")
+    describe("Gah, that was poisoned!")
+    let(hp, th_get_stat(actorid$,ST_HitPoints))
+    let(loss, add(rnd(6),1))
+    let(dmg, d(loss,3))
+    th_stat(actorid$,ST_HitPoints, sub(hp,dmg) )
+    th_stat(actorid$,ST_Body, sub(th_get_stat(actorid$,ST_Body),loss) )
+    th_stat(actorid$,ST_Attack, sub(th_get_stat(actorid$,ST_Attack),loss) )
+    en_checkalive(actorid$, targetid$)
+    th_remove(targetid$,1)
+    ;
+
+#________________________________________
+# Create monsters
+# Body = (damage/4)*10, max for one die, average for multi-dice
+# Speed = 10+(9-AC)*2
+# Mind = level*3
+# Presence = level*3
+# HitPoints = d(level, 8)
+# Experience = exp*5
+
+# monster A
+def(build_ant(id$,x,y))
+#    p("build_ant ",id$,",",x,",",y)
+    cr_new(id$, "Ant")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/bug5", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 13)
+    th_statboth(id$, ST_Speed, 20)
+    th_statboth(id$, ST_Mind, 15)
+    th_statboth(id$, ST_Presence, 6)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(2,8))
+    th_statboth(id$, ST_Defense, 2)
+    en_exp(id$, 50)
+    en_attack(id$, attack_body_drain("You sting "," stings you"))
+    ;
+
+# monster B
+def(build_bat(id$,x,y))
+#    p("build_bat ",id$,",",x,",",y)
+    cr_new(id$, "Bat")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/bat1", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 18)
+    th_statboth(id$, ST_Mind, 3)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    en_exp(id$, 5)
+    ;
+
+# monster C
+def(build_centaur(id$,x,y))
+#    p("build_centaur ",id$,",",x,",",y)
+    cr_new(id$, "Centaur")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/centaur2", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 21)
+    th_statboth(id$, ST_Speed, 20)
+    th_statboth(id$, ST_Mind, 12)
+    th_statboth(id$, ST_Presence, 12)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(4,8))
+    th_statboth(id$, ST_Range, 5)
+    en_exp(id$, 100)
+    th_gold(id$, mul(goldcalc(),2))
+    if(le(rnd(100),15), cr_defeat(id$,monster_drop()) )
+    ;
+
+# monster D
+def(build_dragon(id$,x,y))
+#    p("build_dragon ",id$,",",x,",",y)
+    cr_new(id$, "Dragon")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/dragon_red", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 40)
+    th_statboth(id$, ST_Speed, 28)
+    th_statboth(id$, ST_Mind, 20)
+    th_statboth(id$, ST_Presence, 20)
+    en_secondary(id$)
+    th_statboth(id$, ST_Range, 4)
+    th_statboth(id$, ST_Defense, 4)
+    th_statboth(id$, ST_HitPoints, d(10,8))
+    en_exp(id$, 2000)
+    th_gold(id$, mul(goldcalc(),10))
+    cr_defeat(id$,monster_drop())
+    ;
+
+# monster N
+def(build_dryad(id$,x,y))
+#    p("build_dryad ",id$,",",x,",",y)
+    cr_new(id$, "Dryad")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/dryad", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 18)
+    th_statboth(id$, ST_Speed, 21)
+    th_statboth(id$, ST_Mind, 9)
+    th_statboth(id$, ST_Presence, 9)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(3,8))
+    en_exp(id$, 200)
+    if(le(rnd(100),100), cr_defeat(id$,monster_drop()) )
+    en_attack(id$, attack_dryad())
+    ;
+
+# monster E
+def(build_eye(id$,x,y))
+#    p("build_eye ",id$,",",x,",",y)
+    cr_new(id$, "Floating Eye")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/eyeball5", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 15)
+    th_statboth(id$, ST_Speed, 10)
+    th_statboth(id$, ST_Mind, 15)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_Range, 5)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    en_exp(id$, 25)
+    en_attack(id$, attack_eye())
+    ;
+
+# monster L
+def(build_fairy(id$,x,y))
+#    p("build_fairy ",id$,",",x,",",y)
+    cr_new(id$, "Fairy")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/fairy1", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 12)
+    th_statboth(id$, ST_Mind, 9)
+    th_statboth(id$, ST_Presence, 9)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(3,8))
+    en_exp(id$, 50)
+    th_gold(id$, goldcalc())
+    en_attack(id$, attack_fairy())
+    ;
+
+# monster F
+def(build_fungi(id$,x,y))
+#    p("build_fungi ",id$,",",x,",",y)
+    cr_new(id$, "Screaming Fungi")
+    cr_brain(id$, "g")
+    th_tile(id$, 0, "images/creature/shrieker", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 22)
+    th_statboth(id$, ST_Mind, 24)
+    th_statboth(id$, ST_Presence, 24)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(8,8))
+    en_exp(id$, 425)
+    en_attack(id$, attack_summon())
+    cr_defeat(id$, attack_summon())
+    ;
+
+# monster O
+def(build_goon(id$, x, y))
+#    p("build_goon ",id$,",",x,",",y)
+    cr_new(id$, "Goon")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/goon1", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 20)
+    th_statboth(id$, ST_Speed, 16)
+    th_statboth(id$, ST_Mind, 3)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    en_exp(id$, 25)
+    th_gold(id$, div(goldcalc(),2))
+    if(le(rnd(100),15), cr_defeat(id$,monster_drop()) )
+    ;
+
+# monster H
+def(build_hobgoblin(id$,x,y))
+#    p("build_hobgoblin ",id$,",",x,",",y)
+    cr_new(id$, "Hobgoblin")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/lemonhead", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 18)
+    th_statboth(id$, ST_Speed, 15)
+    th_statboth(id$, ST_Mind, 3)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    en_exp(id$, 15)
+    ;
+
+# monster G
+def(build_imp(id$,x,y))
+#    p("build_imp ",id$,",",x,",",y)
+    cr_new(id$, "Imp")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/people/child1", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 18)
+    th_statboth(id$, ST_Speed, 18)
+    th_statboth(id$, ST_Mind, 3)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    th_statboth(id$, ST_Range, 5)
+    en_exp(id$, 40)
+    if(le(rnd(100),10), cr_defeat(id$,monster_drop()) )
+    ;
+
+# monster I
+def(build_invisible(id$,x,y))
+#    p("build_invisible ",id$,",",x,",",y)
+    cr_new(id$, "Invisible Stalker")
+    cr_brain(id$, "h")
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 27)
+    th_statboth(id$, ST_Speed, 22)
+    th_statboth(id$, ST_Mind, 24)
+    th_statboth(id$, ST_Presence, 24)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(8,8))
+    en_exp(id$, 600)
+    ;
+
+# monster J
+def(build_cerberus(id$,x,y))
+#    p("build_cerberus ",id$,",",x,",",y)
+    cr_new(id$, "Cerberus")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/cerberus", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 14)
+    th_statboth(id$, ST_Mind, 3)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    en_exp(id$, 10)
+    ;
+
+# monster M
+def(build_mimic(id$,x,y))
+#    p("build_mimic ",id$,",",x,",",y)
+    #FIXME: mimic other things?
+    cr_new(id$, "Gold")
+    cr_brain(id$, "s")
+    th_tile(id$, 0, "images/item/gold", 1, 1)
+    th_tile(id$, 1, "images/creature/tentacles2", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 20)
+    th_statboth(id$, ST_Speed, 14)
+    th_statboth(id$, ST_Mind, 21)
+    th_statboth(id$, ST_Presence, 21)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(7,8))
+    en_exp(id$, 700)
+    en_attack(id$, attack_mimic())
+    if(le(rnd(30),100), cr_defeat(id$,monster_drop()) )
+    ;
+
+# monster Q
+def(build_quasit(id$,x,y))
+#    p("build_quasit ",id$,",",x,",",y)
+    cr_new(id$, "Quasit")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/demon5", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 20)
+    th_statboth(id$, ST_Speed, 24)
+    th_statboth(id$, ST_Mind, 9)
+    th_statboth(id$, ST_Presence, 9)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(3,8))
+    en_exp(id$, 175)
+    if(le(rnd(100),30), cr_defeat(id$,monster_drop()) )
+    ;
+
+# monster R
+def(build_rust_monster(id$,x,y))
+#    p("build_rust_monster ",id$,",",x,",",y)
+    cr_new(id$, "Rust Monster")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/demon9", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 17)
+    th_statboth(id$, ST_Speed, 21)
+    th_statboth(id$, ST_Mind, 15)
+    th_statboth(id$, ST_Presence, 15)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(5,8))
+    en_exp(id$, 125)
+    en_attack(id$, attack_rust())
+    ;
+
+# monster S
+def(build_serpent(id$,x,y))
+#    p("build_serpent ",id$,",",x,",",y)
+    cr_new(id$, "Serpent")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/snake2", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 13)
+    th_statboth(id$, ST_Speed, 18)
+    th_statboth(id$, ST_Mind, 3)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    en_exp(id$, 15)
+    ;
+
+# monster K
+def(build_spider(id$,x,y))
+#    p("build_spider ",id$,",",x,",",y)
+    cr_new(id$, "Spider")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/spider3", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 10)
+    th_statboth(id$, ST_Speed, 12)
+    th_statboth(id$, ST_Mind, 3)
+    th_statboth(id$, ST_Presence, 3)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(1,8))
+    en_exp(id$, 5)
+    ;
+
+# monster P
+def(build_titan_greater(id$,x,y))
+#    p("build_titan_greater ",id$,",",x,",",y)
+    cr_new(id$, "Greater Titan")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/giant4", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 35)
+    th_statboth(id$, ST_Speed, 24)
+    th_statboth(id$, ST_Mind, 25)
+    th_statboth(id$, ST_Presence, 25)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(15,8))
+    th_statboth(id$, ST_Defense, 6)
+    en_exp(id$, 1000)
+    th_gold(id$, mul(goldcalc(),4))
+    if(le(rnd(100),70), cr_defeat(id$,monster_drop()) )
+    en_turn(id$, turn_regenerate(3))
+    ;
+
+# monster T
+def(build_titan_lesser(id$,x,y))
+#    p("build_titan_lesser ",id$,",",x,",",y)
+    cr_new(id$, "Lesser Titan")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/giant3", 2, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 23)
+    th_statboth(id$, ST_Speed, 20)
+    th_statboth(id$, ST_Mind, 18)
+    th_statboth(id$, ST_Presence, 18)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(6,8))
+    th_statboth(id$, ST_Defense, 2)
+    en_exp(id$, 275)
+    th_gold(id$, mul(goldcalc(),2))
+    if(le(rnd(100),50), cr_defeat(id$,monster_drop()) )
+    en_turn(id$, turn_regenerate(1))
+    ;
+
+# monster U
+def(build_unspeakable(id$,x,y))
+#    p("build_unspeakable ",id$,",",x,",",y)
+    cr_new(id$, "Unspeakable")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/tentacles6", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 30)
+    th_statboth(id$, ST_Speed, 28)
+    th_statboth(id$, ST_Mind, 24)
+    th_statboth(id$, ST_Presence, 24)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(8,8))
+    en_exp(id$, 650)
+    if(le(rnd(100),40), cr_defeat(id$,monster_drop()) )
+    ;
+
+# monster V
+def(build_vrykolakas(id$,x,y))
+#    p("build_vrykolakas ",id$,",",x,",",y)
+    cr_new(id$, "Vrykolakas")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/wraith4", 1, 2) #FIXME
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 25)
+    th_statboth(id$, ST_Speed, 26)
+    th_statboth(id$, ST_Mind, 24)
+    th_statboth(id$, ST_Presence, 24)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(8,8))
+    th_statboth(id$, ST_Defense, 4)
+    en_exp(id$, 900)
+    if(le(rnd(100),20), cr_defeat(id$,monster_drop()) )
+    en_attack(id$, attack_body_drain("You suck ", " sucks your blood"))
+    en_turn(id$, turn_regenerate(2))
+    ;
+
+# monster W
+def(build_wraith(id$,x,y))
+#    p("build_wraith ",id$,",",x,",",y)
+    cr_new(id$, "Wraith")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/wraith5", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 20)
+    th_statboth(id$, ST_Speed, 20)
+    th_statboth(id$, ST_Mind, 15)
+    th_statboth(id$, ST_Presence, 15)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(5,8))
+    th_statboth(id$, ST_Defense, 4)
+    en_exp(id$, 275)
+    en_attack(id$, attack_body_drain("You touch ", " touches you with chill hands"))
+    ;
+
+# monster X
+def(build_troglodyte(id$,x,y))
+#    p("build_troglodyte ",id$,",",x,",",y)
+    cr_new(id$, "Troglodyte")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/troll1", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 28)
+    th_statboth(id$, ST_Speed, 24)
+    th_statboth(id$, ST_Mind, 21)
+    th_statboth(id$, ST_Presence, 21)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(7,8))
+    th_statboth(id$, ST_Defense, 6)
+    en_exp(id$, 600)
+    ;
+
+# monster Y
+def(build_lictor(id$,x,y))
+#    p("build_lictor ",id$,",",x,",",y)
+    cr_new(id$, "Lictor")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/demon8", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 26)
+    th_statboth(id$, ST_Speed, 16)
+    th_statboth(id$, ST_Mind, 12)
+    th_statboth(id$, ST_Presence, 12)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(4,8))
+    en_exp(id$, 250)
+    if(le(rnd(100),30), cr_defeat(id$,monster_drop()) )
+    ;
+
+# monster Z
+def(build_zombie(id$,x,y))
+#    p("build_zombie ",id$,",",x,",",y)
+    cr_new(id$, "Zombie")
+    cr_brain(id$, "h")
+    th_tile(id$, 0, "images/creature/zombie1", 1, 2)
+    th_moveto(id$, mapid$, x, y)
+    th_statboth(id$, ST_Body, 20)
+    th_statboth(id$, ST_Speed, 12)
+    th_statboth(id$, ST_Mind, 6)
+    th_statboth(id$, ST_Presence, 6)
+    en_secondary(id$)
+    th_statboth(id$, ST_HitPoints, d(2,8))
+    en_exp(id$, 35)
+    ;
+
+#________________________________________
+# Monster callbacks
+
+# defeatFunc for monsters with items.
+def(monster_drop())
+    output("You have slain ",st_get_name$(targetid$),"!")
+    let(itid$, new_thing$())
+    th_moveto(itid$, mapid$, th_get_x(targetid$), th_get_y(targetid$))
+    ;
+
+# Ant, Vrykolakas, Wraith
+def(attack_body_drain(youmsg$,tarmsg$))
+    if(le(attackresult,0), return(0))
+    let(youmsg$,join$(youmsg$,st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$),tarmsg$))
+    if(not(en_magattack(actorid$, targetid$, 0, youmsg$, tarmsg$)), return(0))
+    let(loss,sub(rnd(6),th_get_stat(targetid$,ST_MagicDefense)))
+    if(gt(loss, th_get_stat(targetid$,ST_Body)), let(loss,th_get_stat(targetid$,ST_Body)) )
+    if(le(loss,0), return(0))
+    if(eq(targetid$,"player"), output("You feel weaker."))
+    th_stat(targetid$, ST_Body, sub(th_get_stat(targetid$,ST_Body),loss))
+    th_stat(targetid$, ST_Attack, sub(th_get_stat(targetid$,ST_Attack),loss))
+    th_stat(targetid$, ST_HitPoints, sub(th_get_stat(targetid$,ST_HitPoints),loss))
+    en_checkalive(targetid$,actorid$)
+    ;
+
+# Dryad ruins your weapon
+def(attack_dryad())
+    if(le(attackresult,0), return(0))
+    if(ne(targetid$,"player"), return(0))
+    let(wpnid$, pl_get_equip$("player",EQ_Shield))
+    if(eq(wpnid$,""), let(wpnid$,pl_get_equip$("player",EQ_Weapon)))
+    if(eq(wpnid$,""), return(0))
+    let(wpnname$,st_get_name$(wpnid$))
+    # don't blunt it below 0, especially as it might be a shield.
+    if(not(th_get_statmax(wpnid$,ST_Attack)), return(0))
+    output("Your ",wpnname$," appears to be weaker now.")
+    th_statboth(wpnid$,ST_Attack,sub(th_get_statmax(wpnid$,ST_Attack),1))
+    th_statmax(targetid$,ST_Attack,sub(th_get_statmax(targetid$,ST_Attack),1))
+    if(eq(left$(wpnname$,5),"weak "), return(0))
+    st_name(wpnid$, join$("weak ",wpnname$))
+    ;
+
+# Floating Eye
+def(attack_eye())
+    if(le(attackresult,0), return(0))
+    let(youmsg$,join$("You gaze at ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," gazes at you"))
+    if(not(en_magattack(actorid$, targetid$, 0, youmsg$, tarmsg$)), return(0))
+    let(loss,sub(rnd(6),th_get_stat(targetid$,ST_MagicDefense)))
+    if(ge(loss, th_get_stat(targetid$,ST_Speed)), let(loss,sub(th_get_stat(targetid$,ST_Speed),1)) )
+    if(le(loss,0), return(0))
+    if(eq(targetid$,"player"), output("You feel slower."))
+    th_stat(targetid$, ST_Speed, sub(th_get_stat(targetid$,ST_Speed),loss))
+    th_stat(targetid$, ST_Evade, sub(th_get_stat(targetid$,ST_Evade),loss))
+    en_checkalive(targetid$,actorid$)
+    ;
+
+# Fairy - steal gold and teleport, the little bastard.
+def(attack_fairy())
+    let(youmsg$,join$("You finger ",st_get_name$(targetid$),"'s pockets"))
+    let(tarmsg$,join$(st_get_name$(actorid$)," fingers your pockets"))
+    if(not(en_magattack(actorid$,targetid$,0,youmsg$,tarmsg$)), return(0))
+    let(gold, th_get_gold(targetid$))
+    if(eq(targetid$,"player"), output("Fairy stole all your gold!"))
+    th_gold(targetid$, 0)
+    th_gold(actorid$, add(th_get_gold(actorid$),gold))
+    let(xy$, get_map_random$())
+    let(x, val(word$(xy$,1)))
+    let(y, val(word$(xy$,2)))
+    th_moveto(actorid$,mapid$,x,y)
+    ;
+
+# Mimic
+def(attack_mimic())
+#    p("attack_mimic actorid$=",actorid$,", targetid$=",targetid$,", attack=",attackresult)
+    if(not(st_exists(actorid$)), return(0))
+    if(eq(targetid$,"player"),
+        output("That's not ",st_get_name$(actorid$),", that's a Mimic!") )
+    th_pose(actorid$, 1)
+    cr_brain(actorid$, "h")
+    st_name(actorid$, "Mimic")
+    en_attack(actorid$, 0)
+    ;
+
+# Quasit
+def(attack_quasit())
+    if(le(attackresult,0), return(0))
+    let(youmsg$,join$("You dig your claws in ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," digs its claws in you"))
+    if(not(en_magattack(actorid$, targetid$, 0, youmsg$, tarmsg$)), return(0))
+    let(loss,sub(d(2,6),th_get_stat(targetid$,ST_MagicDefense)))
+    if(ge(loss, th_get_stat(targetid$,ST_MagicPoints)), let(loss,sub(th_get_stat(targetid$,ST_MagicPoints),1)) )
+    if(le(loss,0), return(0))
+    if(eq(targetid$,"player"), output("You feel drained."))
+    th_stat(targetid$, ST_MagicPoints, sub(th_get_stat(targetid$,ST_MagicPoints),loss))
+    ;
+
+# Rust Monster
+def(attack_rust())
+    if(le(attackresult,0), return(0))
+    if(ne(targetid$,"player"), return(0))
+    let(armid$, pl_get_equip$("player",EQ_Shield))
+    let(armpos, EQ_Shield)
+    if(eq(armid$,""), do(let(armid$,pl_get_equip$("player",EQ_Armor)), let(armpos,EQ_Armor)))
+    if(eq(armid$,""), return(0))
+    let(armname$,st_get_name$(armid$))
+    let(evdiff, 1)
+    let(dediff, 1)
+    if(eq(th_get_statmax(armid$,ST_Evade),0), let(evdiff,0))
+    if(eq(th_get_statmax(armid$,ST_Defense),0), let(dediff,0))
+    if(and(not(evdiff), not(dediff)),
+        do(pl_remove("player",armpos),th_remove(armid$,1),
+            output("Your ",armname$," crumbles to red dust!"), return(0) ),
+        )
+    output("Your ",armname$," appears to be weaker now.")
+    th_statboth(armid$,ST_Evade,sub(th_get_statmax(armid$,ST_Evade),evdiff))
+    th_statboth(armid$,ST_Defense,sub(th_get_statmax(armid$,ST_Defense),dediff))
+    th_stat(targetid$,ST_Evade,sub(th_get_stat(targetid$,ST_Evade),evdiff))
+    th_statmax(targetid$,ST_Evade,sub(th_get_statmax(targetid$,ST_Evade),evdiff))
+    th_stat(targetid$,ST_Defense,sub(th_get_stat(targetid$,ST_Defense),dediff))
+    th_statmax(targetid$,ST_Defense,sub(th_get_statmax(targetid$,ST_Defense),dediff))
+    if(eq(left$(armname$,6),"rusty "), return(0))
+    st_name(armid$, join$("rusty ",armname$))
+    ;
+
+# Screaming Fungi
+def(attack_summon())
+    if(gt(rnd(2),1), return(0))
+    playsound("sounds/beep.au")
+    let(x0, th_get_x(actorid$))
+    let(y0, th_get_y(actorid$))
+    let(x1, 0)
+    let(y1, 0)
+    while(not(clear_tile(x1, y1)),
+        let(x1, sub(add(x0,rnd(3)),2)), let(y1, sub(add(y0,rnd(3)),2)) )
+    new_monster(tempid$(), x1, y1, 1)
+    ;
+
+# Greater Titan, Lesser Titan, Vrykolakas
+def(turn_regenerate(raise))
+    let(hp,th_get_stat(actorid$,ST_HitPoints))
+    let(hpmax,th_get_statmax(actorid$,ST_HitPoints))
+    if(lt(hp,hpmax), th_stat(actorid$,ST_HitPoints, add(hp,raise)) )
+    ;
+
+#________________________________________
+# Outputs some text to the player only.
+def(describe(text$))
+    if(ne(actorid$,"player"), return(0))
+    output(text$)
+    ;
+
+# Tries to subtract 'cost' MagicPoints from actorid$, and returns 1 if
+# successful, 0 if not.
+def(mpcost(cost))
+    if(lt(th_get_stat(actorid$,ST_MagicPoints),cost),
+        do(describe("You don't have enough magic points."), return(0)) )
+    th_stat(actorid$,ST_MagicPoints,sub(th_get_stat(actorid$,ST_MagicPoints),cost))
+    return(1)
+    ;
+
+def(goldcalc())
+    let(gold,mul(10,level))
+    addv(gold,50)
+    let(gold,rnd(gold))
+    addv(gold,1)
+    return(gold)
+    ;
+
+#________________________________________
+def(set_globals())
+    # constants
+    global(LEVEL_WIDTH, 48)
+    global(LEVEL_HEIGHT, 48)
+    global(MAX_ROOMS, 9)
+    global(MAX_TRAPS, 9)
+    global(KEY_LEVEL, 26)
+    # game state
+    global(mapid$, "")
+    global(level, 0)
+    global(max_level, 0)
+    global(x_stairs_up[0], 0)
+    global(y_stairs_up[0], 0)
+    global(x_stairs_down[0], 0)
+    global(y_stairs_down[0], 0)
+    global(levelmap[mul(LEVEL_WIDTH,LEVEL_HEIGHT)], 0)
+    global(connected[sub(MAX_ROOMS,1)], 0)
+    global(goneroom[sub(MAX_ROOMS,1)], 0)
+    # tiles
+    global(TILE_Wall, 0)
+    global(TILE_CHAR$[TILE_Wall],"#")
+    global(TILE_Floor, 1)
+    global(TILE_CHAR$[TILE_Floor],".")
+    global(TILE_Corridor, 2)
+    global(TILE_CHAR$[TILE_Corridor],"_")
+    global(TILE_Stairs_Up, 3)
+    global(TILE_CHAR$[TILE_Stairs_Up],"<")
+    global(TILE_Stairs_Down, 4)
+    global(TILE_CHAR$[TILE_Stairs_Down],">")
+    global(TILE_Trap, 5)
+    global(TILE_CHAR$[TILE_Trap],".")
+    global(TILE_Gold, 6)
+    global(TILE_CHAR$[TILE_Gold],".")
+    global(TILE_Door, 7)
+    global(TILE_CHAR$[TILE_Door],"+")
+    global(TILE_Key, 8)
+    global(TILE_CHAR$[TILE_Key],".")
+    global(TILE_Thing, 9)
+    global(TILE_CHAR$[TILE_Thing],".")
+    # 0 1 2
+    # 3 4 5
+    # 6 7 8
+    # possible connections, read with val(word$(i))
+    global(PASSAGE$[0], "1 3")
+    global(PASSAGE$[1], "0 2 4")
+    global(PASSAGE$[2], "1 5")
+    global(PASSAGE$[3], "0 4 6")
+    global(PASSAGE$[4], "1 3 5 7")
+    global(PASSAGE$[5], "2 4 8")
+    global(PASSAGE$[6], "3 7")
+    global(PASSAGE$[7], "4 6 8")
+    global(PASSAGE$[8], "5 7")
+    # monster data
+    global(MON_TYPES, 26)
+    global(MONTYPE_Ant, 1)
+    global(MONTYPE_Bat, 2)
+    global(MONTYPE_Centaur, 3)
+    global(MONTYPE_Dragon, 4)
+    global(MONTYPE_Eye, 5)
+    global(MONTYPE_Fungi, 6)
+    global(MONTYPE_Imp, 7)
+    global(MONTYPE_Hobgoblin, 8)
+    global(MONTYPE_Invisible, 9)
+    global(MONTYPE_Cerberus, 10)
+    global(MONTYPE_Spider, 11)
+    global(MONTYPE_Fairy, 12)
+    global(MONTYPE_Mimic, 13)
+    global(MONTYPE_Dryad, 14)
+    global(MONTYPE_Goon, 15)
+    global(MONTYPE_Titan_Greater, 16)
+    global(MONTYPE_Quasit, 17)
+    global(MONTYPE_Rust_Monster, 18)
+    global(MONTYPE_Serpent, 19)
+    global(MONTYPE_Titan_Lesser, 20)
+    global(MONTYPE_Unspeakable, 21)
+    global(MONTYPE_Vrykolakas, 22)
+    global(MONTYPE_Wraith, 23)
+    global(MONTYPE_Troglodyte, 24)
+    global(MONTYPE_Lictor, 25)
+    global(MONTYPE_Zombie, 26)
+    # item data
+    global(CHANCE_Potion, 20)
+    global(CHANCE_Scroll, 30)
+    global(CHANCE_Weapon, 50)
+    global(CHANCE_Armor, 70)
+    global(CHANCE_TOTAL, CHANCE_Armor)
+    # weapon data
+    global(WEAPON_Dagger, 50)
+    global(WEAPON_Darts, 70)
+    global(WEAPON_Mace, 110)
+    global(WEAPON_Spear, 130)
+    global(WEAPON_Shortsword, 150)
+    global(WEAPON_Bow, 170)
+    global(WEAPON_Longsword, 190)
+    global(WEAPON_DemonSword, 210)
+    global(WEAPON_TOTAL, WEAPON_DemonSword)
+    # armor data
+    global(ARMOR_Leather, 50)
+    global(ARMOR_Helm, 70)
+    global(ARMOR_Shield, 110)
+    global(ARMOR_Bronze, 130)
+    global(ARMOR_Scale, 150)
+    global(ARMOR_Banded, 170)
+    global(ARMOR_Steel, 190)
+    global(ARMOR_TOTAL, ARMOR_Steel)
+    # potion data
+    global(POTION_Healing, 35)
+    global(POTION_Strength, 36)
+    global(POTION_Intelligence, 37)
+    global(POTION_Dexterity, 38)
+    global(POTION_Charisma, 39)
+    global(POTION_RaiseLevel, 40)
+    global(POTION_ExtraHealing, 45)
+    global(POTION_Haste, 50)
+    global(POTION_Magic, 60)
+    global(POTION_TOTAL, POTION_Magic)
+    # scroll data
+    global(SCROLL_Healing, 15)
+    global(SCROLL_MonsterDet, 21)
+    global(SCROLL_GoldDet, 25)
+    global(SCROLL_Scrying, 30)
+    global(SCROLL_MagicDet, 36)
+    global(SCROLL_Slow, 47)
+    global(SCROLL_DrainLife, 56)
+    global(SCROLL_FireArrow, 66)
+    global(SCROLL_Cold, 69)
+    global(SCROLL_Fire, 72)
+    global(SCROLL_Lightning, 75)
+    global(SCROLL_Teleport, 80)
+    global(SCROLL_Cancellation, 85)
+    global(SCROLL_RemoveCurse, 87)
+    global(SCROLL_TOTAL, SCROLL_RemoveCurse)
+    # special effects
+    global(EFF_Haste, 1)
+    global(EFFECT_NAME$[EFF_Haste],"Haste")
+    global(EFFECT_TOTAL, EFF_Haste)
+    # number of turns remaining in effect, -1=infinite
+    global(effect[EFFECT_TOTAL],0)
+
+    build_ter_grass()
+    build_ter_road()
+    build_ter_flower()
+    build_ter_water()
+    build_ter_wall()
+    build_ter_corridor()
+    build_ter_floor()
+    build_ter_stairs_up()
+    build_ter_stairs_down()
+    ;
+

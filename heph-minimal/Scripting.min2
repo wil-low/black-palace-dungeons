@@ -1,0 +1,622 @@
+Objects
+
+Objects in Hephaestus have an inheritance hierarchy, shown in the tree below; nested objects inherit from the next level up. Thus, any command that says it applies to a Thing will also apply to a Block, Item, or Entity. Any command that says it applies to an Entity will also apply to a Creature or the Player.
+
+Stuff: everything you can refer to with an id 
+
+Map: a 2D map of Grids.
+Terrain: the definition of a terrain type, used by a Grid.
+Thing: anything that can appear on a Map 
+
+Block: a Thing that cannot be carried.
+Statted: a Thing with stats 
+
+Item: a Thing that can be taken by the Player.
+Entity: a living Thing. 
+
+Creature: a non-player Entity, with some form of AI.
+Player: your character. Always id "player", and there is currently only ever one Player.
+
+Grid: a single map square with terrain type and contents. Grids are not "Stuff"; you can only refer to them by map id and coordinate.
+
+
+Scripting Constants
+
+A number of global variables are defined for use as constants; it would be a bad idea to change any of them.
+
+GAMETURN
+The number of turns since the adventure started. If you assume that each turn is 1 game-world minute, there are 1440 minutes in a day, so you could use 'int(div(GAMETURN,1440))' to tell you how many days since the game started, and 'int(div(mod(GAMETURN,1440),60))' to give you the hour of the current day.
+VIEW_DIST
+The number of grids from the center of the view to the edge - it's currently 5, but you should use the constant, as it may change someday.
+VIEW_TILES
+The number of grids across the view - VIEW_DIST*2+1, or currently 11.
+TILE_SIZE
+The size of a grid in pixels, currently 48. Mainly used in graphics functions.
+VIEW_SIZE
+The size of the view in pixels - VIEW_DIST*TILE_SIZE, or currently 528. Mainly used in graphics functions.
+North
+East
+South
+West
+Values of the four directions. Note that directions are 0-indexed.
+NDIRS
+The total number of directions - 4 (1 higher than West), but it's much better to use NDIRS instead of wondering why you wrote '4' when you fix your code some months later.
+DIR_ABBV$[]
+The first letter of each direction - "n" for North, etc.
+DIR_NAME$[]
+The full name of each direction - "north" for North, etc.
+DIR_DX[]
+DIR_DY[]
+The "delta" (amount to add to your current coordinate) to move in each direction - North moves you up (to a lower y- coordinate), so DIR_DX[North] is 0, DIR_DY[North] is -1.
+LAYER_Under
+LAYER_Over
+Values for terrain layers - see the 'ter_' functions below.
+OPA_None
+OPA_Partial
+OPA_Full
+Opacity values - see 'ter_opa()' and 'th_opa()' functions below.
+TYPE_Map
+TYPE_Block
+TYPE_Item
+TYPE_Creature
+TYPE_Player
+The values returned by 'st_exists()' to indicate the type of a Stuff.
+ST_Body
+ST_Speed
+ST_Mind
+ST_Presence
+ST_HitPoints
+ST_MagicPoints
+ST_Attack
+ST_Evade
+ST_Defense
+ST_Range
+ST_MagicAbility
+ST_MagicEvade
+ST_MagicDefense
+Index numbers for each stat, used by 'th_stat()' functions below. See Gameplay for an explanation. Note that the stats are 0-indexed.
+NSTATS
+The total number of stats - this is 1 higher than ST_MagicDefense.
+STAT_ABBV$[]
+The 2-letter stat abbreviation - STAT_ABBV$[ST_Body] is "Bo", etc.
+STAT_NAME$[]
+The full name of each stat - STAT_NAME$[ST_Body] is "Body", etc.
+EQ_Weapon
+EQ_Shield
+EQ_Armor
+EQ_Hat
+EQ_Accessory
+Index numbers for each equipment position. Note that these are 0-indexed.
+NEQUIP
+The total number of equipment positions - 1 higher than EQ_Accessory.
+EQUIP_NAME$[]
+The full name of each equipment position - EQUIP_NAME$[EQ_Weapon] is "Weapon".
+
+
+Scripting Functions
+
+The mdh.hephaestus.scripting library is automatically loaded when you start Hephaestus, and it will not load any other libraries, so adventure files are safe to share with others.
+Unless specifically stated otherwise, all coordinates and indices from these functions are 0-based.
+Callback functions ("func()" arguments below) are not evaluated immediately as functions usually are. All variables in the callback are replaced with their current values, but any argument functions are not evaluated, and the entire function is stored for later use. This allows you to pass in calculated information. So, say you have this code:
+
+def(makeTeleporter(mapid$, x, y, xdest, ydest))
+    let(id$, tempid$())
+    bl_new(id$, "")
+    th_moveto(id$, mapid$, x, y)
+    # teleportTarget is the callback function!
+    st_trigger(id$, teleportTarget(mapid$, xdest, ydest, sub(rnd(NDIRS),1)))
+    ;
+
+
+If you call this function with 'makeTeleporter("test_M",1,1, 9,9)', the callback is stored in the Block as 'teleportTarget("test_M",9,9,sub(rnd(4),1))'. Notice that the sub() and rnd() functions aren't evaluated just yet, but NDIRS is.
+
+Callbacks are one of the most powerful features in Hephaestus, and you can't really build much without them, so take the time to experiment with them and get used to using them.
+
+~alert(title$, text$, buttons$, defaultbtn, cancelbtn {, iconfile$})
+	displays an alert box, with the given 'title$' and 'text$'. 'text$' can contain newlines ('\n'). 'button$' is a string containing the labels for the buttons, each separated by a '|' character (i.e. "OK|Cancel"). 'defaultbtn' and 'cancelbtn' are the buttons (1-based) which will be activated when the user hits Enter or Escape, respectively. If 'iconfile$' is specified, that image is shown at the top left side of the dialog (you must give the full filename) - this might be a system icon ("images/icons/question.gif", etc.) or a character's portrait. Returns the index (1-based) of the button chosen.
+~bl_new(id$, name$)
+	Creates a new Block. Returns 1.
+~cr_brain(id$, brain$)
+	Sets the brain of a Creature. Brains are predesigned, and generally very stupid, AI routines for a Creature. Most brains allow a Creature to attack anyone they don't like, if they are within range. The default is no brain (rather like marketing staff). See also 'cr_think()'. Returns 1. 
+
+"" = no brain
+No-brainers do not move or attack.
+"g" = guard
+Guards do not move, but do attack. They will not leave their posts to chase after enemies. The guard brain is also useful if you want to move a Creature in its en_turn() callback - you move it around, and it'll do its own fighting.
+"s" = static
+Static do not move, but do attack. If they are attacked, they become brain "h".
+"r" = random
+Move randomly like drunken frat boys, and attack anything nearby (also like drunken frat boys). If they are attacked, they become brain "h". They have a 7/12 chance of moving forward, a 2/12 chance each of moving left or right, and a 1/12 chance of moving backwards.
+"h" = hunts player
+Move in a straight line towards the player, and attack whenever possible. Hunters are fairly stupid, so it's easy to get them trapped.
+"a" = avoids player
+Move in a straight line away from the player, and attack only if there is no escape move possible. If attacked, avoiders become brain "r" - so they can become hunters in just two attacks!
+"p<sequence>" = programmed
+Programmed to move in a preset pattern, and will not deviate from it. They will attack if possible. Each character of the sequence is a single turn's action. If they cannot perform the action this turn, they will wait and try again next turn.
+
+p = Pause
+n = North
+e = East
+s = South
+w = West
+t = Trigger Here
+0-9 = Change pose
+
+
+~cr_defeat(id$, func())
+	Sets the defeat function of a Creature. When the Creature is defeated in combat, this function will be called instead of the usual "You have slain" message; 'actorid$' will contain the killer's id, and 'targetid$' will contain this Creature's id. This is useful for boss monsters who "escape" at the end of a combat, or who have some dying words, or who just drop some items when they die. The player still receives gold and exp for the fight. To disable the defeat function, set it to 0: 'cr_defeat(id$, 0)'. Returns 1.
+~cr_faction(id$, faction)
+	Assigns a Creature to a given faction; 0 is the Player's faction, any other value is hostile to the player. Creatures are hostile to all factions other than their own (so you can have Creatures fight each other by giving them different factions). The default is faction 1. Returns 1.
+~cr_get_brain$(id$)
+	Returns the current brain of a Creature. See 'cr_brain()'.
+~cr_get_faction(id$)
+	Returns the faction of a Creature. See 'cr_faction()'.
+~cr_selfdefense(id$)
+	Creature 'id$' attempts to find an enemy to attack in the list 'enemies$[]'; the first one in range and a direct line of sight will be attacked. Normally 'cr_selfdefense()' is only called from a think function, where 'enemies$[]' is constructed for you - see 'cr_think()'. Returns 1 if an enemy was found, 0 if not.
+~cr_think(id$, func())
+	Sets the AI thinking function of a Creature. This callback is called every turn, and you can evaluate the situation and call the various en_do_...() functions or 'cr_self_defense()' to perform actions. There are three global variables set before the think function is called: 'actorid$' contains the id of this Creature. 'friend$[]' is a list (indexed by number) of all friendly Entities in sight, and 'enemies$[]' is a list (indexed by number) of all hostile Entities in sight.
+
+The callback function should return 1 if the Creature did anything, or 0 if not.
+
+To make an AI that behaves like the "brain" AIs, the Creature must make a Speed roll before moving, but after checking for combat, because all Creatures can attack every turn, but anything with a Speed under 20 is not guaranteed to move every turn.
+
+# AI to wander in circles
+# thinkCircles(1) turns right when blocked, thinkCircles(-1) turns left
+def(thinkCircles(turn))
+    # check for self-defense
+    if(cr_selfdefense(actorid$), return(1))
+    # make a Speed roll to move
+    if(le(th_task(actorid$, ST_Speed), 0), return(0))
+    # now figure out where to move
+    # try to move forward, return 1 if it worked.
+    if(en_do_move(actorid$), return(1))
+    # otherwise, turn left or right
+    th_facing(actorid$, add(th_get_facing(actorid$),turn))
+    return(0)
+    ;
+
+
+Remember that every Creature on the current map, visible to the player or not, is checked for AI every single turn, so if you perform complex calculations on many Creatures, you will slow the turn update badly.
+
+To disable the think function, assign a standard-issue brain with 'cr_brain()'. Returns 1.
+
+~cr_new(id$, name$)
+	Creates a new Creature. Returns 1.
+~d(n, s)
+	Returns the total of 'n' random numbers from 1 to 's' - this is equivalent to rolling 'n' 's'-sided dice, thus the function name.
+~en_attack(id$, func())
+	entity 'id$' will call 'func' after every attack. The id of this Entity will be in 'actorid$', the target will be in 'targetid$', and the amount the attack succeeded or failed by will be in 'attackresult'. Returns 1.
+~en_checkalive(id$, killerid$)
+	Updates Entity 'id$' and checks to see if it is alive. If not, the Entity is reported as killed by 'killerid$', or by nobody if 'killerid$' is "". Returns 1 if alive, 0 if not. You should call this after making any negative change to an Entity's HitPoints or primary stats (Body, Speed, Mind, or Presence).
+~en_do_move(id$)
+	entity 'id$' tries to move ahead, in the facing determined by 'th_facing()'. If blocked by a hostile Entity, it will be attacked; if blocked by anything triggerable, it will be triggered. Returns 1 if the move/attack/trigger was successful, 0 if not. 'en_do_move()' is mostly used in 'cr_think()' AI routines.
+~en_do_attack(id$)
+	entity 'id$' tries to attack ahead, in the facing determined by 'th_facing()'. Unlike 'en_do_move()', 'en_do_attack()' can make ranged attacks. Returns 1 if the attack was successful, 0 if not. 'en_do_attack()' is mostly used in 'cr_think()' AI routines.
+~en_do_magic(id$, magicname$)
+	entity 'id$' tries to cast a magic spell 'magicname$' ahead, in the facing determined by 'th_facing()'. Returns 1 if the spell was successful, 0 if not. 'en_do_magic()' is mostly used in 'cr_think()' AI routines.
+~en_do_trigger(id$)
+	entity 'id$' tries to trigger something in its current grid. Returns 1 if the trigger was successful, 0 if not. 'en_do_trigger()' is mostly used in 'cr_think()' AI routines.
+~en_exp(id$, exp)
+	Sets the experience of an Entity. Creature experience is used as a reward when defeated by the Player. Player experience is the current total of experience, which will be automatically spent to increase the player's level when it reaches (current level)?100 XP. Returns 1.
+~en_get_exp(id$)
+	Returns the experience of an Entity.
+~en_get_target$(id$, friendlyTarget, range)
+	Returns the id of the first target visible ahead of Entity 'id$', or "" if no target is visible. Only targets within 'range' (minimum 1) squares are found. If 'friendlyTarget' is 0, only an enemy will be selected; if non-zero, only a friend will be selected. You will usually use this in magic spells, in the form:
+
+global(targetid$,en_get_target(actorid$,0,5))
+
+
+~en_has_magic(id$, magicname$)
+	Returns 1 if Entity 'id$' has a given magic spell 'magicname$', 0 if not.
+~en_magattack(id$, targetid$, dmg, youmsg$, tarmsg$)
+	entity 'id$' makes a magical attack on 'targetid$', with damage on a successful hit equal to 'dmg'. 'youmsg$' is used to report the attack's result to 'id$', 'tarmsg$' is used to report the attack's result to 'targetid$'. Returns 1 if the attack hit, even if it did no damage, 0 if it missed. The messages will be followed by the results of the attack, but you must insert any names. If you are sure that the actor or target will always be a creature, you can just use "" for their message.
+
+# Shoots a fire arrow doing damage equal to 25% of MagicAbility at a target
+# ahead of you.
+def(magicFireArrow())
+    # Precondition: that there is a target ahead of you.
+    global(targetid$,en_get_target$(actorid$, 0, 5))
+    if(eq(targetid$,""), do(describe(join$("No enemy to ",
+        DIR_NAME$[th_get_facing(actorid$)],".")),return(0)) )
+    let(youmsg$,join$("You shoot an arrow of fire at ",st_get_name$(targetid$)))
+    let(tarmsg$,join$(st_get_name$(actorid$)," shoots an arrow of fire at you"))
+    let(dmg, mul(th_get_stat(actorid$,ST_MagicAbility),0.25))
+    en_magattack(actorid$, targetid$, dmg, youmsg$, tarmsg$)
+    ;
+
+
+~en_magic(id$, magic$, func())
+	Gives Entity 'id$' a magic spell. 'magicname$' is the user's prompt, 'func()' is the function called when the spell is invoked; the id of the Entity will be in 'actorid$'. To remove a spell, set it to 0 instead of 'func()'. Returns 1.
+~en_secondary(id$)
+	Calculates the standard "secondary stats" for an Entity, based on the "primary stats" (Body, Speed, Mind, Presence). You can then adjust the stats further. Returns 1.
+
+HitPoints = Body
+MagicPoints = Mind
+Attack = Body
+Evade = Speed
+Defense = 0
+Range = 0
+MagicAbility = Mind
+MagicEvade = Presence
+MagicDefense = 0
+
+
+~en_turn(id$, func())
+	Sets the turn function of an Entity. Every turn, the function and its arguments will be evaluated, exactly as you pass them in. The Entity's id will be in the global variable 'actorid$'. To disable the turn function, set it to 0. The primary use of this is to give an Entity poisoning or regeneration or a "sudden death" timer, and when the effect runs out or is cured the turn function would be set to 0. Returns 1.
+~gameover(win, text$)
+	ends the game. If 'win' is 1, a big "WINNER!" fills the screen; if 0, "GAME OVER". Below that is 'text$', which should be kept very short (you can fit perhaps 20 characters across), but may contain newlines. Returns 1.
+~gr_get_size(mapid$, x, y)
+	Returns the number of things in a Grid.
+~gr_get_terrain$(mapid$, x, y)
+	Returns the Terrain type for a Grid.
+~gr_get_thing$(mapid$, x, y, i)
+	Returns the id$ of the 'i'th Thing in a Grid; 'i' is 0-indexed, and must be less than 'gr_get_size(mapid$,x,y)'. Returns 1.
+~gr_terrain(mapid$, x, y, terid$)
+	Sets the Terrain type for a Grid to 'terid$'. The Terrain must already exist - see 'ter_new()'. Returns 1.
+~inputdlg$(title$, prompt$, inittext$ {, iconfile$})
+	displays a dialog box with the given title, a prompt, and a text field with the initial value 'inittext$'. If 'iconfile$' is specified, that image is shown at the top left side of the dialog (you must give the full filename) - this might be a system icon ("images/icons/question.gif", etc.) or a character's portrait. Returns the text entered by the user, or "" if the user hit Cancel or left the field blank.
+~it_dropfunc(id$, func())
+	Sets the callback function for an Item which will be called when the Player tries to drop the Item. The id of the Player will be in 'actorid$', and the Item will be in 'targetid$'. If the callback returns 1, the drop succeeds; if it returns 0, the drop will fail, the Player will still have the Item, and the callback should give a message explaining why the Player cannot drop it. Returns 1. Set 'func()' to 0 to disable the trigger.
+~it_equip(id$, pos)
+	Sets an Item to be usable as equipment in position 'pos' (one of the EQ_ constants defined above), or not equipment if 'pos' is -1. Returns 1.
+~it_equipfunc(id$, func())
+	Sets the callback function for an Item which will be called when the Player tries to equip the Item. The id of the Player will be in 'actorid$', and the Item will be in 'targetid$'. If the callback returns 1, the equip succeeds; if it returns 0, the equip will fail, the Player will still have the Item, and the callback should give a message explaining why the Player cannot equip it ("You are not strong enough!" or "You cannot hold a two-handed weapon and a shield at the same time!", for instance). Returns 1. Set 'func()' to 0 to disable the trigger.
+~it_new(id$, name$)
+	Creates a new Item. Returns 1.
+~it_removefunc(id$, func())
+	Sets the callback function for an Item which will be called when the Player tries to remove the Item. The id of the Player will be in 'actorid$', and the Item will be in 'targetid$'. If the callback returns 1, the remove succeeds; if it returns 0, the remove will fail, the Player will still have the Item, and the callback should give a message explaining why the Player cannot remove it ("It is cursed!", for instance). Returns 1. Set 'func()' to 0 to disable the trigger.
+~it_takefunc(id$, func())
+	Sets the callback function for an Item which will be called when the Player tries to take the Item. The id of the Player will be in 'actorid$', and the Item will be in 'targetid$'. If the callback returns 1, the take succeeds; if it returns 0, the take will fail, the Player will still have the Item, and the callback should give a message explaining why the Player cannot take it ("It is too heavy for you!", for instance). Returns 1. Set 'func()' to 0 to disable the trigger.
+~map_bounds(id$, func())
+	Sets the bounds function of a Map. When the Player (and only the Player) tries to enter the outer edge of a Map, and is not prevented by walls or blocking Things, this function is called. The Player still cannot enter the outer edge, though. Bounds are mostly used to return to a world map from towns or dungeons, or to a town from buildings. To disable the bounds function, set it to 0: 'map_bounds(id$, 0)'. Creatures will not even try to enter the outer bounds of a Map. Returns 1.
+~map_fill(id$, x, y, <str hash define>, mapdata$)
+	Fills in the terrain of the map 'id$', starting at 'x','y'. 'mapdata$' is split up vertically by newlines, and each character represents one grid. Each character is looked up in 'define' to find the terrain id; Minimal syntax requires an index, but it is ignored, so you should write 'define$[""]'. Spaces in 'mapdata$' are ignored - the terrain in those grids is unchanged. This allows you to fill non-rectangular regions. Returns 1. 
+
+For example, the following script produces the game shown in this screenshot.
+
+def(newgame())
+    ter0()
+    ter1()
+    map_new("binary_M", "Binary", 5, 5)
+    map_fill("binary_M", 0, 0, ter$[""], join$(
+        "10111\n",
+        "10001\n",
+        "11101\n",
+        "10001\n",
+        "10111\n", ) )
+    th_moveto("player", "binary_M",1,1)
+    ;
+
+def(ter0())
+    ter_new("ter0", "")
+    ter_tile("ter0", LAYER_Under, "images/ground/grass", 1, 1)
+    ter_walls("ter0", "0000")
+    ter_opa("ter0", OPA_None)
+    global(ter$["0"], "ter0")
+    ;
+
+def(ter1())
+    ter_new("ter1", "")
+    ter_tile("ter1", LAYER_Under, "images/ground/forest", 1, 1)
+    ter_walls("ter1", "1111")
+    ter_opa("ter1", OPA_Full)
+    global(ter$["1"], "ter1")
+    ;
+
+
+~map_get_xsize(id$)
+	Returns the horizontal size of a Map. Because Grids are 0-indexed, this will be one higher than the highest Grid on the Map. So if you want to cover a Map in plains, you might write:
+
+    let(plains$, tempid$())
+    ter_new(plains$, "")
+    ter_tile(plains$, 0, "images/ground/grass", 1, 1)
+    for(y, 0, sub(map_get_ysize(mapid$),1), 1,
+        for(x, 0, sub(map_get_xsize(mapid$),1), 1,
+            gr_terrain(mapid$, x, y, plains$) ) )
+
+
+~map_get_ysize(id$)
+	Returns the vertical size of a Map. See map_get_xsize().
+~map_new(id$, name$, xsize, ysize)
+	Creates a new empty map. Returns 1.
+~menu(title$, text$, options$, cancel {, iconfile$})
+	displays a menu dialog, with the given 'title$' and 'text$'. 'text$' can contain newlines ('\n'). 'options$' is a string containing the choices for the menu, each separated by a '|' character. If 'cancel' is non-zero, a "Cancel" button will be provided. If 'iconfile$' is specified, that image is shown at the top left side of the dialog (you must give the full filename) - this might be a system icon ("images/icons/question.gif", etc.) or a character's portrait. Returns the index (1-based) of the button chosen, or 0 if "Cancel" was chosen.
+~output(<any a>,,,)
+	Joins together all 'a', and displays it in the output area. Returns 1.
+~outputicon(icon$, <any b>,,,)
+	Joins together all 'b', and displays it in the output area with image file 'icon$' to the left. 'icon$' must be the full filename, not just the basename - "images/item/gold_0n.gif", for instance. Returns 1.
+~output_color(fg$, bg$)
+	Changes the foreground and background colors of the output window. The colors are the same as listed below for 'gcolor()'. Red (#ff0000) and blue (#0000ff) are used by combat and error messages, so you should always choose output colors that will leave those visible - either a dark background or a light one, or a green one, but do not use a pure blue or red output background. Returns 1.
+~pause()
+	"Pauses" the map view. When the map view is paused, it will not automatically redraw until you tell it to with a redraw(), or until you tell it to resume(). You must always resume() after pausing. Returns 1. This is most often used in animated intro sequences:
+
+def(intro())
+    pause()
+    th_moveto("player", "world_M",5,0)
+    redraw()
+    wait(0.5)
+    th_moveto("player", "world_M",5,1)
+    redraw()
+    wait(0.5)
+    th_moveto("player", "world_M",5,2)
+    redraw()
+    wait(0.5)
+    th_moveto("player", "world_M",5,3)
+    redraw()
+    wait(0.5)
+    th_moveto("player", "world_M",5,4)
+    redraw()
+    wait(0.5)
+    th_moveto("player", "world_M",5,5)
+    resume()
+    ;
+
+
+~pl_drop(plid$, itid$)
+	The player drops an item 'itid$' from inventory to the ground. 'plid$' should always be "player" (it is included for compatibility with future versions which may allow multi-character parties). Returns 1 if the drop succeeded, 0 if it failed, which can happen if you've set 'it_dropfunc()'.
+~pl_equip(plid$, itid$)
+	The player equips an item 'itid$' from inventory, first removing any equipment in the same position. 'plid$' should always be "player". Returns 1 if the equip succeeded, 0 if it failed, which can happen if you've set 'it_equipfunc()'.
+~pl_get_equip$(plid$, pos)
+	Returns the id$ of an equipment item of the Player; 'pos' is one of the EQ_* constants above. Returns "" if no item is ready there.
+~pl_get_item$(plid$, i)
+	Returns the id$ of the 'i'th item carried by Player; 'i' is 0-indexed, and must be less than 'pl_get_item_count(plid$)'.
+~pl_get_item_count(plid$)
+	Returns the number of items carried by the Player. 'plid$' should always be "player". Returns 1.
+~pl_get_level(plid$)
+	Returns the Player's current level. There is no way to change the level except to give the Player more experience.
+~pl_remove(plid$, pos)
+	The player removes equipment from 'pos', which must be one of EQ_*, and returns it to inventory. 'plid$' should always be "player". Returns 1 if the remove succeeded, 0 if it failed, which can happen if you've set 'it_removefunc()'.
+~pl_take(plid$, itid$)
+	The player takes an item 'itid$', which may have any location. 'plid$' should always be "player". Returns 1 if the take succeeded, 0 if it failed, which can happen if you've set 'it_takefunc()'.
+~playsound(filename$ {, control})
+	plays a sound file. 'filename$' is the path relative to Hephaestus, including the extension (usually ".au" or ".wav"), and always uses '/' between paths (even if you're using Windows). If 'control' is included, it can have one of three values: SOUND_Loop, to play the sound looping over and over; SOUND_Stop, to stop the named sound, if it's currently playing; or SOUND_StopAll, to stop all sounds in the engine. See Sound. Returns 1.
+~redraw()
+	Forces the map view to update right now. See pause(). Returns 1.
+~resume()
+	"Resumes" the map view, so it will update normally. See pause(). Returns 1.
+~stats_lock(a)
+	If 'a' is non-zero, locks the stats display so you can make multiple changes as a single update, without the display flickering. When you get done with your changes, call again with 'a' as 0 to unlock it. Returns 1.
+~st_exists(id$)
+	Returns 0 if Stuff 'id$' does not exist, or one of the TYPE_* constants if it does. As other types may be added in the future, you should always have an 'else' case in any test involving the type, for instance:
+
+let(type,st_exists(targetid$))
+if(eq(type,0),return("Nothing"),
+    eq(type,TYPE_Map),return("Map"),
+    eq(type,TYPE_Item),return("Item"),
+    eq(type,TYPE_Creature),return("Creature"),
+    eq(type,TYPE_Player),return("Player"),
+    return("Unknown") )
+
+
+~st_get_name$(id$)
+	Returns the name of a Stuff.
+~st_get_prop(id$, key$)
+~st_get_prop$(id$, key$)
+	Returns the value of property 'key$' assigned to a Stuff. If you try to read a property which has not been set, returns 0 for 'st_get_prop' or "" for 'st_get_prop$'. If you try to read a property which is of a different type than the function (string for 'st_get_prop' or number for 'st_get_prop$'), an error occurs. See also 'st_prop'.
+~st_name(id$, name$)
+	Changes the name of a Stuff. Returns 1.
+~st_prop(id$, key$, <any value>)
+	Sets the value of property 'key$' on Stuff 'id$' to 'value'. Properties can be used for any values of your own, and read with 'st_get_prop'. These let you expand the capabilities of the system almost indefinitely. The main uses are as status flags, or to hold lists of items for shopkeepers or creatures with predefined loot (use a property like "nitems" to hold the number of items, and 'join$("item",i)' to identify each item). Returns 1.
+~st_trigger(id$, func())
+	Sets the trigger function of a Stuff. If the target is a Map, then it is triggered every turn that the player is on it; if it is a Thing, it is triggered when the user runs into it or hits "trigger" on it; if it is a Terrain, it is triggered when the user tries to enter it. 
+
+When triggered, the function and its arguments will be evaluated, exactly as you pass them in (function arguments are not evaluated until the triggering event, but variables are immediately evaluated). If you want to disable the trigger, set it to 0. The id of the Thing triggered will be in the global variable 'targetid$', and the id of the Entity that triggered it will be in 'actorid$', which you can test to separate the Player from Creatures.
+
+If the target is a Terrain, then the return value of the trigger function matters - zero indicates that the actor cannot enter the grid, non-zero indicates that the actor can. The return value does not matter for other targets.
+
+Returns 1.
+
+~tempid$()
+	Returns a random temporary id, guaranteed not to clash with anything currently defined; it is in the form "_1", etc.; users should never create an id starting with an underscore. tempid$() is mostly used when you're generating terrain, equipment items, or blocks that you never expect to refer to by id again. Or you can store the id in a global variable.
+~ter_frame(id$, layer, frame)
+	Sets the current frame of a Terrain. 'layer' is LAYER_Under or LAYER_Over. This is used for the same reason as 'th_frame' - it can be used to produce the effect of waves lapping at a shore, if every tile on the same row or column is given the same frame, then the next frame for the next row or column, etc. Returns 1.
+~ter_get_tile$(id$, layer)
+	Returns the 'basefile$' of a Terrain layer's tile, used to identify the type of terrain an Entity is on.
+~ter_get_walls$(id$)
+	Returns the walls of a Terrain; see 'ter_walls()' for the format.
+~ter_new(id$, name$)
+	Creates a new Terrain. Returns 1. The recommended way to work with terrains is to get a temporary id with 'tempid$()', build the terrain, and then assign it to the grids, either directly (shown in the example below) or with 'map_fill()':
+
+def(build_elysium())
+    map_new("elysium","Elysium",11,11)
+    let(grass$, tempid$())
+    ter_new(grass$, "")
+    ter_tile(grass$, LAYER_Under, "images/ground/grass", 1, 1)
+    for(y,0,10,1, for(x,0,10,1, gr_terrain("elysium",x,y, grass$) ) )
+    let(flower$, tempid$())
+    ter_new(flower$, "")
+    ter_tile(flower$, LAYER_Under, "images/ground/dandelions", 1, 1)
+    for(i,1,20,1,
+        let(x,sub(rnd(11),1)), let(y,sub(rnd(11),1)),
+        gr_terrain("elysium",x,y, flower$)
+    )
+    ;
+
+
+~ter_opa(id$, opa)
+	Sets the opacity of a Terrain: OPA_None (you can see through it), OPA_Partial (there's a "mist" over everything behind it, and you can't see through two partials), OPA_Full (you can't see through it). Returns 1.
+~ter_tile(id$, layer, basefile$, nfacings, nframes)
+	Assigns a new tile to a Terrain. 'layer' is LAYER_Under or LAYER_Over; 'basefile$' is the path relative to Hephaestus - see Art. 'nfacings' must be 1, 2, or 4; 'nframes' must be 1 or more, the latter two depend on the image files available. Returns 1.
+~ter_walls(id$, walls$)
+	Sets the walls of a Terrain. 'walls$' must be 4 characters, representing N, E, S, W in order, each one 0=no wall, or 1=wall; all Terrains start as "0000". Walls aren't just physical walls, either - ledges that you can't ascend or descend and catwalks can be built with walls, for instance. Walls block both entry and exit from the terrain. Returns 1.
+~th_blocking(id$, state)
+	Sets the blocking state of a Thing; 0=non-blocking, non-zero=blocking. The default for Items is non-blocking, for all other types is blocking. Any non-blocking Item can be picked up and carried by the Player. Returns 1.
+~th_frame(id$, frame)
+	Sets the starting frame of a Thing. This is only really useful when creating animation sequences with multiple Things using the same tile; if you just create them all with the same frame, they'll appear to be doing synchronized jumping jacks or something, which is very silly-looking. Returns 1.
+~th_facing(id$, facing)
+	Sets the facing of a Thing; 0=North, 1=East, 2=South, 3=West. Returns 1.
+~th_get_facing(id$)
+	Returns the facing of a Thing; 0=North, 1=East, 2=South, 3=West.
+~th_get_gold(id$)
+	Returns the gold of a Thing. Only works on Statted things - Items or Entities.
+~th_get_mapid$(id$)
+	Returns the map id of a Thing's current location.
+~th_get_pose(id$)
+	Returns the current pose of a Thing.
+~th_get_stat(id$, stat)
+	Returns the current stat score of a Thing for 'stat'. Only works on Statted things - Items or Entities.
+~th_get_statmax(id$, stat)
+	Returns the maximum stat score of a Thing for 'stat'. Only works on Statted things - Items or Entities.
+~th_get_sx(id$)
+	Returns the leftmost x-coord of a Thing on the screen for use with graphics functions. If the coord is less than 0 or greater than VIEW_SIZE, then the Thing is not visible.
+~th_get_sy(id$)
+	Returns the topmost y-coord of a Thing on the screen for use with graphics functions. If the coord is less than 0 or greater than VIEW_SIZE, then the Thing is not visible. This is the top of the grid square, NOT the top of the tile. If the tile is 70 pixels tall, for instance, it will extend 22 pixels above 'th_get_sy()'.
+~th_get_x(id$)
+	Returns the x-coord of a Thing's current location.
+~th_get_y(id$)
+	Returns the y-coord of a Thing's current location.
+~th_gold(id$, gold)
+	Sets the gold of a Thing. Creature gold is used as a reward when defeated by the Player. Player gold is the current cash carried, which can be spent to buy items and services. Item gold is used as the price to buy the Item new (Items are worth half as much when sold). Naturally, all game worlds use gold as their currency, just as all alternate history worlds have fleets of zeppelins. Returns 1. Only works on Statted things - Items or Entities.
+~th_moveto(id$, mapid$, x, y {, teleport }?)
+	Moves a Thing to a new Grid. If 'teleport' is specified and non-zero, the trigger (see 'st_trigger()') of the destination grid is not checked. For instance, in Hades, the stairs "teleport" the player onto the next level's stairs; if they did not, the player would bounce up and down forever as each stair's trigger activated. Returns 1 if the move was successful, 0 if it failed.
+~th_opa(id$, opa)
+	Sets the opacity of Thing 'id$'. The default opacity of all Things is OPA_None. Returns 1.
+~th_pose(id$, pose)
+	Sets the pose of a Thing (0-indexed). Returns 1.
+~th_remove(id$, destroy)
+	Removes a Thing from the map, and destroys it if destroy is non-zero. Returns 1.
+~th_stat(id$, stat, score)
+	Sets the current stat score of a Thing for 'stat' to 'score'. If you set the current stat higher than the maximum, it is cut off at the max. Entities use their stats directly, while the stats of Items are added to the stats of a Player who equips that Items, and subtracted again when the Item is unequipped. Only works on Statted things - Items or Entities.
+~th_statmax(id$, stat, score)
+	Sets the maximum stat score of a Thing for 'stat' to 'score'. If you set the maximum stat lower than the current stat, the current stat is also lowered. Only works on Statted things - Items or Entities.
+~th_statboth(id$, stat, score)
+	Sets both the current and maximum stat score of a Thing for 'stat' to 'score'. Only works on Statted things - Items or Entities.
+~th_task(id$, stat)
+	Returns the result of Thing 'id$' attempting a task against a given 'stat'. This is a 'dXX' roll (roll 2d10, if 2 is rolled, roll again and subtract, if 20 is rolled, roll again and add), plus the stat, minus 20 (the basic target number). A positive result is a success (unless you want to make it more difficult), a zero or negative result is a failure. The roll will not exceed twice the stat in either direction. Because 2d10 has a bell-shaped probability curve (highest in the center, curving down to 1% at the ends) even a moderate bonus or penalty can make a big difference, but on average a +/-1 modifier is +/-5% chance of success. Only works on Statted things - Items or Entities.
+~th_tile(id$, pose, basefile$, nfacings, nframes)
+	Assigns a new tile to a thing's pose. 'basefile$' is the path relative to Hephaestus - see Art. 'nfacings' must be 1, 2, or 4; 'nframes' must be 1 or more, the latter two depend on the image files available. When first defining a Thing, be sure to define the poses in order. If you want to remove a tile, set 'basefile$' to "". Returns 1.
+~wait(a)
+	Waits for 'a' seconds, which may be fractional, and then returns. Mostly used as a delay in animation sequences, see pause(). Returns 1.
+~window_color(fg$, bg$)
+	Changes the foreground and background colors of the game window. The colors are the same as listed below for 'gcolor()'. This will make the menu bar flash in and out of existence, an unfortunate problem with Java's windowing toolkit. Returns 1.
+~window_image(filename$)
+	Changes the tiled background image of the lower left corner of the game window. Note that this is not aligned with the bottom of the output, and its positioning will vary on different platforms, or even the same platform with different fonts, so don't rely on the image being lined up wherever it is on your screen, use it more like a web page background. Returns 1.
+
+
+Graphics Functions
+
+The mdh.hephaestus.graphics library is automatically loaded when you start Hephaestus.
+
+The graphics functions allow you to draw freeform graphics on top of the display. The main use for this is for special effects and illustrating attacks, or for use in "cinematic" sequences. The drawings are not shown until you issue a redraw() command (or the view updates for the next turn), and remain until you issue a gcls() command.
+
+The display is VIEW_SIZE pixels across and down, and coords are 0-indexed.
+
+Graphics functions use an invisible "cursor" position, rather than passing the start coordinate in each time. To draw a line from 10,5 to 100,50, you gmove(10,5) to the start of the line, then gline(100,50) to the end of the line; afterwards, the cursor will be at 100,50.
+
+Example
+
+Call the following function, and the player will be "targeted" with four yellow lines from the corners and a red box; if you put this in a map's 'st_trigger' function, the player will be constantly targeted.
+
+def(targeting())
+    # find the top-left corner of the player's grid
+    let(x, mul(th_get_x("player"),TILE_SIZE))
+    let(y, mul(th_get_y("player"),TILE_SIZE))
+    # offset to the center of the player's image, which is 48x70
+    addv(x, 24)  # 48/2 = 24
+    addv(y, 11)  # (70-48)/2 = 11
+    gcls()
+    gcolor("yellow")
+    gplot(0,0)
+    gline(x,y)
+    gline(VIEW_SIZE,0)
+    gplot(0,VIEW_SIZE)
+    gline(x,y)
+    gline(VIEW_SIZE,VIEW_SIZE)
+    gcolor("red")
+    gmove(sub(x,24), sub(y,35))
+    grect(add(x,24), add(y,35))
+    redraw()
+    ;
+
+
+~gcls()
+	Clears the graphics pane. Returns 1.
+~gcolor(c$)
+	Sets the current color to the color code 'c'. 'c' may be one of the folowing named colors, or "web format" ("#RRGGBB"). Returns 1. 
+
+Name
+Web Format
+Color Test
+
+black
+#000000
+   
+
+blue
+#0000ff
+   
+
+cyan
+#00ffff
+   
+
+darkGray
+#404040
+   
+
+gray
+#808080
+   
+
+green
+#00ff00
+   
+
+lightGray
+#c0c0c0
+   
+
+magenta
+#ff00ff
+   
+
+orange
+#ffc800
+   
+
+pink
+#ffafaf
+   
+
+red
+#ff0000
+   
+
+white
+#ffffff
+   
+
+yellow
+#ffff00
+   
+
+'gcolor()' also supports alpha-blending, aka "partial transparency". By using the format "#aarrggbb", the hex number in "aa" is the alpha level. A value of "00" or "ff" means that the color is completely opaque; a value of "01" means that the color is almost, but not quite, completely transparent; intermediate values are blended between the drawn color and the background color. For instance, "#7fff0000" will tint red everything it is drawn over.
+
+~gcurx()
+	Returns the x-coord of the cursor.
+~gcury()
+	Returns the y-coord of the cursor.
+~gfilloval(x, y)
+	Fills an oval (as 'goval') with the current color, and moves the cursor to 'x','y'. Returns 1.
+~gfillrect(x, y)
+	Fills the region on the graphics window from the cursor to 'x','y' with the current color, and moves the cursor to 'x','y'. Returns 1.
+~gfont(a$, b$, c)
+	Sets the font to family 'a$' ("Serif", "SansSerif", or "Monospaced"), style 'b$' ("p"=plain, "b"=bold, "i"=italic, "bi"="bold+italic"), and size 'c'. An error occurs if you give illegal values. Returns 1.
+~gimage(filename$ {, w, h {, sx, sy, sw, sh} })
+	draws an image on the graphics screen at the cursor. If w,h are specified, the image is scaled to that width and height. If sx,sy,sw,sh are specified, only a subsection of the image is drawn and scaled. Returns 1.
+~gline(x, y)
+	draws a line on the graphics screen from the cursor to 'x','y', and moves the cursor there. Returns 1.
+~gmove(x, y)
+	Moves the cursor to 'x','y' without painting anything. Returns 1.
+~goval(x, y)
+	draws an oval on the graphics screen from the cursor to 'x','y', and moves the cursor there. Returns 1.
+~gplot(x, y)
+	draws a pixel on the graphics screen at 'x','y' and moves the cursor there. Returns 1.
+~grect(x, y)
+	draws a rectangle on the graphics screen from the cursor to 'x','y', and moves the cursor there. Returns 1.
+~gtext(a$)
+	draws text 'a' on the graphics window at the cursor (top left corner of the text), in the current font and color, and moves the cursor to immediately after the text, or to the start of the next "line" if the cursor is off the screen. Returns 1.
+~gtext_height(a$)
+	Returns the height of text 'a' in pixels.
+~gtext_width(a$)
+	Returns the width of text 'a' in pixels.
