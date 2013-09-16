@@ -1,5 +1,5 @@
-# Подземелья.min по мотивам книги-игры "Подземелья Черного Замка"
-# Copyright 2002 © by Andrey Ivushkin <ivushkin@lnau.lg.ua>
+# РџРѕРґР·РµРјРµР»СЊСЏ.min РїРѕ РјРѕС‚РёРІР°Рј РєРЅРёРіРё-РёРіСЂС‹ "РџРѕРґР·РµРјРµР»СЊСЏ Р§РµСЂРЅРѕРіРѕ Р—Р°РјРєР°"
+# Copyright 2002 В© by Andrey Ivushkin <ivushkin@lnau.lg.ua>
 # Author: Andrey Ivushkin
 # Email: ivushkin@lnau.lg.ua
 # Created: 28.10.02 9:20
@@ -125,14 +125,14 @@ def(newgame())
     window_color("white", "black")
     output_color("white", "black")
     output("\n       ",GAME$)
-    output("  Copyright 2002 © by Andrey Ivushkin")
+    output("  Copyright 2002 В© by Andrey Ivushkin")
     output("       <ivushkin@lnau.lg.ua>\n")
-	output("Создается игровой мир...\n")
+	output("РЎРѕР·РґР°РµС‚СЃСЏ РёРіСЂРѕРІРѕР№ РјРёСЂ...\n")
 	build_world()
 	build_player()
 	_intro()
 	_buildings()
-	output("\n\t\tГотово.\n")
+	output("\n\t\tР“РѕС‚РѕРІРѕ.\n")
 	;
 
 def(build_player())
@@ -151,14 +151,14 @@ def(build_player())
 	st_prop("player","bag_room",7)
     stats_lock(0)
     # Give the player some simple magic spells
-	en_magic("player","Где я?",debugWhereAmI())
-	en_magic("player","Телепортироваться",debugTeleport())
+	en_magic("player","Р“РґРµ СЏ?",debugWhereAmI())
+	en_magic("player","РўРµР»РµРїРѕСЂС‚РёСЂРѕРІР°С‚СЊСЃСЏ",debugTeleport())
 #	spell_select(5)
 	let(id$,tempid$())
-    let(id$,create_it$("Меч","images/weapon/dagger3",1,1))
+    let(id$,create_it$("РњРµС‡","images/weapon/dagger3",1,1))
     it_equip(id$,EQ_Weapon)
     pl_equip("player",id$)
-    it_new("Bulb","Фляга с водой")
+    it_new("Bulb","Р¤Р»СЏРіР° СЃ РІРѕРґРѕР№")
     st_prop("Bulb","hp",2)
     th_tile("Bulb",0,"images/item/bulb_purple",1,1)
     it_removefunc("Bulb",no_remove())
@@ -168,10 +168,10 @@ def(build_player())
 	;
 
 def(spell_select(count))
-	let(opt$,"Левитация|Огонь|Иллюзия|Сила|Слабость|Копия|Исцеление|Плавание")
+	let(opt$,"Р›РµРІРёС‚Р°С†РёСЏ|РћРіРѕРЅСЊ|РР»Р»СЋР·РёСЏ|РЎРёР»Р°|РЎР»Р°Р±РѕСЃС‚СЊ|РљРѕРїРёСЏ|РСЃС†РµР»РµРЅРёРµ|РџР»Р°РІР°РЅРёРµ")
 	for(i,1,count,1,
-		let(text$,join$("Выберите ",str$(i),"-е заклятье:",)),
-		let(ch,menu("Обучение магии",text$,opt$,0)),
+		let(text$,join$("Р’С‹Р±РµСЂРёС‚Рµ ",str$(i),"-Рµ Р·Р°РєР»СЏС‚СЊРµ:",)),
+		let(ch,menu("РћР±СѓС‡РµРЅРёРµ РјР°РіРёРё",text$,opt$,0)),
 		let(spell$,word$(opt$,ch,"|")),
 		output("Got ",spell$," spell"),
 		let(n$,join$(str$(i)," ",spell$)),
@@ -256,11 +256,11 @@ def(build_ter(var$, char$, name$, basefile$, nframes, walls$, opa))
 def(set_globals())
 	quest("")
 	tick_set(0)
-	global(GAME$,"Подземелья Черного Замка")
-	global(BULB$,"Ваша фляга пуста.")
-	global(TODO$,"Что Вы сделаете?")
-	global(TOSAY$,"Что Вы скажете ")
-	global(YESNO$,"Да|Нет")
+	global(GAME$,"РџРѕРґР·РµРјРµР»СЊСЏ Р§РµСЂРЅРѕРіРѕ Р—Р°РјРєР°")
+	global(BULB$,"Р’Р°С€Р° С„Р»СЏРіР° РїСѓСЃС‚Р°.")
+	global(TODO$,"Р§С‚Рѕ Р’С‹ СЃРґРµР»Р°РµС‚Рµ?")
+	global(TOSAY$,"Р§С‚Рѕ Р’С‹ СЃРєР°Р¶РµС‚Рµ ")
+	global(YESNO$,"Р”Р°|РќРµС‚")
 	let(ter$,"Terrain$")
     build_ter(ter$, ".", "", "images/ground/grass", 1, "0000", OPA_None)
     build_ter(ter$, "*", "", "images/ground/road", 1, "0000", OPA_None)
@@ -308,7 +308,7 @@ def(set_globals())
 def(takeme(place))
 	if(lt(st_get_prop("player","bag_room"),place),
 		do(
-			output("В заплечном мешке нет места!"),
+			output("Р’ Р·Р°РїР»РµС‡РЅРѕРј РјРµС€РєРµ РЅРµС‚ РјРµСЃС‚Р°!"),
 			return(0)
 		),
 		st_prop("player","bag_room",sub(st_get_prop("player","bag_room"),place))
@@ -320,7 +320,7 @@ def(takeme(place))
 def(dropme())
 	st_prop("player","bag_room",add(st_get_prop("player","bag_room"),
 		st_get_prop(targetid$,"place")))
-	output("В мешке",st_get_prop("player","bag_room"))
+	output("Р’ РјРµС€РєРµ",st_get_prop("player","bag_room"))
 	return(1)
 	;
 
@@ -331,28 +331,28 @@ def(player_teleport(mapid$, x, y))
     ;
 
 def(wounded())
-    let(id$,create_cr$("Раненый разбойник","","images/people/beggar1", 1, 1,1,1,1,1,"world",38,66))
+    let(id$,create_cr$("Р Р°РЅРµРЅС‹Р№ СЂР°Р·Р±РѕР№РЅРёРє","","images/people/beggar1", 1, 1,1,1,1,1,"world",38,66))
     st_trigger(id$,wounded_talk())
     ;
 
 def(wounded_talk())
-	if(eq(alert("Trader","Здравствуй, добрый человек!\nЯ торговец, на меня напали разбойники и ограбили. Недолго мне осталось.\nЯ очень хочу пить, дай мне немного воды.",
-		"Да|Нет",1,2,"images/people/beggar1_0n.gif"),1),reward_for_water())
+	if(eq(alert("Trader","Р—РґСЂР°РІСЃС‚РІСѓР№, РґРѕР±СЂС‹Р№ С‡РµР»РѕРІРµРє!\nРЇ С‚РѕСЂРіРѕРІРµС†, РЅР° РјРµРЅСЏ РЅР°РїР°Р»Рё СЂР°Р·Р±РѕР№РЅРёРєРё Рё РѕРіСЂР°Р±РёР»Рё. РќРµРґРѕР»РіРѕ РјРЅРµ РѕСЃС‚Р°Р»РѕСЃСЊ.\nРЇ РѕС‡РµРЅСЊ С…РѕС‡Сѓ РїРёС‚СЊ, РґР°Р№ РјРЅРµ РЅРµРјРЅРѕРіРѕ РІРѕРґС‹.",
+		"Р”Р°|РќРµС‚",1,2,"images/people/beggar1_0n.gif"),1),reward_for_water())
 	th_remove(targetid$,1)
 	;
 
 def(no_remove())
-	output("Это нельзя выбросить")
+	output("Р­С‚Рѕ РЅРµР»СЊР·СЏ РІС‹Р±СЂРѕСЃРёС‚СЊ")
 	return(0)
 	;
 
 def(reward_for_water())
-	if(not(st_get_prop("player","bulb_water")),do(alert("Игрок","Прости, у меня нет для тебя воды.","OK",
+	if(not(st_get_prop("player","bulb_water")),do(alert("РРіСЂРѕРє","РџСЂРѕСЃС‚Рё, Сѓ РјРµРЅСЏ РЅРµС‚ РґР»СЏ С‚РµР±СЏ РІРѕРґС‹.","OK",
 		1,1,"images/player/hero_0e.gif"),return(0)))
 	st_prop("player","bulb_water",0)
 	output(BULB$)
-	let(i$,"На первом перекрестке иди прямо.\nКогда увидишь 2 яблони,\nрой между ними.")
-	alert("Торговец",join$("Большое спасибо. Я тебя отблагодарю.\n",i$,"\nТам я зарыл все свое добро."),"OK",
+	let(i$,"РќР° РїРµСЂРІРѕРј РїРµСЂРµРєСЂРµСЃС‚РєРµ РёРґРё РїСЂСЏРјРѕ.\nРљРѕРіРґР° СѓРІРёРґРёС€СЊ 2 СЏР±Р»РѕРЅРё,\nСЂРѕР№ РјРµР¶РґСѓ РЅРёРјРё.")
+	alert("РўРѕСЂРіРѕРІРµС†",join$("Р‘РѕР»СЊС€РѕРµ СЃРїР°СЃРёР±Рѕ. РЇ С‚РµР±СЏ РѕС‚Р±Р»Р°РіРѕРґР°СЂСЋ.\n",i$,"\nРўР°Рј СЏ Р·Р°СЂС‹Р» РІСЃРµ СЃРІРѕРµ РґРѕР±СЂРѕ."),"OK",
 		1,1,"images/people/beggar1_0n.gif")
 	let(id$,info$(i$))
     st_trigger(id$,treasure(26,66))
@@ -363,7 +363,7 @@ def(drink_bulb())
 	if(eq(bw,0), do(output(BULB$),return(0)))
 	if(HP_recover(targetid$),do(
 		st_prop("player","bulb_water",sub(bw,2)),
-		output("Вы делаете глоток из фляги и чувствуете себя лучше."),
+		output("Р’С‹ РґРµР»Р°РµС‚Рµ РіР»РѕС‚РѕРє РёР· С„Р»СЏРіРё Рё С‡СѓРІСЃС‚РІСѓРµС‚Рµ СЃРµР±СЏ Р»СѓС‡С€Рµ."),
 		return(1)
 	))
 	;
@@ -373,19 +373,19 @@ def(treasure(x,y))
 		do(
 				decr(y),
 				th_remove(targetid$,1),
-				output("Вы нашли сокровище!"),
+				output("Р’С‹ РЅР°С€Р»Рё СЃРѕРєСЂРѕРІРёС‰Рµ!"),
 				build_gold("world",x,y,10),
-				let(i$,create_it$("Серебряное кольцо","images/item/ring_cyan",1,1)),
+				let(i$,create_it$("РЎРµСЂРµР±СЂСЏРЅРѕРµ РєРѕР»СЊС†Рѕ","images/item/ring_cyan",1,1)),
 				th_moveto(i$,"world",x,y),
 				st_trigger(i$,use_ring_cyan()),
 				it_takefunc(i$,ring_cyan_luck()),
 				it_dropfunc(i$,dropme()),
-				let(is$,create_it$("Светильник","images/item/lamp",1,1)),
+				let(is$,create_it$("РЎРІРµС‚РёР»СЊРЅРёРє","images/item/lamp",1,1)),
 			    takedrop(is$,1),
 			    st_trigger(is$,use_lamp()),
 				th_moveto(is$,"world",x,y),
 			),
-			output("Здесь ничего нет!")
+			output("Р—РґРµСЃСЊ РЅРёС‡РµРіРѕ РЅРµС‚!")
 	)
 	;
 
@@ -397,7 +397,7 @@ def(takedrop(id$,place))
 
 def(build_gold(mapid$,x,y,gold))
     let(id$,tempid$())
-    it_new(id$,"Золото")
+    it_new(id$,"Р—РѕР»РѕС‚Рѕ")
     th_tile(id$,0,"images/item/gold",1,1)
     it_takefunc(id$,take_gold(gold))
     th_moveto(id$,mapid$,x,y)
@@ -407,7 +407,7 @@ def(build_gold(mapid$,x,y,gold))
 def(take_gold(gold))
 	if(ne(actorid$,"player"),return(0))
 	th_gold("player",add(th_get_gold("player"),gold))
-	output("Вы нашли ",gold," золота!")
+	output("Р’С‹ РЅР°С€Р»Рё ",gold," Р·РѕР»РѕС‚Р°!")
 	th_remove(targetid$,1)
 	return(0)
 	;
@@ -436,19 +436,19 @@ def(ring_cyan_luck())
 	;
 
 def(spider_reward())
-	let(i$,create_it$("Бриллиант","images/item/gem_big_sapphire",1,1))
+	let(i$,create_it$("Р‘СЂРёР»Р»РёР°РЅС‚","images/item/gem_big_sapphire",1,1))
 	takedrop(i$,1)
 	st_trigger(i$,use_diamond())
 	th_moveto(i$, "world", 44, 62)
-	let(i$,create_it$("Золотой свисток","images/item/music1",1,1))
+	let(i$,create_it$("Р—РѕР»РѕС‚РѕР№ СЃРІРёСЃС‚РѕРє","images/item/music1",1,1))
 	takedrop(i$,1)
 	st_trigger(i$,use_gold_whistler())
 	th_moveto(i$, "world", 44, 62)
-	output("Гигантский паук мертв, и Вы находите\nкое-что на его дереве...")
+	output("Р“РёРіР°РЅС‚СЃРєРёР№ РїР°СѓРє РјРµСЂС‚РІ, Рё Р’С‹ РЅР°С…РѕРґРёС‚Рµ\nРєРѕРµ-С‡С‚Рѕ РЅР° РµРіРѕ РґРµСЂРµРІРµ...")
 	;
 
 def(spider(with_reward))
-    let(id$,create_cr$("Гигантский паук","h","images/creature/spider2", 1, 2, 10,5,5,5, "world", 43, 61))
+    let(id$,create_cr$("Р“РёРіР°РЅС‚СЃРєРёР№ РїР°СѓРє","h","images/creature/spider2", 1, 2, 10,5,5,5, "world", 43, 61))
     enemy(id$)
    	if(with_reward,cr_defeat(id$,spider_reward()))
 	;
@@ -488,32 +488,32 @@ def(create_bl$(name$,image$,mapid$,x,y,nframes,nfacings))
     ;
     
 def(dryad())
-	let(f$,create_cr$("Лесовичок","","images/creature/dryad",1,2,8,3,8,0,"world",36,62))
+	let(f$,create_cr$("Р›РµСЃРѕРІРёС‡РѕРє","","images/creature/dryad",1,2,8,3,8,0,"world",36,62))
 	st_trigger(f$,dryad_talk())
 	cr_defeat(f$,dryad_defeat())
 	;
 
 def(dryad_talk())
-	let(ch,menu("Лесовичок","Я охраняю эти леса. Что Вы делаете в моих владениях?",
-		"Я собираюсь драться с Барладом Дэртом|Я хочу спасти Принцессу|Просто прогуливаюсь|<Атаковать Лесовичка>",0,
+	let(ch,menu("Р›РµСЃРѕРІРёС‡РѕРє","РЇ РѕС…СЂР°РЅСЏСЋ СЌС‚Рё Р»РµСЃР°. Р§С‚Рѕ Р’С‹ РґРµР»Р°РµС‚Рµ РІ РјРѕРёС… РІР»Р°РґРµРЅРёСЏС…?",
+		"РЇ СЃРѕР±РёСЂР°СЋСЃСЊ РґСЂР°С‚СЊСЃСЏ СЃ Р‘Р°СЂР»Р°РґРѕРј Р”СЌСЂС‚РѕРј|РЇ С…РѕС‡Сѓ СЃРїР°СЃС‚Рё РџСЂРёРЅС†РµСЃСЃСѓ|РџСЂРѕСЃС‚Рѕ РїСЂРѕРіСѓР»РёРІР°СЋСЃСЊ|<РђС‚Р°РєРѕРІР°С‚СЊ Р›РµСЃРѕРІРёС‡РєР°>",0,
 		"images/creature/dryad_0n.gif"))
 	if(eq(ch,4),do(enemy(targetid$),return(0)))
 	if(eq(ch,3),
 		do(
-			alert(st_get_name$(targetid$),"Что ж, я помогу тебе выбраться отсюда!","OK",1,1,"images/creature/dryad_0n.gif"),
+			alert(st_get_name$(targetid$),"Р§С‚Рѕ Р¶, СЏ РїРѕРјРѕРіСѓ С‚РµР±Рµ РІС‹Р±СЂР°С‚СЊСЃСЏ РѕС‚СЃСЋРґР°!","OK",1,1,"images/creature/dryad_0n.gif"),
 			th_moveto("player","world",73,20),
 			return(0)
 		)
 	)
-	alert(st_get_name$(targetid$),"Я помогу тебе. Иди за моим клубочком,\nон покажет безопасный путь. Пока!","OK",1,1,"images/creature/dryad_0n.gif")
-	let(r$,create_cr$("Волшебный клубочек","pnnnnnnwwnnwwwwwswwwwwnnnwnnwnnennwnnwnnneeenennnwnn","images/item/rope",1,1,0,30,0,0,"world", 36,61))
+	alert(st_get_name$(targetid$),"РЇ РїРѕРјРѕРіСѓ С‚РµР±Рµ. РРґРё Р·Р° РјРѕРёРј РєР»СѓР±РѕС‡РєРѕРј,\nРѕРЅ РїРѕРєР°Р¶РµС‚ Р±РµР·РѕРїР°СЃРЅС‹Р№ РїСѓС‚СЊ. РџРѕРєР°!","OK",1,1,"images/creature/dryad_0n.gif")
+	let(r$,create_cr$("Р’РѕР»С€РµР±РЅС‹Р№ РєР»СѓР±РѕС‡РµРє","pnnnnnnwwnnwwwwwswwwwwnnnwnnwnnennwnnwnnneeenennnwnn","images/item/rope",1,1,0,30,0,0,"world", 36,61))
 	en_turn(r$,auto_move(34))
 	th_blocking(r$,1)
 	th_remove(targetid$,1)
 	;
 
 def(dryad_defeat())
-	let(i$,create_it$("Серебряный свисток","images/item/music3_cyan",1,1))
+	let(i$,create_it$("РЎРµСЂРµР±СЂСЏРЅС‹Р№ СЃРІРёСЃС‚РѕРє","images/item/music3_cyan",1,1))
 	takedrop(i$,1)
 	st_trigger(i$,use_silver_whistler())
 	th_moveto(i$, "world", th_get_x(targetid$),th_get_y(targetid$))
@@ -521,7 +521,7 @@ def(dryad_defeat())
 
 def(use_silver_whistler())
 	if(q_is("Trader present"),do(
-		let(ch,alert("Торговец","Хороший свисток, но что мне с ним делать?\nДобавите еще 2 золотых?",
+		let(ch,alert("РўРѕСЂРіРѕРІРµС†","РҐРѕСЂРѕС€РёР№ СЃРІРёСЃС‚РѕРє, РЅРѕ С‡С‚Рѕ РјРЅРµ СЃ РЅРёРј РґРµР»Р°С‚СЊ?\nР”РѕР±Р°РІРёС‚Рµ РµС‰Рµ 2 Р·РѕР»РѕС‚С‹С…?",
 			YESNO$,1,2,"images/people/citizen2_0n.gif")),
 		if(eq(ch,1),
 			if(goldcost(2),do(
@@ -541,25 +541,25 @@ def(auto_move(y))
 	;
 
 def(hien())
-	let(f$,create_cr$("Гиена","","images/creature/dog1",1,2,7,3,8,0,"world",32,56))
+	let(f$,create_cr$("Р“РёРµРЅР°","","images/creature/dog1",1,2,7,3,8,0,"world",32,56))
 	st_trigger(f$,hien_talk())
 	;
 
 def(hien_talk())
-	let(ch,menu(GAME$,"Ваш путь преградила Гиена.",
-		"<Спросить, что ей нужно>|<Напасть на Гиену>",0,"images/creature/dog1_0n.gif"))
+	let(ch,menu(GAME$,"Р’Р°С€ РїСѓС‚СЊ РїСЂРµРіСЂР°РґРёР»Р° Р“РёРµРЅР°.",
+		"<РЎРїСЂРѕСЃРёС‚СЊ, С‡С‚Рѕ РµР№ РЅСѓР¶РЅРѕ>|<РќР°РїР°СЃС‚СЊ РЅР° Р“РёРµРЅСѓ>",0,"images/creature/dog1_0n.gif"))
 	if(eq(ch,2),do(enemy(targetid$),return(0)))
 	if(eq(ch,1),do(
-		alert("Гиена","О, я так рада хоть с кем-то поговорить!\nЕсли встретите разбойников, передайте от меня привет.",
+		alert("Р“РёРµРЅР°","Рћ, СЏ С‚Р°Рє СЂР°РґР° С…РѕС‚СЊ СЃ РєРµРј-С‚Рѕ РїРѕРіРѕРІРѕСЂРёС‚СЊ!\nР•СЃР»Рё РІСЃС‚СЂРµС‚РёС‚Рµ СЂР°Р·Р±РѕР№РЅРёРєРѕРІ, РїРµСЂРµРґР°Р№С‚Рµ РѕС‚ РјРµРЅСЏ РїСЂРёРІРµС‚.",
 			"OK",1,1,"images/creature/dog1_0n.gif"),
-		st_trigger(info$("Гиена передает привет разбойникам"),hien_word()),
+		st_trigger(info$("Р“РёРµРЅР° РїРµСЂРµРґР°РµС‚ РїСЂРёРІРµС‚ СЂР°Р·Р±РѕР№РЅРёРєР°Рј"),hien_word()),
 	))
 	th_remove(targetid$,1)
 	;
 
 def(hien_word())
 	if(q_is("assassins"),do(
-		ass_reward("О, Вы знаете Гиену!"),
+		ass_reward("Рћ, Р’С‹ Р·РЅР°РµС‚Рµ Р“РёРµРЅСѓ!"),
 		th_remove(targetid$,1),
 		return(1)
 	))
@@ -573,7 +573,7 @@ def(info$(text$))
     ;
 
 def(no_use())
-	output("Это здесь ни к чему!")
+	output("Р­С‚Рѕ Р·РґРµСЃСЊ РЅРё Рє С‡РµРјСѓ!")
 	;
 
 def(small_village())
@@ -590,7 +590,7 @@ def(small_village())
 		8,7,	2,3,	8,7,	2,3,	8,2,	8,7,	2,8,	2,8,	-1,-1
 	)
 	let(id$,tempid$())
-	bl_new(id$,"Колодец")
+	bl_new(id$,"РљРѕР»РѕРґРµС†")
 	th_tile(id$,0,"images/dungeon/well1",1,1)
 	st_trigger(id$,well())
 	th_moveto(id$,"world",13,59)
@@ -598,7 +598,7 @@ def(small_village())
 	let(y,read())
 	while(ge(x,0),
 		let(id$,tempid$()),
-		bl_new(id$,"Дом"),
+		bl_new(id$,"Р”РѕРј"),
 		th_tile(id$,0,"images/wild/house_stilts",1,1),
 		th_moveto(id$,"world",x,y),
 		let(x, read()), let(y, read())
@@ -615,7 +615,7 @@ def(small_village())
 		if(z,
 			do(
 			let(id$,tempid$()),
-			bl_new(id$,"Изгородь"),
+			bl_new(id$,"РР·РіРѕСЂРѕРґСЊ"),
 			if(eq(z,1), th_tile(id$,0,"images/wild/fence_white_es",1,1)),
 			if(eq(z,3), th_tile(id$,0,"images/wild/fence_white_sw",1,1)),
 			if(eq(z,5), th_tile(id$,0,"images/wild/fence_white_nw",1,1)),
@@ -628,38 +628,38 @@ def(small_village())
 		let(x, read()),
 		let(z, read())
 	)	
-	let(iid$,create_cr$("Старик","","images/people/old_citizen3",1,2,1,1,1,1,"world",15,59))
+	let(iid$,create_cr$("РЎС‚Р°СЂРёРє","","images/people/old_citizen3",1,2,1,1,1,1,"world",15,59))
 	st_trigger(iid$,old1_talk())
 	return(1)
 	;
 
 def(well())
-	let(ch,menu(GAME$,"Перед Вами колодец, полный воды.",
-		"Попить воды|Наполнить флягу",1,"images/dungeon/well1_0n"))
-	if(eq(ch,1),output("Попив воды, вы чувствуете себя получше."))
+	let(ch,menu(GAME$,"РџРµСЂРµРґ Р’Р°РјРё РєРѕР»РѕРґРµС†, РїРѕР»РЅС‹Р№ РІРѕРґС‹.",
+		"РџРѕРїРёС‚СЊ РІРѕРґС‹|РќР°РїРѕР»РЅРёС‚СЊ С„Р»СЏРіСѓ",1,"images/dungeon/well1_0n"))
+	if(eq(ch,1),output("РџРѕРїРёРІ РІРѕРґС‹, РІС‹ С‡СѓРІСЃС‚РІСѓРµС‚Рµ СЃРµР±СЏ РїРѕР»СѓС‡С€Рµ."))
 	if(eq(ch,2),
 		if(eq(st_get_prop("player","bulb_water"),4),
-			output("Ваша фляга уже наполнена."),
+			output("Р’Р°С€Р° С„Р»СЏРіР° СѓР¶Рµ РЅР°РїРѕР»РЅРµРЅР°."),
 		do(
-			output("Ваша фляга снова полна и может\nиспользоваться как прежде."),
+			output("Р’Р°С€Р° С„Р»СЏРіР° СЃРЅРѕРІР° РїРѕР»РЅР° Рё РјРѕР¶РµС‚\nРёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РєР°Рє РїСЂРµР¶РґРµ."),
 			st_prop("player","bulb_water",4)
 		))
 	)
 	;
 
 def(debugWhereAmI())
-	output("Вы в клетке ",th_get_x("player"),", ",th_get_y("player"))
+	output("Р’С‹ РІ РєР»РµС‚РєРµ ",th_get_x("player"),", ",th_get_y("player"))
 	;
 
 def(debugTeleport())
-	let(dest$,inputdlg$("Телепортация","Куда Вас телепортировать?",""))
+	let(dest$,inputdlg$("РўРµР»РµРїРѕСЂС‚Р°С†РёСЏ","РљСѓРґР° Р’Р°СЃ С‚РµР»РµРїРѕСЂС‚РёСЂРѕРІР°С‚СЊ?",""))
 	let(firstof,instr(dest$," "))
 #	if(gt(firstof,1),return(0))
 	let(x,val(mid$(dest$,1,decr(firstof))))
 	let(y,val(mid$(dest$,incr(firstof))))
 	if(mul(x,y),do(
 		th_moveto("player","world",x,y,1),
-		output("Телепортация завершена."),
+		output("РўРµР»РµРїРѕСЂС‚Р°С†РёСЏ Р·Р°РІРµСЂС€РµРЅР°."),
 		redraw(),
 		th_moveto("player","world",x,y)
 	))
@@ -667,16 +667,16 @@ def(debugTeleport())
 	
 def(old1_talk())
 	let(gif$,"images/people/old_citizen3_0n.gif")
-	alert("Старик","Я так одинок, добрый человек. Несколько месяцев назад здесь\nбыла большая счастливая деревня, но люди покинули ее.\nЯ последний остался...","OK",1,1,gif$)
-	let(ch,menu(GAME$,join$(TOSAY$,"ему?"),"Иду биться с чародеем|Куда ведет эта дорога?|<Покинуть деревню>",
+	alert("РЎС‚Р°СЂРёРє","РЇ С‚Р°Рє РѕРґРёРЅРѕРє, РґРѕР±СЂС‹Р№ С‡РµР»РѕРІРµРє. РќРµСЃРєРѕР»СЊРєРѕ РјРµСЃСЏС†РµРІ РЅР°Р·Р°Рґ Р·РґРµСЃСЊ\nР±С‹Р»Р° Р±РѕР»СЊС€Р°СЏ СЃС‡Р°СЃС‚Р»РёРІР°СЏ РґРµСЂРµРІРЅСЏ, РЅРѕ Р»СЋРґРё РїРѕРєРёРЅСѓР»Рё РµРµ.\nРЇ РїРѕСЃР»РµРґРЅРёР№ РѕСЃС‚Р°Р»СЃСЏ...","OK",1,1,gif$)
+	let(ch,menu(GAME$,join$(TOSAY$,"РµРјСѓ?"),"РРґСѓ Р±РёС‚СЊСЃСЏ СЃ С‡Р°СЂРѕРґРµРµРј|РљСѓРґР° РІРµРґРµС‚ СЌС‚Р° РґРѕСЂРѕРіР°?|<РџРѕРєРёРЅСѓС‚СЊ РґРµСЂРµРІРЅСЋ>",
 		0,gif$))
 	if(eq(ch,1),
 		do(
-			alert("Старик","Я дам тебе несколько советов. Дорога от деревни идет\nмеж Коричневых топей. Не сворачивай с нее!\n\nСамые сильные слуги Барлада Дэрта - Зеленые Рыцари.\nОни знают могущественные заклятия, а некоторые\nмогут отражать, особенно заклятие Копии.",
+			alert("РЎС‚Р°СЂРёРє","РЇ РґР°Рј С‚РµР±Рµ РЅРµСЃРєРѕР»СЊРєРѕ СЃРѕРІРµС‚РѕРІ. Р”РѕСЂРѕРіР° РѕС‚ РґРµСЂРµРІРЅРё РёРґРµС‚\nРјРµР¶ РљРѕСЂРёС‡РЅРµРІС‹С… С‚РѕРїРµР№. РќРµ СЃРІРѕСЂР°С‡РёРІР°Р№ СЃ РЅРµРµ!\n\nРЎР°РјС‹Рµ СЃРёР»СЊРЅС‹Рµ СЃР»СѓРіРё Р‘Р°СЂР»Р°РґР° Р”СЌСЂС‚Р° - Р—РµР»РµРЅС‹Рµ Р С‹С†Р°СЂРё.\nРћРЅРё Р·РЅР°СЋС‚ РјРѕРіСѓС‰РµСЃС‚РІРµРЅРЅС‹Рµ Р·Р°РєР»СЏС‚РёСЏ, Р° РЅРµРєРѕС‚РѕСЂС‹Рµ\nРјРѕРіСѓС‚ РѕС‚СЂР°Р¶Р°С‚СЊ, РѕСЃРѕР±РµРЅРЅРѕ Р·Р°РєР»СЏС‚РёРµ РљРѕРїРёРё.",
 				"OK",1,1,gif$)
 		)
 	)
-	if(eq(ch,2),alert(GAME$,"Старик становится подозрительным и умолкает.\nВам придется покинуть деревню...",
+	if(eq(ch,2),alert(GAME$,"РЎС‚Р°СЂРёРє СЃС‚Р°РЅРѕРІРёС‚СЃСЏ РїРѕРґРѕР·СЂРёС‚РµР»СЊРЅС‹Рј Рё СѓРјРѕР»РєР°РµС‚.\nР’Р°Рј РїСЂРёРґРµС‚СЃСЏ РїРѕРєРёРЅСѓС‚СЊ РґРµСЂРµРІРЅСЋ...",
 		"OK",1,1,gif$))
 	st_trigger(targetid$,0)
 	;
@@ -688,7 +688,7 @@ def(tick_set(m))
 def(three_assassins())
 	global(ENTCOUNT,3)
 	for(i,1,ENTCOUNT,1,do(
-		global(ENT$[i],create_cr$("Разбойник","h","images/people/assassin1",1,2,add(i,11),add(i,9),1,1,"world",add(14,mul(i,2)),30)),
+		global(ENT$[i],create_cr$("Р Р°Р·Р±РѕР№РЅРёРє","h","images/people/assassin1",1,2,add(i,11),add(i,9),1,1,"world",add(14,mul(i,2)),30)),
 		cr_faction(ENT$[i],1)
 		)
 	)
@@ -696,14 +696,14 @@ def(three_assassins())
 	tick_set(2)
 	st_trigger("world",quest_tick())
 	redraw()
-	alert(GAME$,"Дорогу Вам преграждают 3 разбойника.\nОни собираются убить Вас и ограбить...","OK",1,1)
-	let(as$,"Разбойники")
-	let(ch,menu(as$,join$(TOSAY$,"им?"),"Я отдам вам все деньги|Я иду драться с волшебником|Я встретил вашего знакомого|",
+	alert(GAME$,"Р”РѕСЂРѕРіСѓ Р’Р°Рј РїСЂРµРіСЂР°Р¶РґР°СЋС‚ 3 СЂР°Р·Р±РѕР№РЅРёРєР°.\nРћРЅРё СЃРѕР±РёСЂР°СЋС‚СЃСЏ СѓР±РёС‚СЊ Р’Р°СЃ Рё РѕРіСЂР°Р±РёС‚СЊ...","OK",1,1)
+	let(as$,"Р Р°Р·Р±РѕР№РЅРёРєРё")
+	let(ch,menu(as$,join$(TOSAY$,"РёРј?"),"РЇ РѕС‚РґР°Рј РІР°Рј РІСЃРµ РґРµРЅСЊРіРё|РЇ РёРґСѓ РґСЂР°С‚СЊСЃСЏ СЃ РІРѕР»С€РµР±РЅРёРєРѕРј|РЇ РІСЃС‚СЂРµС‚РёР» РІР°С€РµРіРѕ Р·РЅР°РєРѕРјРѕРіРѕ|",
 		0,"images/people/assassin1_0n.gif"))
-	if(eq(ch,1),alert(as$,"Парень, ты и так нам отдашь все!","OK",1,1))
-	if(eq(ch,2),ass_reward("Правда? Мы тебе поможем."))
+	if(eq(ch,1),alert(as$,"РџР°СЂРµРЅСЊ, С‚С‹ Рё С‚Р°Рє РЅР°Рј РѕС‚РґР°С€СЊ РІСЃРµ!","OK",1,1))
+	if(eq(ch,2),ass_reward("РџСЂР°РІРґР°? РњС‹ С‚РµР±Рµ РїРѕРјРѕР¶РµРј."))
 	if(eq(ch,3),do(
-		alert(as$,"И кого же ты видел?","OK",1,1),
+		alert(as$,"Р РєРѕРіРѕ Р¶Рµ С‚С‹ РІРёРґРµР»?","OK",1,1),
 		quest("assassins")
 	))
 	;
@@ -714,13 +714,13 @@ def(remove_entities())
 	;
 
 def(ass_reward(txt$))
-	alert("Разбойники",join$(txt$,"\nВот перо аиста. Может пригодиться... Если пойдешь отсюда направо,\nпридешь к мосту неподалеку от Черного Замка. Бывай!"),"OK",1,1)
+	alert("Р Р°Р·Р±РѕР№РЅРёРєРё",join$(txt$,"\nР’РѕС‚ РїРµСЂРѕ Р°РёСЃС‚Р°. РњРѕР¶РµС‚ РїСЂРёРіРѕРґРёС‚СЊСЃСЏ... Р•СЃР»Рё РїРѕР№РґРµС€СЊ РѕС‚СЃСЋРґР° РЅР°РїСЂР°РІРѕ,\nРїСЂРёРґРµС€СЊ Рє РјРѕСЃС‚Сѓ РЅРµРїРѕРґР°Р»РµРєСѓ РѕС‚ Р§РµСЂРЅРѕРіРѕ Р—Р°РјРєР°. Р‘С‹РІР°Р№!"),"OK",1,1)
 	build_stork$()
 	remove_entities()
 	;
 	
 def(build_stork$())
-	let(id$,create_it$("Перо аиста","images/item/wand_cyan",1,1))
+	let(id$,create_it$("РџРµСЂРѕ Р°РёСЃС‚Р°","images/item/wand_cyan",1,1))
 	takedrop(id$,1)
 	th_moveto(id$,"world",17,30)
 	st_trigger(id$,use_stork_feather())
@@ -753,7 +753,7 @@ def(ass_defeat())
 	let(y,th_get_y(ENT$[3])) 
 	th_moveto(build_stork$(),"world",x,y)
 	build_gold("world",x,y,7)
-	let(id$,create_it$("Бронзовый кувшин","images/item/potion_tan",1,1))
+	let(id$,create_it$("Р‘СЂРѕРЅР·РѕРІС‹Р№ РєСѓРІС€РёРЅ","images/item/potion_tan",1,1))
 	takedrop(id$,1)
 	st_trigger(id$,use_bronze_jug())
 	th_moveto(id$,"world",x,y)
@@ -766,18 +766,18 @@ def(use_bronze_jug())
 	;
 
 def(_buildings())
-	let(id$,create_bl$("Таверна","images/wild/house_stone","world",59,63,1,1))
+	let(id$,create_bl$("РўР°РІРµСЂРЅР°","images/wild/house_stone","world",59,63,1,1))
 	st_trigger(id$,aquatic_inn())
-	let(id$,create_bl$("Магазинчик","images/wild/house_stone","world",51,54,1,1))
-	st_trigger(id$,output("Магазинчик закрыт."))
-	let(id$,create_bl$("Маленький домик","images/wild/house_stone","world",25,50,1,1))
-	let(id$,create_bl$("Указатель без надписи","images/wild/sign_plank","world",24,47,1,1))
+	let(id$,create_bl$("РњР°РіР°Р·РёРЅС‡РёРє","images/wild/house_stone","world",51,54,1,1))
+	st_trigger(id$,output("РњР°РіР°Р·РёРЅС‡РёРє Р·Р°РєСЂС‹С‚."))
+	let(id$,create_bl$("РњР°Р»РµРЅСЊРєРёР№ РґРѕРјРёРє","images/wild/house_stone","world",25,50,1,1))
+	let(id$,create_bl$("РЈРєР°Р·Р°С‚РµР»СЊ Р±РµР· РЅР°РґРїРёСЃРё","images/wild/sign_plank","world",24,47,1,1))
 	;
 
 def(aquatic_inn())
 	if(ne(actorid$,"player"),return(0))
-	output("Вы входите в таверну Водяного")
-	st_trigger(targetid$,output("Вы уже были в таверне!"))
+	output("Р’С‹ РІС…РѕРґРёС‚Рµ РІ С‚Р°РІРµСЂРЅСѓ Р’РѕРґСЏРЅРѕРіРѕ")
+	st_trigger(targetid$,output("Р’С‹ СѓР¶Рµ Р±С‹Р»Рё РІ С‚Р°РІРµСЂРЅРµ!"))
 	map_new("aqua_inn","Aquatic inn",9,8)
 	map_bounds("aqua_inn",th_moveto("player","world",58,63))
     map_fill("aqua_inn", 0, 0, Terrain$[""], join$(
@@ -792,7 +792,7 @@ def(aquatic_inn())
 	))	
 	th_moveto("player","aqua_inn",2,6)
 	th_facing("player",North)
-	let(a$,create_cr$("Водяной","pnnww","images/creature/deepone1",1,2,9,9,20,0,"aqua_inn",7,3))
+	let(a$,create_cr$("Р’РѕРґСЏРЅРѕР№","pnnww","images/creature/deepone1",1,2,9,9,20,0,"aqua_inn",7,3))
 	en_turn(a$,aquatic_move(6))
 	st_trigger(a$,aquatic_welcome())
 	return(0)
@@ -805,19 +805,19 @@ def(aquatic_move(x))
 	;
 
 def(aquatic_welcome())
-	alert("Водяной","Добро пожаловать в мою таверну.\nБудьте здесь как дома.\nХотите купить жареную рыбу, попить воды?",
+	alert("Р’РѕРґСЏРЅРѕР№","Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ РІ РјРѕСЋ С‚Р°РІРµСЂРЅСѓ.\nР‘СѓРґСЊС‚Рµ Р·РґРµСЃСЊ РєР°Рє РґРѕРјР°.\nРҐРѕС‚РёС‚Рµ РєСѓРїРёС‚СЊ Р¶Р°СЂРµРЅСѓСЋ СЂС‹Р±Сѓ, РїРѕРїРёС‚СЊ РІРѕРґС‹?",
 		"OK",1,1,"images/creature/deepone1_0n.gif")
 	st_trigger(targetid$,aquatic_talk())
 	aquatic_talk()
 	;
 def(aquatic_talk())
-	let(ch,menu(GAME$,join$("У вас ",th_get_gold(actorid$)," золота.\n",TODO$),"<Купить жареную рыбу за 1 золотой (2 HP)>|<Выпить воды за 2 золотых>|<Напасть на Водяного>|<Поблагодарить и выйти из таверны>",
+	let(ch,menu(GAME$,join$("РЈ РІР°СЃ ",th_get_gold(actorid$)," Р·РѕР»РѕС‚Р°.\n",TODO$),"<РљСѓРїРёС‚СЊ Р¶Р°СЂРµРЅСѓСЋ СЂС‹Р±Сѓ Р·Р° 1 Р·РѕР»РѕС‚РѕР№ (2 HP)>|<Р’С‹РїРёС‚СЊ РІРѕРґС‹ Р·Р° 2 Р·РѕР»РѕС‚С‹С…>|<РќР°РїР°СЃС‚СЊ РЅР° Р’РѕРґСЏРЅРѕРіРѕ>|<РџРѕР±Р»Р°РіРѕРґР°СЂРёС‚СЊ Рё РІС‹Р№С‚Рё РёР· С‚Р°РІРµСЂРЅС‹>",
 		1,"images/creature/deepone1_0n.gif"))
-	if(eq(ch,1),buy_item("Жареная рыба","images/item/food_taco","aqua_inn",7,1,1,2))
+	if(eq(ch,1),buy_item("Р–Р°СЂРµРЅР°СЏ СЂС‹Р±Р°","images/item/food_taco","aqua_inn",7,1,1,2))
 	if(eq(ch,2),do(
-		output("Вы с удовольствием пьете воду..."),
+		output("Р’С‹ СЃ СѓРґРѕРІРѕР»СЊСЃС‚РІРёРµРј РїСЊРµС‚Рµ РІРѕРґСѓ..."),
         wait(3),
-        output("   и внезапно падаете без чувств..."),
+        output("   Рё РІРЅРµР·Р°РїРЅРѕ РїР°РґР°РµС‚Рµ Р±РµР· С‡СѓРІСЃС‚РІ..."),
         gcls(),
         gcolor("black"),
         gmove(0, 0),
@@ -833,16 +833,16 @@ def(aquatic_talk())
         ),
 		st_prop("player","bag_room",0),
 		th_gold("player",0),
-		output("Вы просыпаетесь в незнакомом месте.\nЗолото и заплечный мешок исчезли!\nВодяной ограбил Вас!!!"),
+		output("Р’С‹ РїСЂРѕСЃС‹РїР°РµС‚РµСЃСЊ РІ РЅРµР·РЅР°РєРѕРјРѕРј РјРµСЃС‚Рµ.\nР—РѕР»РѕС‚Рѕ Рё Р·Р°РїР»РµС‡РЅС‹Р№ РјРµС€РѕРє РёСЃС‡РµР·Р»Рё!\nР’РѕРґСЏРЅРѕР№ РѕРіСЂР°Р±РёР» Р’Р°СЃ!!!"),
         redraw()
 	))
 	if(eq(ch,3),enemy(targetid$))
-	if(eq(ch,4),do(output("Вы покидаете таверну."),th_moveto("player","world",58,63)))
+	if(eq(ch,4),do(output("Р’С‹ РїРѕРєРёРґР°РµС‚Рµ С‚Р°РІРµСЂРЅСѓ."),th_moveto("player","world",58,63)))
 	;
 
 def(goldcost(cost))
     if(lt(th_get_gold("player"),cost),
-        do(describe("У Вас не хватает денег."), return(0)) )
+        do(describe("РЈ Р’Р°СЃ РЅРµ С…РІР°С‚Р°РµС‚ РґРµРЅРµРі."), return(0)) )
     th_gold("player",sub(th_get_gold("player"),cost))
     return(1)
 	;
@@ -864,14 +864,14 @@ def(enemy(id$))
 def(HP_recover(id$))
 	let(hp,th_get_stat("player",ST_HitPoints))
 	if(eq(hp,th_get_statmax("player",ST_HitPoints)),
-		do(output("Вам не нужно восстанавливать HP!"),return(0)))
+		do(output("Р’Р°Рј РЅРµ РЅСѓР¶РЅРѕ РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°С‚СЊ HP!"),return(0)))
 	th_stat("player",ST_HitPoints,add(hp,st_get_prop(id$,"hp")))
 	return(1)
 	;
 
 def(eat_food())
 	if(HP_recover(targetid$),do(
-		output(st_get_name$(targetid$)," улучшает самочувствие."),
+		output(st_get_name$(targetid$)," СѓР»СѓС‡С€Р°РµС‚ СЃР°РјРѕС‡СѓРІСЃС‚РІРёРµ."),
 		th_remove(targetid$,1)
 	))
 	;
@@ -882,7 +882,7 @@ def(make_food(id$,hp))
 	;
 
 def(trader_appear$())
-	let(id$,create_cr$("Торговец","","images/people/citizen2",1,2,14,10,1,1,"world",50,54))
+	let(id$,create_cr$("РўРѕСЂРіРѕРІРµС†","","images/people/citizen2",1,2,14,10,1,1,"world",50,54))
 	st_trigger(id$,trader_welcome())
 	return(id$)
 	;
@@ -894,10 +894,10 @@ def(trader_disappear(id$))
 	;
 	
 def(trader_welcome())
-	let(ch,alert("Торговец","Как дела, парень?\nХочешь зайти в мой магазинчик?",
+	let(ch,alert("РўРѕСЂРіРѕРІРµС†","РљР°Рє РґРµР»Р°, РїР°СЂРµРЅСЊ?\nРҐРѕС‡РµС€СЊ Р·Р°Р№С‚Рё РІ РјРѕР№ РјР°РіР°Р·РёРЅС‡РёРє?",
 		YESNO$,1,2,"images/people/citizen2_0n.gif"))
 	if(eq(ch,2),do(trader_disappear(targetid$),return(1)))
-	output("Вы заходите в магазинчик.")
+	output("Р’С‹ Р·Р°С…РѕРґРёС‚Рµ РІ РјР°РіР°Р·РёРЅС‡РёРє.")
 	map_new("shop","Trader's shop",7,8)
         map_fill("shop", 0, 0, Terrain$[""], join$(
 		"#######\n",
@@ -909,12 +909,12 @@ def(trader_welcome())
 		"#_____#\n",
 		"#######\n",
 	))	
-	create_bl$("Часы","images/dungeon/clock","shop",5,1,1,2)
-	create_bl$("Лавка","images/dungeon/bench2_ns","shop",1,1,1,1)
-	create_bl$("Окно","images/dungeon/window_big","shop",3,0,1,1)
-	global(I$[0],create_bl$("Стол","images/dungeon/counter_ns1","shop",3,2,1,1))
+	create_bl$("Р§Р°СЃС‹","images/dungeon/clock","shop",5,1,1,2)
+	create_bl$("Р›Р°РІРєР°","images/dungeon/bench2_ns","shop",1,1,1,1)
+	create_bl$("РћРєРЅРѕ","images/dungeon/window_big","shop",3,0,1,1)
+	global(I$[0],create_bl$("РЎС‚РѕР»","images/dungeon/counter_ns1","shop",3,2,1,1))
 	st_trigger(I$[0],trader_buy(targetid$))
-	let(tbl$,"Стол")
+	let(tbl$,"РЎС‚РѕР»")
 	global(I$[1],create_bl$(tbl$,"images/dungeon/counter_ns2","shop",3,3,1,1))
 	st_trigger(I$[1],trader_buy(targetid$))
 	global(I$[2],create_bl$(tbl$,"images/dungeon/counter_ns2","shop",3,4,1,1))
@@ -937,46 +937,46 @@ def(trader_welcome())
 	;
 
 def(trader_buy(id$))
-	let(ch,menu("Торговец","Вот мои товары:",
-		"Картошка (1 HP за 1 золотой)|Виноград (2 HP за 2 золотых)|Морковь (1 HP за 1 золотой)|Капуста (2 HP за 2 золотых)|Молоко (3 HP за 2 золотых)|<Поговорить с торговцем>",
+	let(ch,menu("РўРѕСЂРіРѕРІРµС†","Р’РѕС‚ РјРѕРё С‚РѕРІР°СЂС‹:",
+		"РљР°СЂС‚РѕС€РєР° (1 HP Р·Р° 1 Р·РѕР»РѕС‚РѕР№)|Р’РёРЅРѕРіСЂР°Рґ (2 HP Р·Р° 2 Р·РѕР»РѕС‚С‹С…)|РњРѕСЂРєРѕРІСЊ (1 HP Р·Р° 1 Р·РѕР»РѕС‚РѕР№)|РљР°РїСѓСЃС‚Р° (2 HP Р·Р° 2 Р·РѕР»РѕС‚С‹С…)|РњРѕР»РѕРєРѕ (3 HP Р·Р° 2 Р·РѕР»РѕС‚С‹С…)|<РџРѕРіРѕРІРѕСЂРёС‚СЊ СЃ С‚РѕСЂРіРѕРІС†РµРј>",
 		1,"images/people/citizen2_0n.gif"))
 	if(not(ch),return(0)) 
 	if(eq(ch,6),do(trader_talk(id$),return(0)))
-	if(eq(ch,1),buy_item("Картошка (1 HP)","images/item/brain","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
-	if(eq(ch,2),buy_item("Виноград (2 HP)","images/item/food_grapes","shop",th_get_x("player"),sub(th_get_y("player"),1),2,2))
-	if(eq(ch,3),buy_item("Морковь (1 HP)","images/item/food_carrots","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
-	if(eq(ch,4),buy_item("Капуста (2 HP)","images/item/food_cabbage","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
-	if(eq(ch,5),buy_item("Молоко (3 HP)","images/item/potion_grey","shop",th_get_x("player"),sub(th_get_y("player"),1),2,3))
+	if(eq(ch,1),buy_item("РљР°СЂС‚РѕС€РєР° (1 HP)","images/item/brain","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
+	if(eq(ch,2),buy_item("Р’РёРЅРѕРіСЂР°Рґ (2 HP)","images/item/food_grapes","shop",th_get_x("player"),sub(th_get_y("player"),1),2,2))
+	if(eq(ch,3),buy_item("РњРѕСЂРєРѕРІСЊ (1 HP)","images/item/food_carrots","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
+	if(eq(ch,4),buy_item("РљР°РїСѓСЃС‚Р° (2 HP)","images/item/food_cabbage","shop",th_get_x("player"),sub(th_get_y("player"),1),1,1))
+	if(eq(ch,5),buy_item("РњРѕР»РѕРєРѕ (3 HP)","images/item/potion_grey","shop",th_get_x("player"),sub(th_get_y("player"),1),2,3))
 	return(1)
 	;
 
 def(trader_dead())
-	buy_item("Картошка (1 HP)","images/item/brain","shop",5,2,0,1)
-	buy_item("Виноград (2 HP)","images/item/food_grapes","shop",5,3,0,2)
-	buy_item("Морковь (1 HP)","images/item/food_carrots","shop",5,4,0,1)
-	buy_item("Капуста (2 HP)","images/item/food_cabbage","shop",5,5,0,1)
-	buy_item("Молоко (3 HP)","images/item/potion_grey","shop",5,6,0,3)
+	buy_item("РљР°СЂС‚РѕС€РєР° (1 HP)","images/item/brain","shop",5,2,0,1)
+	buy_item("Р’РёРЅРѕРіСЂР°Рґ (2 HP)","images/item/food_grapes","shop",5,3,0,2)
+	buy_item("РњРѕСЂРєРѕРІСЊ (1 HP)","images/item/food_carrots","shop",5,4,0,1)
+	buy_item("РљР°РїСѓСЃС‚Р° (2 HP)","images/item/food_cabbage","shop",5,5,0,1)
+	buy_item("РњРѕР»РѕРєРѕ (3 HP)","images/item/potion_grey","shop",5,6,0,3)
 	build_gold("shop",4,6,10)
 	check_luck()
 	;
 
 def(trader_talk(i$))
-	let(tr$,"Торговец")
-	alert(tr$,"Вокруг нет опасности. Обычный лес.\nПосетителей у меня было много, но никто не возвращался.\nЗдесь безопасно, просто Вы заблудились.",
+	let(tr$,"РўРѕСЂРіРѕРІРµС†")
+	alert(tr$,"Р’РѕРєСЂСѓРі РЅРµС‚ РѕРїР°СЃРЅРѕСЃС‚Рё. РћР±С‹С‡РЅС‹Р№ Р»РµСЃ.\nРџРѕСЃРµС‚РёС‚РµР»РµР№ Сѓ РјРµРЅСЏ Р±С‹Р»Рѕ РјРЅРѕРіРѕ, РЅРѕ РЅРёРєС‚Рѕ РЅРµ РІРѕР·РІСЂР°С‰Р°Р»СЃСЏ.\nР—РґРµСЃСЊ Р±РµР·РѕРїР°СЃРЅРѕ, РїСЂРѕСЃС‚Рѕ Р’С‹ Р·Р°Р±Р»СѓРґРёР»РёСЃСЊ.",
 		"OK",1,1,"images/people/citizen2_0n.gif")
-	let(ch,menu(tr$,join$(TOSAY$,"ему?"),"Я ищу Черный Замок|Я собираюсь победить Барлада Дэрта|Хочу разбудить Принцессу|Просто гуляю по лесу|<Напасть на торговца>",
+	let(ch,menu(tr$,join$(TOSAY$,"РµРјСѓ?"),"РЇ РёС‰Сѓ Р§РµСЂРЅС‹Р№ Р—Р°РјРѕРє|РЇ СЃРѕР±РёСЂР°СЋСЃСЊ РїРѕР±РµРґРёС‚СЊ Р‘Р°СЂР»Р°РґР° Р”СЌСЂС‚Р°|РҐРѕС‡Сѓ СЂР°Р·Р±СѓРґРёС‚СЊ РџСЂРёРЅС†РµСЃСЃСѓ|РџСЂРѕСЃС‚Рѕ РіСѓР»СЏСЋ РїРѕ Р»РµСЃСѓ|<РќР°РїР°СЃС‚СЊ РЅР° С‚РѕСЂРіРѕРІС†Р°>",
 		0,"images/people/citizen2_0n.gif"))
 	if(eq(ch,4),do(
-		alert(tr$,"Тогда приятной прогулки. До свидания!",
+		alert(tr$,"РўРѕРіРґР° РїСЂРёСЏС‚РЅРѕР№ РїСЂРѕРіСѓР»РєРё. Р”Рѕ СЃРІРёРґР°РЅРёСЏ!",
 			"OK",1,1,"images/people/citizen2_0n.gif"),
 		trader_leave(),
 		return(1)
 	))
 	if(eq(ch,5),do(enemy(i$),return(0)))
-	let(ch,menu(tr$,join$("Я могу рассказать кое-что интересное за 7 золотых или какой-нибудь подарок.\n",TODO$),
-		"Заплатите 7 золотых|Дадите подарок|Уйдете",0,"images/people/citizen2_0n.gif"))
+	let(ch,menu(tr$,join$("РЇ РјРѕРіСѓ СЂР°СЃСЃРєР°Р·Р°С‚СЊ РєРѕРµ-С‡С‚Рѕ РёРЅС‚РµСЂРµСЃРЅРѕРµ Р·Р° 7 Р·РѕР»РѕС‚С‹С… РёР»Рё РєР°РєРѕР№-РЅРёР±СѓРґСЊ РїРѕРґР°СЂРѕРє.\n",TODO$),
+		"Р—Р°РїР»Р°С‚РёС‚Рµ 7 Р·РѕР»РѕС‚С‹С…|Р”Р°РґРёС‚Рµ РїРѕРґР°СЂРѕРє|РЈР№РґРµС‚Рµ",0,"images/people/citizen2_0n.gif"))
 	if(eq(ch,2),do(
-		alert(tr$,"Что Вы можете мне подарить?...","OK",1,1),
+		alert(tr$,"Р§С‚Рѕ Р’С‹ РјРѕР¶РµС‚Рµ РјРЅРµ РїРѕРґР°СЂРёС‚СЊ?...","OK",1,1),
 		quest("Trader present"),
 		return(0)
 	))
@@ -985,36 +985,36 @@ def(trader_talk(i$))
 	;
 
 def(trader_info())
-	alert("Торговец","Могу рассказать, куда ведут дороги отсюда.\nСправа в лесу - Застава волшебника.\nЕсли пойдете налево, увидите маленькую хижину, в которой живет старик.\nЧерный Замок действительно существует, но до него еще далеко.\nСоветую Вам не прятаться, а идти туда в открытую.\nВот все, что я знаю!!! Пока.",
+	alert("РўРѕСЂРіРѕРІРµС†","РњРѕРіСѓ СЂР°СЃСЃРєР°Р·Р°С‚СЊ, РєСѓРґР° РІРµРґСѓС‚ РґРѕСЂРѕРіРё РѕС‚СЃСЋРґР°.\nРЎРїСЂР°РІР° РІ Р»РµСЃСѓ - Р—Р°СЃС‚Р°РІР° РІРѕР»С€РµР±РЅРёРєР°.\nР•СЃР»Рё РїРѕР№РґРµС‚Рµ РЅР°Р»РµРІРѕ, СѓРІРёРґРёС‚Рµ РјР°Р»РµРЅСЊРєСѓСЋ С…РёР¶РёРЅСѓ, РІ РєРѕС‚РѕСЂРѕР№ Р¶РёРІРµС‚ СЃС‚Р°СЂРёРє.\nР§РµСЂРЅС‹Р№ Р—Р°РјРѕРє РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ СЃСѓС‰РµСЃС‚РІСѓРµС‚, РЅРѕ РґРѕ РЅРµРіРѕ РµС‰Рµ РґР°Р»РµРєРѕ.\nРЎРѕРІРµС‚СѓСЋ Р’Р°Рј РЅРµ РїСЂСЏС‚Р°С‚СЊСЃСЏ, Р° РёРґС‚Рё С‚СѓРґР° РІ РѕС‚РєСЂС‹С‚СѓСЋ.\nР’РѕС‚ РІСЃРµ, С‡С‚Рѕ СЏ Р·РЅР°СЋ!!! РџРѕРєР°.",
 		"OK",1,1,"images/people/citizen2_0n.gif")
 	trader_leave()
 	;
 
 def(trader_leave())
-	output("Вы покидаете магазинчик.")
+	output("Р’С‹ РїРѕРєРёРґР°РµС‚Рµ РјР°РіР°Р·РёРЅС‡РёРє.")
 	quest("")
 	th_moveto("player","world",50,54)
 	for(i,0,4,1,th_remove(I$[i],1))
 	;
 
 def(guide_talk())
-	let(tr$,"Проводник")
+	let(tr$,"РџСЂРѕРІРѕРґРЅРёРє")
 	st_trigger(targetid$,0)
-	alert(tr$,"Я помогаю заблудившимся путникам. Как,\nвы не заблудились? Я все равно помогу вам. Поешьте.\nКуда вам надо? В одиночку можно погибнуть в болотах,\nа их вокруг множество. За 2 золотых я помогу вам.",
+	alert(tr$,"РЇ РїРѕРјРѕРіР°СЋ Р·Р°Р±Р»СѓРґРёРІС€РёРјСЃСЏ РїСѓС‚РЅРёРєР°Рј. РљР°Рє,\nРІС‹ РЅРµ Р·Р°Р±Р»СѓРґРёР»РёСЃСЊ? РЇ РІСЃРµ СЂР°РІРЅРѕ РїРѕРјРѕРіСѓ РІР°Рј. РџРѕРµС€СЊС‚Рµ.\nРљСѓРґР° РІР°Рј РЅР°РґРѕ? Р’ РѕРґРёРЅРѕС‡РєСѓ РјРѕР¶РЅРѕ РїРѕРіРёР±РЅСѓС‚СЊ РІ Р±РѕР»РѕС‚Р°С…,\nР° РёС… РІРѕРєСЂСѓРі РјРЅРѕР¶РµСЃС‚РІРѕ. Р—Р° 2 Р·РѕР»РѕС‚С‹С… СЏ РїРѕРјРѕРіСѓ РІР°Рј.",
 		"OK",1,1,"images/people/citizen5_1e.gif")
 	th_stat("player",ST_HitPoints,add(2,th_get_stat("player",ST_HitPoints)))
 	let(ch,guide_answer(1))
 	if(eq(ch,2),do(
-		alert(tr$,"Нет-нет, вокруг никакого жилья нет. Только\nлеса и болота. Правда,есть одно интересное\nместечко в самом центре леса. Черный Замок\nназывается. Слышали о таком?",
+		alert(tr$,"РќРµС‚-РЅРµС‚, РІРѕРєСЂСѓРі РЅРёРєР°РєРѕРіРѕ Р¶РёР»СЊСЏ РЅРµС‚. РўРѕР»СЊРєРѕ\nР»РµСЃР° Рё Р±РѕР»РѕС‚Р°. РџСЂР°РІРґР°,РµСЃС‚СЊ РѕРґРЅРѕ РёРЅС‚РµСЂРµСЃРЅРѕРµ\nРјРµСЃС‚РµС‡РєРѕ РІ СЃР°РјРѕРј С†РµРЅС‚СЂРµ Р»РµСЃР°. Р§РµСЂРЅС‹Р№ Р—Р°РјРѕРє\nРЅР°Р·С‹РІР°РµС‚СЃСЏ. РЎР»С‹С€Р°Р»Рё Рѕ С‚Р°РєРѕРј?",
 			"OK",1,1,"images/people/citizen5_1e.gif"),
 		let(ch,guide_answer(0))
 	))
 	if(eq(ch,1),do(
-		let(al,alert(tr$,"Я это сразу понял. Я сам ненавижу волшебника и уже\nпомогал вашим предшественникам. Но это будет\nстоить 2 золотых.",
-			"Заплатить|Уйти",1,2,"images/people/citizen5_1e.gif")),
+		let(al,alert(tr$,"РЇ СЌС‚Рѕ СЃСЂР°Р·Сѓ РїРѕРЅСЏР». РЇ СЃР°Рј РЅРµРЅР°РІРёР¶Сѓ РІРѕР»С€РµР±РЅРёРєР° Рё СѓР¶Рµ\nРїРѕРјРѕРіР°Р» РІР°С€РёРј РїСЂРµРґС€РµСЃС‚РІРµРЅРЅРёРєР°Рј. РќРѕ СЌС‚Рѕ Р±СѓРґРµС‚\nСЃС‚РѕРёС‚СЊ 2 Р·РѕР»РѕС‚С‹С….",
+			"Р—Р°РїР»Р°С‚РёС‚СЊ|РЈР№С‚Рё",1,2,"images/people/citizen5_1e.gif")),
 		if(eq(al,1),do(
 			th_gold("player",sub(th_get_gold("player"),2)),
-			alert(tr$,"Благодарю вас. Пойдемте...","OK",1,1,"images/people/citizen5_1e.gif"),
+			alert(tr$,"Р‘Р»Р°РіРѕРґР°СЂСЋ РІР°СЃ. РџРѕР№РґРµРјС‚Рµ...","OK",1,1,"images/people/citizen5_1e.gif"),
 			guide_to_death(targetid$)
 		))
 	))
@@ -1022,15 +1022,15 @@ def(guide_talk())
 	;
 
 def(guide())
-	let(id$,create_cr$("Проводник","","images/people/citizen5",2,2,1,1,1,1,"world",24,50))
+	let(id$,create_cr$("РџСЂРѕРІРѕРґРЅРёРє","","images/people/citizen5",2,2,1,1,1,1,"world",24,50))
 	st_trigger(id$,guide_talk())
 	;
 	
 def(guide_answer(acc))
-	let(s$,"Я ищу Барлада Дэрта|")
-	if(eq(acc,1),do(joinv$(s$,"Проводите меня к ближайшему селению|")))
-	joinv$(s$,"<Отказаться и уйти>")
-	let(ch,menu("Проводник",join$(TOSAY$,"ему?"),s$,0,"images/people/citizen5_1e.gif"))
+	let(s$,"РЇ РёС‰Сѓ Р‘Р°СЂР»Р°РґР° Р”СЌСЂС‚Р°|")
+	if(eq(acc,1),do(joinv$(s$,"РџСЂРѕРІРѕРґРёС‚Рµ РјРµРЅСЏ Рє Р±Р»РёР¶Р°Р№С€РµРјСѓ СЃРµР»РµРЅРёСЋ|")))
+	joinv$(s$,"<РћС‚РєР°Р·Р°С‚СЊСЃСЏ Рё СѓР№С‚Рё>")
+	let(ch,menu("РџСЂРѕРІРѕРґРЅРёРє",join$(TOSAY$,"РµРјСѓ?"),s$,0,"images/people/citizen5_1e.gif"))
 	return(ch)
 	;
 	
@@ -1090,10 +1090,10 @@ def(move_rel(i$,rel_dir))
 	;
 
 def(gk_onway())
-	let(gk$,create_cr$("Зеленый рыцарь","pwsssswsssssseess","images/people/frogman3",1,1,16,10,1,1,"world",3,40))
+	let(gk$,create_cr$("Р—РµР»РµРЅС‹Р№ СЂС‹С†Р°СЂСЊ","pwsssswsssssseess","images/people/frogman3",1,1,16,10,1,1,"world",3,40))
 	en_turn(gk$,auto_move(51))
 	st_trigger(gk$,gk_attack())
-	let(ch,alert(GAME$,"За поворотом дороги слышен шум. Можете спрятаться\nсправа и понаблюдать.","OK",1,1))
+	let(ch,alert(GAME$,"Р—Р° РїРѕРІРѕСЂРѕС‚РѕРј РґРѕСЂРѕРіРё СЃР»С‹С€РµРЅ С€СѓРј. РњРѕР¶РµС‚Рµ СЃРїСЂСЏС‚Р°С‚СЊСЃСЏ\nСЃРїСЂР°РІР° Рё РїРѕРЅР°Р±Р»СЋРґР°С‚СЊ.","OK",1,1))
 	;	
 
 def(gk_attack())
@@ -1105,14 +1105,14 @@ def(gk_attack())
 def(gk_defeat())
 	let(x,th_get_x(targetid$))	
 	let(y,th_get_y(targetid$))	
-	let(pl$,create_it$("Латы Зеленого Рыцаря","images/armor/scale_green",1,1))
+	let(pl$,create_it$("Р›Р°С‚С‹ Р—РµР»РµРЅРѕРіРѕ Р С‹С†Р°СЂСЏ","images/armor/scale_green",1,1))
 	th_statboth(pl$,ST_Evade,-1)
 	th_statboth(pl$,ST_Defense,2)
 	it_equip(pl$,EQ_Armor)
 	it_equipfunc(pl$,gk_scale_equip())
 	it_removefunc(pl$,gk_scale_remove())
 	th_moveto(pl$,"world",x,y)
-	let(pl$,create_it$("Меч Зеленого Рыцаря","images/weapon/dagger9",1,1))
+	let(pl$,create_it$("РњРµС‡ Р—РµР»РµРЅРѕРіРѕ Р С‹С†Р°СЂСЏ","images/weapon/dagger9",1,1))
 	th_statboth(pl$,ST_Attack,2)
 	th_statboth(pl$,ST_Range,1)
 	it_equip(pl$,EQ_Weapon)
@@ -1121,14 +1121,14 @@ def(gk_defeat())
 
 def(gk_scale_equip())
     output_color("green", "black")
-	output("Внимание!\nВы в латах Зеленого рыцаря.")
+	output("Р’РЅРёРјР°РЅРёРµ!\nР’С‹ РІ Р»Р°С‚Р°С… Р—РµР»РµРЅРѕРіРѕ СЂС‹С†Р°СЂСЏ.")
     output_color("white", "black")
 	return(1)
 	;
 	
 def(gk_scale_remove())
     output_color("green", "black")
-	output("Вы снимаете латы Зеленого рыцаря.")
+	output("Р’С‹ СЃРЅРёРјР°РµС‚Рµ Р»Р°С‚С‹ Р—РµР»РµРЅРѕРіРѕ СЂС‹С†Р°СЂСЏ.")
     output_color("white", "black")
 	return(1)
 	;
